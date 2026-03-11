@@ -4,11 +4,11 @@ An autonomous AI system that transforms simple Telegram prompts into high-fideli
 
 ## ✨ Key Features
 
-- **Autonomous Agent**: Codex drives the entire project lifecycle—from `npm create vite` and dependency installation to writing premium code and building for production.
-- **Multi-Step Intake**: A guided Telegram bot flow (`/build`) collects project names, custom subdomains, and visual assets.
-- **Asset Support**: Upload logos and gallery images or provide text descriptions for the AI to interpret.
-- **Iterative Updates**: Refine your site after building! Use `/update <siteId> <instructions>` to modify specific parts of your site without a full rebuild.
-- **Smart Deployment**: Automatic deployment to Netlify with intelligent subdomain conflict resolution.
+- **Autonomous Agent**: Codex drives the entire project lifecycle—from Vite initialization to writing premium React code and production builds.
+- **Guided Intake & Personas**: Choose from design personas like **Cyberpunk**, **Minimalist**, or **Luxury** to set the visual tone.
+- **Recursive Repair Loop**: If a build fails, the system automatically analyzes error logs and attempts an AI-driven repair.
+- **Multi-modal Updates**: Modify your site using text + images. Send `/update <siteId>`, provide instructions, and upload as many photos as you want!
+- **Automatic Deployment**: Sites are instantly live on Netlify with smart subdomain resolution.
 - **Site Management**: Keep track of all your projects with the `/list` command.
 
 ## 🛠️ Technology Stack
@@ -24,12 +24,12 @@ An autonomous AI system that transforms simple Telegram prompts into high-fideli
 1. **Start the Bot**: Send `/start` to the Telegram bot.
 2. **Build a Site**: Run `/build` and follow the guided prompts:
    - Provide a site description.
-   - Choose a project name and preferred subdomain.
-   - Upload a logo (or describe one).
-   - Upload gallery images (or describe them).
-3. **Wait for Generation**: The bot will stream status updates as the Autonomous Agent initializes the project, installs dependencies, writes the code, and builds the assets.
+   - **Pick a Design Persona** (e.g., Cyberpunk 🌆, Luxury ✨).
+   - Provide a project name and subdomain.
+   - Upload assets (Logo, Photos).
+3. **Wait for Generation**: The bot will stream status updates. If a build error occurs, the **Repair Loop** will automatically kick in to fix it.
 4. **View & Update**: Once finished, you'll get a live Netlify URL and a local preview link. 
-5. **Iterate**: Want to change something? Use `/update <siteId> "Make the header emerald green and add a contact form."`.
+5. **Iterate**: Want to change something? Use `/update <siteId>`. The bot will collect your text instructions and any new images you want to add!
 
 ## 📂 Project Architecture
 

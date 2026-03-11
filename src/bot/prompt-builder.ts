@@ -1,4 +1,4 @@
-import { SiteSpec } from './types.js';
+import { SiteSpec, Asset } from './types.js';
 
 export class PromptBuilder {
   static build(spec: SiteSpec): string {
@@ -80,7 +80,12 @@ ${galleryInstructions}
 Execute all commands, write all files, and finish with a successful build.
 `;
   }
-  static buildIterationPrompt(spec: SiteSpec, instruction: string): string {
+  static buildIterationPrompt(spec: SiteSpec, instruction: string, newAssets: Asset[] = []): string {
+    const assetInstructions = newAssets.map((a, i) => {
+      if (a.source === 'text') return `- **NEW IMAGE ${i+1}**: Description: "${a.content}".`;
+      return `- **NEW IMAGE ${i+1}**: Use local asset \`${a.content}\`. Reference as \`<img src="${a.content}" />\`.`;
+    }).join('\n');
+
     return `
 You are an **Autonomous System Architect** iterating on an existing Vite/React website named "${spec.name}".
 The project is already initialized and configured in the current directory.
@@ -88,6 +93,10 @@ The project is already initialized and configured in the current directory.
 ### YOUR TASK:
 Apply the following **specific** changes/modifications as requested by the user:
 > "${instruction}"
+
+${newAssets.length > 0 ? `### NEW ASSETS PROVIDED:
+${assetInstructions}
+Note: These assets are already placed in the \`public/\` directory. Reference them in your components as shown above.\n` : ''}
 
 ### CRITICAL SAFETY & ISOLATION CONSTRAINTS:
 1. **TARGETED MODIFICATIONS ONLY**: Only change the components and logic directly related to the user's request. DO NOT perform unrelated refactors or change stable parts of the code.

@@ -15,6 +15,8 @@ if (!token) {
 
 interface MySceneSession extends Scenes.WizardSessionData {
   spec: Partial<SiteSpec>;
+  siteId?: string;
+  instruction?: string;
 }
 
 interface MyContext extends Scenes.WizardContext<MySceneSession> {
@@ -195,8 +197,119 @@ async function startGeneration(ctx: MyContext) {
   return ctx.scene.leave();
 }
 
+async function startUpdate(ctx: MyContext) {
+  const { siteId, instruction, spec } = ctx.scene.session;
+  if (!siteId || !instruction) return ctx.scene.leave();
+
+  const workspaceManager = new WorkspaceManager();
+  const sitePath = workspaceManager.findSiteById(siteId);
+
+  if (!sitePath) {
+    await ctx.reply(`❌ Could not find a site with ID "${siteId}".`);
+    return ctx.scene.leave();
+  }
+
+  await ctx.reply(`🔄 Starting update for "${siteId}"...\nInstruction: ${instruction}${spec.assets?.length ? ` (+ ${spec.assets.length} new images)` : ''}`);
+
+  const generationRunner = new GenerationRunner();
+  const chatId = ctx.chat?.id;
+  if (!chatId) return ctx.scene.leave();
+
+  // Run in background
+  (async () => {
+    let progressMessageId: number | undefined;
+    const updateStatus = async (status: string) => {
+      try {
+        if (!progressMessageId) {
+          const msg = await ctx.reply(status);
+          progressMessageId = msg.message_id;
+        } else {
+          await ctx.telegram.editMessageText(chatId, progressMessageId, undefined, status);
+        }
+      } catch (e) { console.warn('Status update failed', e); }
+    };
+
+    try {
+      const { deployedUrl } = await generationRunner.iterate(sitePath, instruction, updateStatus, spec.assets as Asset[]);
+      await ctx.reply(`✅ Successfully updated "${siteId}"!\n🚀 Live URL: ${deployedUrl}`);
+    } catch (error) {
+      console.error('Update failed:', error);
+      await ctx.reply('❌ Sorry, the update failed.');
+    }
+  })();
+
+  return ctx.scene.leave();
+}
+
+const updateScene = new Scenes.WizardScene<MyContext>(
+  'UPDATE_SCENE',
+  async (ctx) => {
+    const text = (ctx.message as any)?.text || '';
+    const parts = text.split(' ');
+    
+    // Check if siteId was passed via /update <siteId> <instr>
+    if (parts[0] === '/update' && parts.length >= 3) {
+      ctx.scene.session.siteId = parts[1];
+      ctx.scene.session.instruction = parts.slice(2).join(' ');
+      ctx.scene.session.spec = { assets: [] };
+      await ctx.reply('Got the instructions! Do you want to upload any images for this update? Send them now, or send /done to proceed with just the text.');
+      return ctx.wizard.next();
+    }
+
+    await ctx.reply('Which site would you like to update? (Provide the ID, e.g., "my-site")');
+    return ctx.wizard.next();
+  },
+  async (ctx) => {
+    if (!ctx.scene.session.siteId) {
+      ctx.scene.session.siteId = (ctx.message as any)?.text;
+      await ctx.reply('What changes would you like to make?');
+      return ctx.wizard.next();
+    }
+    // If we're here, we are already in asset collection
+    return handleUpdateAsset(ctx);
+  },
+  async (ctx) => {
+    if (!ctx.scene.session.instruction) {
+      ctx.scene.session.instruction = (ctx.message as any)?.text;
+      ctx.scene.session.spec = { assets: [] };
+      await ctx.reply('Images to add? Upload them now or send /done to finish.');
+      return ctx.wizard.next();
+    }
+    return handleUpdateAsset(ctx);
+  },
+  async (ctx) => {
+    return handleUpdateAsset(ctx);
+  }
+);
+
+async function handleUpdateAsset(ctx: MyContext) {
+  const message = ctx.message as any;
+  if (message?.text === '/done') {
+    return startUpdate(ctx);
+  }
+
+  if (message?.photo) {
+    const fileId = message.photo[message.photo.length - 1].file_id;
+    const fileUrl = await ctx.telegram.getFileLink(fileId);
+    ctx.scene.session.spec.assets?.push({
+      type: 'image',
+      source: 'file',
+      content: fileUrl.toString(),
+    });
+    await ctx.reply(`Image ${ctx.scene.session.spec.assets?.length} received! Send more or /done.`);
+  } else if (message?.text) {
+    ctx.scene.session.spec.assets?.push({
+      type: 'image',
+      source: 'text',
+      content: message.text,
+    });
+    await ctx.reply('Image description added. Send more or /done.');
+  }
+  return;
+}
+
 const bot = new Telegraf<MyContext>(token);
-const stage = new Scenes.Stage<MyContext>([buildScene]);
+const stage = new Scenes.Stage<MyContext>([buildScene, updateScene]);
 
 bot.use(session());
 bot.use(stage.middleware());
@@ -205,7 +318,14 @@ bot.start((ctx) => ctx.reply('Welcome! Send /build to start building your React 
 bot.command('build', (ctx) => ctx.scene.enter('BUILD_SCENE'));
 
 bot.command('help', (ctx) => {
-  ctx.reply('Commands:\n/build - Create a new site\n/update <siteId> <prompt> - Update an existing site\n/list - List all your sites\n/help - Show this message');
+  ctx.reply(
+    '📖 **Help Guide**\n\n' +
+    '🚀 `/build` - Start the interactive builder. You\'ll pick a design persona, provide a description, and can upload a logo/images.\n\n' +
+    '🔄 `/update <siteId> <instructions>` - Modify an existing site. **NEW:** After sending your instructions, you can upload new images to be added to the project!\n\n' +
+    '📑 `/list` - See all your generated sites and their IDs.\n\n' +
+    '💡 **Tip**: When updating, you can send multiple images and finish with `/done`.',
+    { parse_mode: 'Markdown' }
+  );
 });
 
 bot.command('list', async (ctx) => {
@@ -225,51 +345,7 @@ bot.command('list', async (ctx) => {
   await ctx.reply(message, { parse_mode: 'Markdown' });
 });
 
-bot.command('update', async (ctx) => {
-  const text = ctx.message.text.split(' ');
-  if (text.length < 3) {
-    return ctx.reply('Usage: /update <siteId> <your instructions>\nExample: /update awesome-startup "change the title to My Awesome Startup"');
-  }
-
-  const siteId = text[1];
-  const instruction = text.slice(2).join(' ');
-
-  const generationRunner = new GenerationRunner();
-  const workspaceManager = new WorkspaceManager();
-
-  const sitePath = workspaceManager.findSiteById(siteId);
-  if (!sitePath) {
-    return ctx.reply(`❌ Could not find a site with ID "${siteId}". Please check the name provided after deployment.`);
-  }
-
-  await ctx.reply(`🔄 Starting update for "${siteId}"...\nInstruction: ${instruction}`);
-
-  const chatId = ctx.chat?.id;
-  if (!chatId) return;
-
-  // Run in background
-  (async () => {
-    let progressMessageId: number | undefined;
-    const updateStatus = async (status: string) => {
-      try {
-        if (!progressMessageId) {
-          const msg = await ctx.reply(status);
-          progressMessageId = msg.message_id;
-        } else {
-          await ctx.telegram.editMessageText(chatId, progressMessageId, undefined, status);
-        }
-      } catch (e) { console.warn('Status update failed', e); }
-    };
-
-    try {
-      const { deployedUrl } = await generationRunner.iterate(sitePath, instruction, updateStatus);
-      await ctx.reply(`✅ Successfully updated "${siteId}"!\n🚀 Live URL: ${deployedUrl}`);
-    } catch (error) {
-      console.error('Update failed:', error);
-      await ctx.reply('❌ Sorry, the update failed.');
-    }
-  })();
-});
+bot.command('update', (ctx) => ctx.scene.enter('UPDATE_SCENE'));
 
 // Fallback for irrelevant messages or commands
 bot.on('message', (ctx) => {
@@ -278,11 +354,12 @@ bot.on('message', (ctx) => {
     ctx.reply(
       "🤖 I'm sorry, I didn't quite get that.\n\n" +
       "Here's how you can use me:\n" +
-      "🚀 /build - Create a new React website from scratch\n" +
+      "🚀 /build - Create a new React website (supports personas & images)\n" +
+      "🔄 /update <siteId> - Modify a site (supports text + image uploads)\n" +
       "📑 /list - See all your generated sites\n" +
-      "🔄 /update <siteId> <prompt> - Modify an existing site\n" +
       "❓ /help - Get detailed command info\n\n" +
-      "Try sending /build to start your first project!"
+      "Try sending /build to start your first project!",
+      { parse_mode: 'Markdown' }
     );
   }
 });

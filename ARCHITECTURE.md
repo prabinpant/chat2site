@@ -64,9 +64,21 @@ graph TD
 
 ---
 
+---
+
+## 🩹 Recursive Repair Loop: The Safety Net
+If the `npm run build` step fails:
+1. **Detection**: `GenerationRunner` catches the non-zero exit code.
+2. **Log Extraction**: It captures the last 50 lines of the terminal output.
+3. **Repair Prompt**: A specialized prompt is sent to Codex: "Analyze these logs, fix the error in the source code, and rebuild."
+4. **Retry**: Codex has one attempt to fix its own mistake before reporting a final failure.
+
+---
+
 ## 🔄 Iterative Updates: The "Loop"
 When you run `/update`:
-1. **Lookup**: `WorkspaceManager` find the folder by ID.
+1. **lookup**: `WorkspaceManager` find the folder by ID.
 2. **Context**: It reads the `.spec.json` to remember what was built.
-3. **Targeted Change**: `PromptBuilder` creates an **Iteration Prompt** (Instruction: "Modify X, keep Y, break nothing").
-4. **Precision Build**: Codex reads the existing `App.tsx`, applies *only* the change, and rebuilds the site.
+3. **Multi-modal Input**: If you uploaded images, they are downloaded into the project's `public/` folder.
+4. **Targeted Change**: `PromptBuilder` creates an **Iteration Prompt** including specific instructions for the new assets.
+5. **Precision Build**: Codex modifies existing components and rebuilds.

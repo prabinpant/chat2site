@@ -4,7 +4,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { WorkspaceManager } from './workspace-manager.js';
 import { PromptBuilder } from './prompt-builder.js';
-import { SiteSpec } from './types.js';
+import { SiteSpec, Asset } from './types.js';
 import { CodexService } from '../lib/codex-service.js';
 import { NetlifyDeploymentService } from '../lib/deployment-service.js';
 import { SpecExpansionService } from '../lib/spec-expansion-service.js';
@@ -90,13 +90,37 @@ export class GenerationRunner {
     return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec };
   }
 
-  async iterate(sitePath: string, instruction: string, onProgress: (status: string) => void) {
+  async iterate(sitePath: string, instruction: string, onProgress: (status: string) => void, newAssets: Asset[] = []) {
     onProgress('🔍 Loading site metadata...');
     const spec = this.workspaceManager.loadMetadata(sitePath) as SiteSpec;
     if (!spec) throw new Error('Site metadata not found');
 
+    // Handle New Assets for Iteration
+    if (newAssets.length > 0) {
+      onProgress('🖼️ Processing new images for the update...');
+      const publicPath = path.join(sitePath, 'public');
+      await fs.mkdir(publicPath, { recursive: true });
+
+      for (let i = 0; i < newAssets.length; i++) {
+        const asset = newAssets[i];
+        if (asset.source === 'file') {
+          const fileName = `update_${Date.now()}_${i}.jpg`;
+          const filePath = path.join(publicPath, fileName);
+          
+          try {
+            const response = await fetch(asset.content);
+            const arrayBuffer = await response.arrayBuffer();
+            await fs.writeFile(filePath, Buffer.from(arrayBuffer));
+            asset.content = `/${fileName}`;
+          } catch (e) {
+            console.error(`Failed to download update asset ${asset.content}`, e);
+          }
+        }
+      }
+    }
+
     onProgress('🧠 Building update strategy...');
-    const prompt = PromptBuilder.buildIterationPrompt(spec, instruction);
+    const prompt = PromptBuilder.buildIterationPrompt(spec, instruction, newAssets);
 
     onProgress('🛠️  AI is applying specific changes...');
     await this.executeWithRepair(prompt, sitePath, onProgress);
