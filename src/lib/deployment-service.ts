@@ -25,51 +25,63 @@ export class NetlifyDeploymentService implements DeploymentService {
   }
 
   async deploy(sitePath: string, siteName: string): Promise<DeploymentResult> {
-    try {
-      // Step 1: Initialize sub-project if needed or just use current build
-      // We assume the site is already built in the 'dist' folder
-      
-      console.log(`Deploying ${siteName} from ${sitePath} to Netlify...`);
+    const maxRetries = 3;
+    let currentSiteName = siteName;
+    let attempt = 0;
 
-      // Using Netlify CLI to deploy
-      // --dir specifies the build directory
-      // --prod makes it a production deploy
-      // --name sets the site name (will create if doesn't exist)
-      // --auth provides the token
-      
-      const distPath = path.join(sitePath, 'dist');
-      // Adding --no-build to prevent Netlify CLI from trying to run its own build process
-      // We run inside sitePath to ensure isolation
-      // --site specifies the site name/ID directly, which should bypass any local .netlify folder
-      let cmd = `npx netlify deploy --dir="dist" --prod --site="${siteName}" --auth="${this.authToken}" --no-build --json`;
-      
+    while (attempt < maxRetries) {
       try {
-        console.log(`[DeploymentService] Attempting deployment to site: ${siteName}`);
-        const { stdout } = await execAsync(cmd, { cwd: sitePath });
-        const result = JSON.parse(stdout);
-        return {
-          url: result.url || result.deploy_url,
-          siteId: result.site_id
-        };
-      } catch (error: any) {
-        // If the site doesn't exist, try creating it and deploying in one go
-        if (error.stderr && (error.stderr.includes('Project not found') || error.stderr.includes('Could not find site'))) {
-          console.log(`[DeploymentService] Site ${siteName} not found, creating new site...`);
-          // Using --create-site with a specific name/ID
-          cmd = `npx netlify deploy --dir="dist" --prod --create-site="${siteName}" --auth="${this.authToken}" --no-build --json`;
-          
+        console.log(`[DeploymentService] Attempting deployment to site: ${currentSiteName} (Attempt ${attempt + 1})`);
+        
+        // Try creating/deploying
+        const distPath = path.join(sitePath, 'dist');
+        const cmd = `npx netlify deploy --dir="dist" --prod --site="${currentSiteName}" --auth="${this.authToken}" --no-build --json`;
+        
+        try {
           const { stdout } = await execAsync(cmd, { cwd: sitePath });
           const result = JSON.parse(stdout);
           return {
             url: result.url || result.deploy_url,
             siteId: result.site_id
           };
+        } catch (error: any) {
+          const stderr = error.stderr || '';
+          const stdout = error.stdout || '';
+
+          // Check if site doesn't exist - try creating it
+          if (stderr.includes('Project not found') || stderr.includes('Could not find site')) {
+            console.log(`[DeploymentService] Site ${currentSiteName} not found, creating new site...`);
+            const createCmd = `npx netlify deploy --dir="dist" --prod --create-site="${currentSiteName}" --auth="${this.authToken}" --no-build --json`;
+            const { stdout: createStdout } = await execAsync(createCmd, { cwd: sitePath });
+            const result = JSON.parse(createStdout);
+            return {
+              url: result.url || result.deploy_url,
+              siteId: result.site_id
+            };
+          }
+
+          // Check for "already taken" or "conflict"
+          if (stderr.includes('already exists') || stderr.includes('already taken') || stderr.includes('422') || stdout.includes('already exists')) {
+            console.warn(`[DeploymentService] Subdomain ${currentSiteName} is already taken or conflict occurred.`);
+            attempt++;
+            const shortId = Math.random().toString(36).substring(2, 6);
+            currentSiteName = `${siteName}-${shortId}`;
+            continue; // Retry with new name
+          }
+
+          throw error;
         }
-        throw error;
+      } catch (error: any) {
+        if (attempt >= maxRetries - 1) {
+          console.error('Netlify deployment failed after retries:', error);
+          throw new Error(`Deployment failed after ${maxRetries} attempts: ${error.message}`);
+        }
+        attempt++;
+        const shortId = Math.random().toString(36).substring(2, 6);
+        currentSiteName = `${siteName}-${shortId}`;
       }
-    } catch (error) {
-      console.error('Netlify deployment failed:', error);
-      throw new Error(`Deployment failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+
+    throw new Error('Deployment failed: maximum retries reached');
   }
 }

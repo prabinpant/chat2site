@@ -1,6 +1,15 @@
+export interface Asset {
+  type: 'logo' | 'image';
+  source: 'file' | 'text';
+  content: string; // File path if source is file, description if source is text
+  originalName?: string;
+  mimeType?: string;
+}
+
 export interface SiteSpec {
   name: string;
   description: string;
+  preferredSubdomain?: string;
   features: string[];
   theme: {
     primaryColor: string;
@@ -31,6 +40,7 @@ export interface SiteSpec {
     style: string;
     keywords: string[];
   };
+  assets?: Asset[];
   extraDependencies?: Record<string, string>;
 }
 

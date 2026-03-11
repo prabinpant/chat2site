@@ -1,5 +1,7 @@
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
+import path from 'path';
+import fs from 'fs/promises';
 import { WorkspaceManager } from './workspace-manager.js';
 import { PromptBuilder } from './prompt-builder.js';
 import { SiteSpec } from './types.js';
@@ -29,10 +31,12 @@ export class GenerationRunner {
     const expandedSpec = await this.specExpansionService.expand(initialSpec.description);
     
     // Merge initial context with expanded details
-    const spec = {
+    const spec: SiteSpec = {
       ...expandedSpec,
-      name: expandedSpec.name || initialSpec.name,
-      description: initialSpec.description
+      name: initialSpec.name || expandedSpec.name,
+      description: initialSpec.description,
+      preferredSubdomain: initialSpec.preferredSubdomain,
+      assets: initialSpec.assets || []
     };
 
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
@@ -40,10 +44,35 @@ export class GenerationRunner {
     const safeBaseName = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'site';
     
     const localFolderName = `${safeBaseName}_${timestamp}_${shortId}`;
-    const netlifySiteName = `${safeBaseName}-${shortId}`;
+    const netlifySiteName = spec.preferredSubdomain || `${safeBaseName}-${shortId}`;
 
     const sitePath = this.workspaceManager.prepareSiteDirectory(localFolderName);
     
+    // Handle Assets
+    if (spec.assets && spec.assets.length > 0) {
+      onProgress('🖼️ Preparing your custom assets/logo...');
+      const publicPath = path.join(sitePath, 'public');
+      await fs.mkdir(publicPath, { recursive: true });
+
+      for (let i = 0; i < spec.assets.length; i++) {
+        const asset = spec.assets[i];
+        if (asset.source === 'file') {
+          const extension = asset.type === 'logo' ? 'png' : 'jpg'; // Simple guess
+          const fileName = asset.type === 'logo' ? `logo.${extension}` : `asset_${i}.${extension}`;
+          const filePath = path.join(publicPath, fileName);
+          
+          try {
+            const response = await fetch(asset.content);
+            const arrayBuffer = await response.arrayBuffer();
+            await fs.writeFile(filePath, Buffer.from(arrayBuffer));
+            asset.content = `./${fileName}`; // Update content to local path for LLM
+          } catch (e) {
+            console.error(`Failed to download asset ${asset.content}`, e);
+          }
+        }
+      }
+    }
+
     onProgress('🚀 Autonomous Agent is building your site lifecycle (init, config, install, code, build)...');
     const pronto = PromptBuilder.build(spec);
     await this.codexService.executeAutonomousBuild(pronto, sitePath);

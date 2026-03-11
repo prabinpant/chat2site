@@ -14,6 +14,9 @@ export class PromptBuilder {
       body: 'Sans-serif'
     };
 
+    const logoAsset = spec.assets?.find(a => a.type === 'logo');
+    const galleryAssets = spec.assets?.filter(a => a.type === 'image') || [];
+
     return `
 You are an **Autonomous System Architect**. You have full shell access to the current directory.
 Your task is to build a premium, high-fidelity website named "${spec.name}" from scratch.
@@ -43,9 +46,12 @@ Your task is to build a premium, high-fidelity website named "${spec.name}" from
 ### Site Structure:
 ${(spec.sections || []).map(s => `- ${s.title}: ${s.description} (Layout: ${s.layoutHint || 'standard'})`).join('\n')}
 
+### Assets & Imagery:
+${logoAsset ? `- **LOGO**: Use the provided logo asset at \`${logoAsset.content}\`. ${logoAsset.source === 'text' ? `Description: ${logoAsset.content}` : 'This is a local file in the public/ directory.'}` : '- **LOGO**: Create a sophisticated text-based logo or use a Lucide icon if no logo is provided.'}
+${galleryAssets.length > 0 ? galleryAssets.map((a, i) => `- **IMAGE ${i+1}**: Use \`${a.content}\`. ${a.source === 'text' ? `Description: ${a.content}` : 'Local file in public/ folder.'}`).join('\n') : '- **IMAGERY**: Use Unsplash URLs (https://images.unsplash.com/...) with context-aware keywords.'}
+
 ### Visual Principles:
 - **NEGATIVE SPACE**: Use massive margins and padding. 
-- **IMAGERY**: Use Unsplash URLs (https://images.unsplash.com/...) with context-aware keywords.
 - **MOTION**: Use Framer Motion for sophisticated entrance animations.
 - **POLISH**: Use glassmorphism, soft gradients, and delicate borders.
 
