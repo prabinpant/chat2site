@@ -6,6 +6,14 @@ export interface SiteSpec {
     primaryColor: string;
     darkMode: boolean;
   };
+  sections?: {
+    title: string;
+    description: string;
+  }[];
+  branding?: {
+    tone: string;
+    aesthetic: string;
+  };
 }
 
 export interface GenerationSpec {

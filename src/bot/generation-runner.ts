@@ -6,6 +6,7 @@ import { PromptBuilder } from './prompt-builder.js';
 import { SiteSpec } from './types.js';
 import { CodexService } from '../lib/codex-service.js';
 import { NetlifyDeploymentService } from '../lib/deployment-service.js';
+import { SpecExpansionService } from '../lib/spec-expansion-service.js';
 
 const execAsync = promisify(exec);
 
@@ -13,19 +14,30 @@ export class GenerationRunner {
   private workspaceManager: WorkspaceManager;
   private codexService: CodexService;
   private deploymentService: NetlifyDeploymentService;
+  private specExpansionService: SpecExpansionService;
 
   constructor() {
     this.workspaceManager = new WorkspaceManager();
     this.codexService = new CodexService();
     this.deploymentService = new NetlifyDeploymentService();
+    this.specExpansionService = new SpecExpansionService();
   }
 
-  async run(spec: SiteSpec, onProgress: (status: string) => void): Promise<{ sitePath: string; url?: string; deployedUrl?: string }> {
-    onProgress('🧠 Generating code with Codex...');
+  async run(initialSpec: SiteSpec, onProgress: (status: string) => void): Promise<{ sitePath: string; url?: string; deployedUrl?: string; expandedSpec: SiteSpec }> {
+    onProgress('🧠 Brainstorming site structure and creative direction...');
+    const expandedSpec = await this.specExpansionService.expand(initialSpec.description);
+    
+    // Merge initial context with expanded details
+    const spec = {
+      ...expandedSpec,
+      name: expandedSpec.name || initialSpec.name,
+      description: initialSpec.description
+    };
+
+    onProgress('🧠 Generating premium code with Codex...');
     const prompt = PromptBuilder.build(spec);
     const generatedCode = await this.codexService.generateCode(prompt);
 
-    onProgress('📂 Creating workspace...');
     onProgress('📂 Creating workspace...');
     
     // Generate a unique identifier for local folder and Netlify site
@@ -49,10 +61,9 @@ export class GenerationRunner {
     await this.buildSite(sitePath);
 
     onProgress('🌐 Deploying to Netlify...');
-    onProgress('🌐 Deploying to Netlify...');
     const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
 
-    return { sitePath, url, deployedUrl: deployment.url };
+    return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec };
   }
 
   private async buildSite(sitePath: string): Promise<void> {

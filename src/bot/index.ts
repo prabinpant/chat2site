@@ -56,10 +56,10 @@ bot.command('build', async (ctx) => {
         }
       };
 
-      const { sitePath, url, deployedUrl } = await generationRunner.run(spec, updateStatus);
+      const { sitePath, url, deployedUrl, expandedSpec } = await generationRunner.run(spec, updateStatus);
       
       const absolutePath = path.resolve(sitePath);
-      let successMessage = `✅ Success! Your site is live!\n\n🔗 Local Preview: ${url}\n📂 Local Path: ${absolutePath}`;
+      let successMessage = `✅ Success! "${expandedSpec.name}" is live!\n\n🔗 Local Preview: ${url}\n📂 Local Path: ${absolutePath}`;
       
       if (deployedUrl) {
         successMessage += `\n🚀 Netlify URL: ${deployedUrl}`;
