@@ -1,6 +1,6 @@
 # 🚀 Autonomous AI Website Builder (Prompt2Site)
 
-An autonomous AI system that transforms simple Telegram prompts into high-fidelity, deployed React/Tailwind websites.
+An autonomous AI system that transforms simple Telegram prompts into high-fidelity, deployed React/Tailwind websites. See [ARCHITECTURE.md](ARCHITECTURE.md) for a deep dive into how the system works.
 
 ## ✨ Key Features
 
