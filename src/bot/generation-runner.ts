@@ -51,16 +51,24 @@ export class GenerationRunner {
     const localFolderName = `${safeBaseName}_${timestamp}_${shortId}`;
     const netlifySiteName = `${safeBaseName}-${shortId}`;
 
-    const sitePath = this.workspaceManager.createSiteWorkspace(localFolderName);
+    const sitePath = await this.workspaceManager.initScratchProject(localFolderName);
     
-    if (spec.extraDependencies && Object.keys(spec.extraDependencies).length > 0) {
-      onProgress('🔧 Configuring project dependencies...');
-      this.workspaceManager.updateDependencies(sitePath, spec.extraDependencies);
-    }
+    // Automatically add core design dependencies for the scratch project
+    const coreDeps = {
+      "tailwindcss": "^3.4.1",
+      "postcss": "^8.4.35",
+      "autoprefixer": "^10.4.18",
+      "lucide-react": "^0.344.0",
+      ...spec.extraDependencies
+    };
+
+    onProgress('🔧 Configuring project dependencies and Tailwind...');
+    this.workspaceManager.updateDependencies(sitePath, coreDeps);
+    this.workspaceManager.setupTailwind(sitePath);
 
     this.workspaceManager.injectCode(sitePath, generatedCode);
 
-    onProgress('📦 Installing dependencies (this takes a moment)...');
+    onProgress('📦 Installing dependencies (scratch init takes longer)...');
     await this.installDependencies(sitePath);
 
     onProgress('🚀 Starting development server...');

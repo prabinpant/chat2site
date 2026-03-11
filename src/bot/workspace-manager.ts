@@ -19,36 +19,89 @@ export class WorkspaceManager {
     }
   }
 
-  createSiteWorkspace(siteName: string): string {
+  async initScratchProject(siteName: string): Promise<string> {
     const sitePath = path.join(this.baseDir, siteName);
     if (fs.existsSync(sitePath)) {
-      // For simple project, let's just clear it or handle it
       fs.rmSync(sitePath, { recursive: true, force: true });
     }
     
-    // Copy template
-    // Note: This is a simplified copy, for a real project we'd use a better copy library or carefully handle node_modules
-    fs.mkdirSync(sitePath, { recursive: true });
-    this.copyFolderSync(this.templateDir, sitePath);
+    fs.mkdirSync(this.baseDir, { recursive: true });
     
+    // Initialize Vite project from scratch
+    // Use --template react-ts for a clean TypeScript React setup
+    execSync(`npm create vite@latest . -- --template react-ts`, { 
+      cwd: this.baseDir, 
+      stdio: 'inherit',
+      env: { ...process.env, npm_config_yes: 'true' } 
+    });
+
+    // Rename the folder (create vite makes it in 'baseDir' if '.' is used, but we want it in 'sitePath')
+    // Actually, create vite@latest . creates it in the CWD. 
+    // Let's create the folder first and run it inside.
+    fs.mkdirSync(sitePath, { recursive: true });
+    execSync(`npm create vite@latest . -- --template react-ts`, { 
+      cwd: sitePath, 
+      stdio: 'inherit',
+      env: { ...process.env, npm_config_yes: 'true' } 
+    });
+
+    // Clean up default Vite boilerplate
+    const toRemove = [
+      'src/App.css',
+      'src/assets',
+      'public/vite.svg'
+    ];
+    for (const item of toRemove) {
+      const p = path.join(sitePath, item);
+      if (fs.existsSync(p)) {
+        fs.rmSync(p, { recursive: true, force: true });
+      }
+    }
+
     return sitePath;
   }
 
-  private copyFolderSync(from: string, to: string) {
-    const files = fs.readdirSync(from);
-    for (const file of files) {
-      if (file === 'node_modules' || file === 'dist' || file === '.git') continue;
-      
-      const fromPath = path.join(from, file);
-      const toPath = path.join(to, file);
-      
-      if (fs.lstatSync(fromPath).isDirectory()) {
-        fs.mkdirSync(toPath, { recursive: true });
-        this.copyFolderSync(fromPath, toPath);
-      } else {
-        fs.copyFileSync(fromPath, toPath);
-      }
-    }
+  setupTailwind(sitePath: string) {
+    // Create tailwind.config.js
+    const tailwindConfig = `
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+`;
+    fs.writeFileSync(path.join(sitePath, 'tailwind.config.js'), tailwindConfig);
+
+    // Create postcss.config.js
+    const postcssConfig = `
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+`;
+    fs.writeFileSync(path.join(sitePath, 'postcss.config.js'), postcssConfig);
+
+    // Create index.css with tailwind directives
+    const indexCss = `
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+`;
+    fs.writeFileSync(path.join(sitePath, 'src/index.css'), indexCss);
   }
 
   injectCode(sitePath: string, code: string) {

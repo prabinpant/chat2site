@@ -49,7 +49,7 @@ ${sectionsText}
 
 ### Technical Requirements
 - Use React with TypeScript.
-- Use Tailwind CSS for all styling. Define the custom palette in a style tag if needed or use inline hex colors appropriately.
+- Use Tailwind CSS for all styling (v3 syntax). Prefer utility classes.
 - Use Lucide-react for elegant icons.
 ${spec.extraDependencies ? `- You have access to these extra packages: ${Object.keys(spec.extraDependencies).join(', ')}` : ''}
 - Ensure the site is fully responsive and mobile-optimized.
