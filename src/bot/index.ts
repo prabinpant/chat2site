@@ -235,6 +235,22 @@ bot.command('update', async (ctx) => {
   })();
 });
 
+// Fallback for irrelevant messages or commands
+bot.on('message', (ctx) => {
+  // Only reply if we are not in an active scene
+  if (!ctx.scene.current) {
+    ctx.reply(
+      "🤖 I'm sorry, I didn't quite get that.\n\n" +
+      "Here's how you can use me:\n" +
+      "🚀 /build - Create a new React website from scratch\n" +
+      "📑 /list - See all your generated sites\n" +
+      "🔄 /update <siteId> <prompt> - Modify an existing site\n" +
+      "❓ /help - Get detailed command info\n\n" +
+      "Try sending /build to start your first project!"
+    );
+  }
+});
+
 bot.launch().then(() => console.log('Bot is running...'));
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
