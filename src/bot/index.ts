@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs/promises';
 import { GenerationRunner } from './generation-runner.js';
+import { WorkspaceManager } from './workspace-manager.js';
 import { SiteSpec, Asset } from './types.js';
 
 dotenv.config();
@@ -164,8 +165,75 @@ const stage = new Scenes.Stage<MyContext>([buildScene]);
 bot.use(session());
 bot.use(stage.middleware());
 
-bot.start((ctx) => ctx.reply('Welcome! Send /build to start building your React website.'));
+bot.start((ctx) => ctx.reply('Welcome! Send /build to start building your React website. Use /update <siteId> <instructions> to modify a site.'));
 bot.command('build', (ctx) => ctx.scene.enter('BUILD_SCENE'));
+
+bot.command('help', (ctx) => {
+  ctx.reply('Commands:\n/build - Create a new site\n/update <siteId> <prompt> - Update an existing site\n/list - List all your sites\n/help - Show this message');
+});
+
+bot.command('list', async (ctx) => {
+  const workspaceManager = new WorkspaceManager();
+  const sites = workspaceManager.listSites();
+
+  if (sites.length === 0) {
+    return ctx.reply('📂 You haven\'t built any sites yet! Use /build to get started.');
+  }
+
+  let message = '📑 Your Sites:\n\n';
+  sites.forEach((site, i) => {
+    message += `${i + 1}. **${site.name}**\n   🆔 ID: \`${site.id}\`\n   🔗 ${site.url}\n\n`;
+  });
+
+  message += 'You can use `/update <siteId> <instructions>` to modify any of these.';
+  await ctx.reply(message, { parse_mode: 'Markdown' });
+});
+
+bot.command('update', async (ctx) => {
+  const text = ctx.message.text.split(' ');
+  if (text.length < 3) {
+    return ctx.reply('Usage: /update <siteId> <your instructions>\nExample: /update awesome-startup "change the title to My Awesome Startup"');
+  }
+
+  const siteId = text[1];
+  const instruction = text.slice(2).join(' ');
+
+  const generationRunner = new GenerationRunner();
+  const workspaceManager = new WorkspaceManager();
+
+  const sitePath = workspaceManager.findSiteById(siteId);
+  if (!sitePath) {
+    return ctx.reply(`❌ Could not find a site with ID "${siteId}". Please check the name provided after deployment.`);
+  }
+
+  await ctx.reply(`🔄 Starting update for "${siteId}"...\nInstruction: ${instruction}`);
+
+  const chatId = ctx.chat?.id;
+  if (!chatId) return;
+
+  // Run in background
+  (async () => {
+    let progressMessageId: number | undefined;
+    const updateStatus = async (status: string) => {
+      try {
+        if (!progressMessageId) {
+          const msg = await ctx.reply(status);
+          progressMessageId = msg.message_id;
+        } else {
+          await ctx.telegram.editMessageText(chatId, progressMessageId, undefined, status);
+        }
+      } catch (e) { console.warn('Status update failed', e); }
+    };
+
+    try {
+      const { deployedUrl } = await generationRunner.iterate(sitePath, instruction, updateStatus);
+      await ctx.reply(`✅ Successfully updated "${siteId}"!\n🚀 Live URL: ${deployedUrl}`);
+    } catch (error) {
+      console.error('Update failed:', error);
+      await ctx.reply('❌ Sorry, the update failed.');
+    }
+  })();
+});
 
 bot.launch().then(() => console.log('Bot is running...'));
 

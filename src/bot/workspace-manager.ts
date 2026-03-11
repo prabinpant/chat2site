@@ -40,13 +40,65 @@ export class WorkspaceManager {
     }
   }
 
-  prepareSiteDirectory(siteName: string): string {
+  prepareSiteDirectory(siteName: string, isUpdate: boolean = false): string {
     const sitePath = path.join(this.baseDir, siteName);
-    if (fs.existsSync(sitePath)) {
+    if (!isUpdate && fs.existsSync(sitePath)) {
       fs.rmSync(sitePath, { recursive: true, force: true });
     }
-    fs.mkdirSync(sitePath, { recursive: true });
+    if (!fs.existsSync(sitePath)) {
+      fs.mkdirSync(sitePath, { recursive: true });
+    }
     return sitePath;
+  }
+
+  saveMetadata(sitePath: string, spec: any) {
+    const metadataPath = path.join(sitePath, '.spec.json');
+    fs.writeFileSync(metadataPath, JSON.stringify(spec, null, 2));
+  }
+
+  loadMetadata(sitePath: string): any | null {
+    const metadataPath = path.join(sitePath, '.spec.json');
+    if (fs.existsSync(metadataPath)) {
+      return JSON.parse(fs.readFileSync(metadataPath, 'utf-8'));
+    }
+    return null;
+  }
+
+  findSiteById(id: string): string | null {
+    if (!fs.existsSync(this.baseDir)) return null;
+    const projects = fs.readdirSync(this.baseDir);
+    
+    for (const name of projects) {
+      const sitePath = path.join(this.baseDir, name);
+      if (fs.lstatSync(sitePath).isDirectory()) {
+        const metadata = this.loadMetadata(sitePath);
+        if (metadata && (metadata.preferredSubdomain === id || name.includes(id))) {
+          return sitePath;
+        }
+      }
+    }
+    return null;
+  }
+
+  listSites(): any[] {
+    if (!fs.existsSync(this.baseDir)) return [];
+    const projects = fs.readdirSync(this.baseDir);
+    const sites: any[] = [];
+    
+    for (const name of projects) {
+      const sitePath = path.join(this.baseDir, name);
+      if (fs.lstatSync(sitePath).isDirectory()) {
+        const metadata = this.loadMetadata(sitePath);
+        if (metadata) {
+          sites.push({
+            id: metadata.preferredSubdomain || name,
+            name: metadata.name,
+            url: `https://${metadata.preferredSubdomain || name}.netlify.app`
+          });
+        }
+      }
+    }
+    return sites;
   }
 
   injectCode(sitePath: string, code: string) {

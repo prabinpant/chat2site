@@ -83,7 +83,33 @@ export class GenerationRunner {
     onProgress('🌐 Deploying to Netlify...');
     const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
 
+    // Save metadata for future iterations
+    const finalSpec = { ...spec, preferredSubdomain: netlifySiteName };
+    this.workspaceManager.saveMetadata(sitePath, finalSpec);
+
     return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec };
+  }
+
+  async iterate(sitePath: string, instruction: string, onProgress: (status: string) => void) {
+    onProgress('🔍 Loading site metadata...');
+    const spec = this.workspaceManager.loadMetadata(sitePath) as SiteSpec;
+    if (!spec) throw new Error('Site metadata not found');
+
+    onProgress('🧠 Building update strategy...');
+    const prompt = PromptBuilder.buildIterationPrompt(spec, instruction);
+
+    onProgress('🛠️  AI is applying specific changes...');
+    await this.codexService.executeAutonomousBuild(prompt, sitePath);
+
+    onProgress('🚀 Redeploying updates...');
+    const siteName = spec.preferredSubdomain || path.basename(sitePath);
+    const deployment = await this.deploymentService.deploy(sitePath, siteName);
+
+    onProgress('✅ Update complete!');
+    return {
+      url: deployment.url,
+      deployedUrl: deployment.url // In iteration, simple preview might be enough but we provide the same logic
+    };
   }
 
   // startDevServer remains same as it needs specialized URL detection logic
