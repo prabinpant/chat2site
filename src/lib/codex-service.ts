@@ -18,9 +18,13 @@ export class CodexService {
       const cmd = `codex exec --skip-git-repo-check --sandbox workspace-write --output-last-message "${outputFile}" < "${tempFile}"`;
       console.log(`Running: ${cmd}`);
       
-      // Execute codex cli asynchronously
+      const generationDir = path.dirname(tempFile);
+      
+      // Execute codex cli asynchronously in the temp directory
+      // This isolation prevents it from modifying project files
       await execAsync(cmd, {
-        timeout: 1200000, // 20 minutes (fixed typo from 12000000 which was 3 hours)
+        cwd: generationDir,
+        timeout: 1200000, // 20 minutes
         maxBuffer: 1024 * 1024 * 10 // 10MB
       });
 
