@@ -39,11 +39,13 @@ export class NetlifyDeploymentService implements DeploymentService {
       
       const distPath = path.join(sitePath, 'dist');
       // Adding --no-build to prevent Netlify CLI from trying to run its own build process
-      // Linking to a site name with --site
-      let cmd = `npx netlify deploy --dir="${distPath}" --prod --site="${siteName}" --auth="${this.authToken}" --no-build --json`;
+      // We run inside sitePath to ensure isolation
+      // --site specifies the site name/ID directly, which should bypass any local .netlify folder
+      let cmd = `npx netlify deploy --dir="dist" --prod --site="${siteName}" --auth="${this.authToken}" --no-build --json`;
       
       try {
-        const { stdout } = await execAsync(cmd);
+        console.log(`[DeploymentService] Attempting deployment to site: ${siteName}`);
+        const { stdout } = await execAsync(cmd, { cwd: sitePath });
         const result = JSON.parse(stdout);
         return {
           url: result.url || result.deploy_url,
@@ -51,15 +53,12 @@ export class NetlifyDeploymentService implements DeploymentService {
         };
       } catch (error: any) {
         // If the site doesn't exist, try creating it and deploying in one go
-        if (error.stderr && error.stderr.includes('Project not found')) {
-          console.log(`Site ${siteName} not found, attempting to create and deploy...`);
-          cmd = `npx netlify deploy --dir="${distPath}" --prod --create-site --name="${siteName}" --auth="${this.authToken}" --no-build --json`;
-          // Wait, 'netlify deploy --create-site' doesn't take '--name' in older versions? 
-          // Actually, in the latest it's --create-site [name]. Let's check help again.
-          // Example was: netlify deploy --create-site my-new-site
-          cmd = `npx netlify deploy --dir="${distPath}" --prod --create-site="${siteName}" --auth="${this.authToken}" --no-build --json`;
+        if (error.stderr && (error.stderr.includes('Project not found') || error.stderr.includes('Could not find site'))) {
+          console.log(`[DeploymentService] Site ${siteName} not found, creating new site...`);
+          // Using --create-site with a specific name/ID
+          cmd = `npx netlify deploy --dir="dist" --prod --create-site="${siteName}" --auth="${this.authToken}" --no-build --json`;
           
-          const { stdout } = await execAsync(cmd);
+          const { stdout } = await execAsync(cmd, { cwd: sitePath });
           const result = JSON.parse(stdout);
           return {
             url: result.url || result.deploy_url,

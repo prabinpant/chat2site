@@ -20,7 +20,8 @@ export class CodexService {
       
       // Execute codex cli asynchronously
       await execAsync(cmd, {
-        timeout: 12000000 // 20 minutes
+        timeout: 1200000, // 20 minutes (fixed typo from 12000000 which was 3 hours)
+        maxBuffer: 1024 * 1024 * 10 // 10MB
       });
 
       if (!fs.existsSync(outputFile)) {

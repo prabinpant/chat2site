@@ -26,8 +26,17 @@ export class GenerationRunner {
     const generatedCode = await this.codexService.generateCode(prompt);
 
     onProgress('📂 Creating workspace...');
-    const safeName = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `site-${Date.now()}`;
-    const sitePath = this.workspaceManager.createSiteWorkspace(safeName);
+    onProgress('📂 Creating workspace...');
+    
+    // Generate a unique identifier for local folder and Netlify site
+    const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+    const shortId = Math.random().toString(36).substring(2, 7);
+    const safeBaseName = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'site';
+    
+    const localFolderName = `${safeBaseName}_${timestamp}_${shortId}`;
+    const netlifySiteName = `${safeBaseName}-${shortId}`;
+
+    const sitePath = this.workspaceManager.createSiteWorkspace(localFolderName);
     this.workspaceManager.injectCode(sitePath, generatedCode);
 
     onProgress('📦 Installing dependencies (this takes a moment)...');
@@ -40,7 +49,8 @@ export class GenerationRunner {
     await this.buildSite(sitePath);
 
     onProgress('🌐 Deploying to Netlify...');
-    const deployment = await this.deploymentService.deploy(sitePath, safeName);
+    onProgress('🌐 Deploying to Netlify...');
+    const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
 
     return { sitePath, url, deployedUrl: deployment.url };
   }

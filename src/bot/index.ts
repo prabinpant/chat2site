@@ -28,7 +28,10 @@ bot.command('build', async (ctx) => {
   (async () => {
     let progressMessageId: number | undefined;
 
+    let lastStatus = '';
     const updateStatus = async (status: string) => {
+      if (status === lastStatus) return;
+      lastStatus = status;
       try {
         if (!progressMessageId) {
           const msg = await ctx.reply(status);
