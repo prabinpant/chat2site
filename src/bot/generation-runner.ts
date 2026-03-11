@@ -65,7 +65,7 @@ export class GenerationRunner {
             const response = await fetch(asset.content);
             const arrayBuffer = await response.arrayBuffer();
             await fs.writeFile(filePath, Buffer.from(arrayBuffer));
-            asset.content = `./${fileName}`; // Update content to local path for LLM
+            asset.content = `/${fileName}`; // Update to root-relative path for Vite public folder
           } catch (e) {
             console.error(`Failed to download asset ${asset.content}`, e);
           }

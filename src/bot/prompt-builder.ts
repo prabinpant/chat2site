@@ -17,6 +17,25 @@ export class PromptBuilder {
     const logoAsset = spec.assets?.find(a => a.type === 'logo');
     const galleryAssets = spec.assets?.filter(a => a.type === 'image') || [];
 
+    let logoInstruction = '- **LOGO**: Create a sophisticated text-based logo or use a Lucide icon if no logo is provided.';
+    if (logoAsset) {
+      if (logoAsset.source === 'text') {
+        logoInstruction = `- **LOGO**: Use the provided logo description: "${logoAsset.content}".`;
+      } else {
+        logoInstruction = `- **LOGO**: Use the provided local logo at \`${logoAsset.content}\`. Reference it in your code as \`<img src="${logoAsset.content}" />\`.`;
+      }
+    }
+
+    const galleryInstructions = galleryAssets.length > 0 
+      ? galleryAssets.map((a, i) => {
+          if (a.source === 'text') {
+            return `- **IMAGE ${i+1}**: Description: "${a.content}".`;
+          } else {
+            return `- **IMAGE ${i+1}**: Use local asset \`${a.content}\`. Reference as \`<img src="${a.content}" />\`.`;
+          }
+        }).join('\n')
+      : '- **IMAGERY**: Use Unsplash URLs (https://images.unsplash.com/...) with context-aware keywords.';
+
     return `
 You are an **Autonomous System Architect**. You have full shell access to the current directory.
 Your task is to build a premium, high-fidelity website named "${spec.name}" from scratch.
@@ -47,8 +66,10 @@ Your task is to build a premium, high-fidelity website named "${spec.name}" from
 ${(spec.sections || []).map(s => `- ${s.title}: ${s.description} (Layout: ${s.layoutHint || 'standard'})`).join('\n')}
 
 ### Assets & Imagery:
-${logoAsset ? `- **LOGO**: Use the provided logo asset at \`${logoAsset.content}\`. ${logoAsset.source === 'text' ? `Description: ${logoAsset.content}` : 'This is a local file in the public/ directory.'}` : '- **LOGO**: Create a sophisticated text-based logo or use a Lucide icon if no logo is provided.'}
-${galleryAssets.length > 0 ? galleryAssets.map((a, i) => `- **IMAGE ${i+1}**: Use \`${a.content}\`. ${a.source === 'text' ? `Description: ${a.content}` : 'Local file in public/ folder.'}`).join('\n') : '- **IMAGERY**: Use Unsplash URLs (https://images.unsplash.com/...) with context-aware keywords.'}
+${logoInstruction}
+${galleryInstructions}
+
+**CRITICAL**: When using local assets from the \`public/\` folder, ALWAYS include the leading forward slash and the full extension (e.g., \`.png\`, \`.jpg\`). Reference them as absolute paths from the root, for example: \`<img src="/logo.png" />\`. Do NOT use relative paths like \`./public/...\` or omit the extension.
 
 ### Visual Principles:
 - **NEGATIVE SPACE**: Use massive margins and padding. 
