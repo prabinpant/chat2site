@@ -53,10 +53,17 @@ bot.command('build', async (ctx) => {
         }
       };
 
-      const { sitePath, url } = await generationRunner.run(spec, updateStatus);
+      const { sitePath, url, deployedUrl } = await generationRunner.run(spec, updateStatus);
       
       const absolutePath = path.resolve(sitePath);
-      await ctx.reply(`✅ Success! Your site is live!\n\n🔗 Preview: ${url}\n📂 Local Path: ${absolutePath}\n\nI've already installed dependencies and started the dev server for you!`);
+      let successMessage = `✅ Success! Your site is live!\n\n🔗 Local Preview: ${url}\n📂 Local Path: ${absolutePath}`;
+      
+      if (deployedUrl) {
+        successMessage += `\n🚀 Netlify URL: ${deployedUrl}`;
+      }
+      
+      successMessage += `\n\nI've already installed dependencies and started the dev server for you!`;
+      await ctx.reply(successMessage);
     } catch (error) {
       console.error('Generation failed:', error);
       await ctx.reply('❌ Sorry, something went wrong during generation. Check the logs for details.');

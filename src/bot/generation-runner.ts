@@ -5,19 +5,22 @@ import { WorkspaceManager } from './workspace-manager.js';
 import { PromptBuilder } from './prompt-builder.js';
 import { SiteSpec } from './types.js';
 import { CodexService } from '../lib/codex-service.js';
+import { NetlifyDeploymentService } from '../lib/deployment-service.js';
 
 const execAsync = promisify(exec);
 
 export class GenerationRunner {
   private workspaceManager: WorkspaceManager;
   private codexService: CodexService;
+  private deploymentService: NetlifyDeploymentService;
 
   constructor() {
     this.workspaceManager = new WorkspaceManager();
     this.codexService = new CodexService();
+    this.deploymentService = new NetlifyDeploymentService();
   }
 
-  async run(spec: SiteSpec, onProgress: (status: string) => void): Promise<{ sitePath: string; url?: string }> {
+  async run(spec: SiteSpec, onProgress: (status: string) => void): Promise<{ sitePath: string; url?: string; deployedUrl?: string }> {
     onProgress('🧠 Generating code with Codex...');
     const prompt = PromptBuilder.build(spec);
     const generatedCode = await this.codexService.generateCode(prompt);
@@ -32,7 +35,22 @@ export class GenerationRunner {
     onProgress('🚀 Starting development server...');
     const url = await this.startDevServer(sitePath);
 
-    return { sitePath, url };
+    onProgress('🔨 Building site for production...');
+    await this.buildSite(sitePath);
+
+    onProgress('🌐 Deploying to Netlify...');
+    const deployment = await this.deploymentService.deploy(sitePath, spec.name.toLowerCase().replace(/\s+/g, '-'));
+
+    return { sitePath, url, deployedUrl: deployment.url };
+  }
+
+  private async buildSite(sitePath: string): Promise<void> {
+    try {
+      await execAsync('npm run build', { cwd: sitePath });
+    } catch (error) {
+      console.error('Failed to build site:', error);
+      throw new Error('Site build failed');
+    }
   }
 
   private async installDependencies(sitePath: string): Promise<void> {
