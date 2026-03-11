@@ -55,6 +55,7 @@ Your task is to build a premium, high-fidelity website named "${spec.name}" from
 
 ### Design Identity to Implement:
 - **Tone**: ${spec.branding?.tone || 'Professional & Modern'}
+${spec.persona ? `- **Design Persona**: ${spec.persona}\n- **Persona Style Guide**: ${this.getPersonaInstructions(spec.persona)}` : ''}
 - **Palette**: 
   - Background: #${palette.background}
   - Surface/Cards: #${palette.surface}
@@ -99,8 +100,46 @@ Apply the following **specific** changes/modifications as requested by the user:
 ### Design Identity Ref (Maintain Consistency):
 - **Tone**: ${spec.branding?.tone || 'Modern'}
 - **Palette**: Accent: #${spec.theme.primaryColor}
+${spec.persona ? `- **Persona Style**: ${spec.persona} (${this.getPersonaInstructions(spec.persona)})` : ''}
 
 Execute all commands, write all required files, and finish with a successful build.
 `;
+  }
+
+  static buildRepairPrompt(errorLogs: string): string {
+    return `
+You are an **Autonomous System Architect** tasked with repairing a failed build.
+The previous build attempt failed with the following errors:
+
+\`\`\`
+${errorLogs}
+\`\`\`
+
+### YOUR REPAIR TASK:
+1. **ANALYZE**: Read the error logs carefully to identify the root cause (e.g., missing imports, syntax errors, conflicting dependencies, or missing files).
+2. **FIX**: Use the shell to read the problematic files, apply the necessary fixes, and ensure all imports and logic are correct.
+3. **VERIFY**: Run \`npm run build\` again to verify that your changes fixed the issue.
+
+### CONSTRAINTS:
+- DO NOT re-initialize the project.
+- DO NOT touch unrelated files.
+- Stay focused on solving the specific errors shown in the logs.
+
+Execute all commands, write all required files, and finish with a successful build.
+`;
+  }
+
+  private static getPersonaInstructions(persona: string): string {
+    const guides: Record<string, string> = {
+      'Minimalist': 'Use vast white space, thin typography (Inter/system-ui), subtle grays, and a single accent color. Avoid heavy shadows or complex gradients.',
+      'Cyberpunk': 'Use a dark/black background by default. Incorporate neon accent colors (#00ff00, #ff00ff, #00ffff). Add glitch effects, glassmorphism, and neon glow/shadows.',
+      'Corporate': 'Use clean, structured layouts. Trustworthy blues and grays. Sharp edges, professional sans-serif fonts, and clear call-to-action buttons.',
+      'Modern': 'Use rounded corners, soft shadows, vibrant gradients, and fluid animations (Framer Motion). Follow current landing page trends like bento grids or glass cards.',
+      'Retro 80s': 'Use vibrant neon pinks, purples, and yellows. Incorporate grid patterns, pixel art elements, bold/blocky typography, and VHS-style glitch overlays.',
+      'Eco-Friendly': 'Use earthy tones (sage green, soft browns, creams). Incorporate organic, rounded shapes, leaf/nature icons, and paper-like textures. Use high-quality environmental imagery.',
+      'Luxury': 'Use a sophisticated color palette (Gold on Black, or Cream on Deep Navy). Use elegant Serif typography (Playfair Display style), thin borders, and high-fashion/minimalist imagery.',
+      'SaaS Landing': 'Use the "Linear" or "Stripe" look: Deep dark backgrounds with subtle purple/blue gradients. Use sleek bento box layouts, clean sans-serif fonts, and subtle micro-shadows for depth.'
+    };
+    return guides[persona] || 'Maintain a clean, professional React/Tailwind design.';
   }
 }

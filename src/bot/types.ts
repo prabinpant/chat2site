@@ -10,6 +10,7 @@ export interface SiteSpec {
   name: string;
   description: string;
   preferredSubdomain?: string;
+  persona?: string;
   features: string[];
   theme: {
     primaryColor: string;

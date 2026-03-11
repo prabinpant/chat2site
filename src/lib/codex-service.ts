@@ -53,6 +53,7 @@ export class CodexService {
       console.log(`[AutonomousCodex] Handing over keys to AI in ${sitePath}...`);
       
       return new Promise((resolve, reject) => {
+        let output = '';
         const cp = spawn('codex', ['exec', '--dangerously-bypass-approvals-and-sandbox', '--skip-git-repo-check'], {
           cwd: sitePath,
           shell: true,
@@ -69,19 +70,25 @@ export class CodexService {
         }
 
         cp.stdout?.on('data', (data: Buffer | string) => {
-          process.stdout.write(data);
+          const str = data.toString();
+          output += str;
+          process.stdout.write(str);
         });
 
         cp.stderr?.on('data', (data: Buffer | string) => {
-          process.stderr.write(data);
+          const str = data.toString();
+          output += str;
+          process.stderr.write(str);
         });
 
         cp.on('close', (code: number) => {
           if (code === 0) {
-            resolve("Build completed successfully by Codex");
+            resolve(output);
           } else {
             console.error(`[AutonomousCodex] Failed with code ${code}`);
-            reject(new Error(`Autonomous Codex Build failed with code ${code}`));
+            const error = new Error(`Autonomous Codex Build failed with code ${code}`);
+            (error as any).output = output;
+            reject(error);
           }
         });
 

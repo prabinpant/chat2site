@@ -20,6 +20,21 @@ interface MySceneSession extends Scenes.WizardSessionData {
 interface MyContext extends Scenes.WizardContext<MySceneSession> {
 }
 
+const showPersonaMenu = async (ctx: MyContext) => {
+  await ctx.reply('🎨 Choose a Design Persona for your site:', {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Minimalist 🕊️', callback_data: 'Minimalist' }, { text: 'Cyberpunk 🌆', callback_data: 'Cyberpunk' }],
+        [{ text: 'Corporate 🏢', callback_data: 'Corporate' }, { text: 'Modern ⚡', callback_data: 'Modern' }],
+        [{ text: 'Retro 80s 📼', callback_data: 'Retro 80s' }, { text: 'Eco-Friendly 🌿', callback_data: 'Eco-Friendly' }],
+        [{ text: 'Luxury ✨', callback_data: 'Luxury' }, { text: 'SaaS Layout 💻', callback_data: 'SaaS Landing' }],
+        [{ text: 'Standard (None) 🚫', callback_data: 'None' }]
+      ]
+    }
+  });
+  return ctx.wizard.next();
+};
+
 const buildScene = new Scenes.WizardScene<MyContext>(
   'BUILD_SCENE',
   async (ctx) => {
@@ -41,12 +56,33 @@ const buildScene = new Scenes.WizardScene<MyContext>(
       return ctx.wizard.next();
     }
     
-    await ctx.reply('Cool! What should we call this project? (Type a name or /skip)');
-    return ctx.wizard.selectStep(2);
+    return showPersonaMenu(ctx);
   },
   async (ctx) => {
-    ctx.scene.session.spec.description = (ctx.message as any)?.text;
-    await ctx.reply('Cool! What should we call this project? (Type a name or /skip)');
+    // If we're here, it's because description was missing. Collect it.
+    const text = (ctx.message as any)?.text;
+    if (text) {
+      ctx.scene.session.spec.description = text;
+    }
+    return showPersonaMenu(ctx);
+  },
+  async (ctx) => {
+    // Handle both message text and callback query for persona selection
+    let selection = '';
+    if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
+      selection = ctx.callbackQuery.data;
+      await ctx.answerCbQuery();
+    } else if (ctx.message && 'text' in ctx.message) {
+      selection = ctx.message.text;
+    }
+
+    if (selection && selection !== 'None') {
+      ctx.scene.session.spec.persona = selection;
+    }
+
+    await ctx.reply(`Selected Style: ${selection || 'Standard'}\n\nWhat should we call this project?`, {
+      reply_markup: { remove_keyboard: true }
+    });
     return ctx.wizard.next();
   },
   async (ctx) => {

@@ -75,7 +75,7 @@ export class GenerationRunner {
 
     onProgress('🚀 Autonomous Agent is building your site lifecycle (init, config, install, code, build)...');
     const pronto = PromptBuilder.build(spec);
-    await this.codexService.executeAutonomousBuild(pronto, sitePath);
+    await this.executeWithRepair(pronto, sitePath, onProgress);
 
     onProgress('🚀 Starting development server...');
     const url = await this.startDevServer(sitePath);
@@ -99,7 +99,7 @@ export class GenerationRunner {
     const prompt = PromptBuilder.buildIterationPrompt(spec, instruction);
 
     onProgress('🛠️  AI is applying specific changes...');
-    await this.codexService.executeAutonomousBuild(prompt, sitePath);
+    await this.executeWithRepair(prompt, sitePath, onProgress);
 
     onProgress('🚀 Redeploying updates...');
     const siteName = spec.preferredSubdomain || path.basename(sitePath);
@@ -108,8 +108,34 @@ export class GenerationRunner {
     onProgress('✅ Update complete!');
     return {
       url: deployment.url,
-      deployedUrl: deployment.url // In iteration, simple preview might be enough but we provide the same logic
+      deployedUrl: deployment.url
     };
+  }
+
+  /**
+   * Executes a build with a 1-retry repair loop if failure occurs
+   */
+  private async executeWithRepair(prompt: string, sitePath: string, onProgress: (status: string) => void) {
+    try {
+      await this.codexService.executeAutonomousBuild(prompt, sitePath);
+    } catch (error: any) {
+      const logs = error.output || 'No logs available';
+      console.warn('First build attempt failed. Attempting automatic repair...', logs.slice(-200));
+      
+      onProgress('🩹 Build failed. AI is analyzing logs and attempting an automatic repair...');
+      
+      // Extract last 50 lines of logs for context
+      const relevantLogs = logs.split('\n').slice(-50).join('\n');
+      const repairPrompt = PromptBuilder.buildRepairPrompt(relevantLogs);
+      
+      try {
+        await this.codexService.executeAutonomousBuild(repairPrompt, sitePath);
+        onProgress('✅ Repair successful!');
+      } catch (retryError) {
+        onProgress('❌ Repair attempt failed. Reporting final error.');
+        throw retryError;
+      }
+    }
   }
 
   // startDevServer remains same as it needs specialized URL detection logic
