@@ -31,6 +31,7 @@ export interface SiteSpec {
     style: string;
     keywords: string[];
   };
+  extraDependencies?: Record<string, string>;
 }
 
 export interface GenerationSpec {

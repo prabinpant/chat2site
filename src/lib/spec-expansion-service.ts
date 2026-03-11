@@ -51,6 +51,9 @@ Return ONLY a JSON object following this interface:
   "imagery": {
     "style": "e.g. Minimalist architectural photography | Abstract 3D gradients",
     "keywords": ["5 specific keywords for image generation"]
+  },
+  "extraDependencies": {
+    "package-name": "version (e.g. ^12.0.0)"
   }
 }
 
@@ -59,6 +62,7 @@ Guidelines:
 2. Layout Strategy should prevent generic "box" look.
 3. Sections should flow like a story.
 4. If imagery is needed, provide precise keywords.
+5. **BE GENEROUS with extraDependencies**: If you plan to use Framer Motion, include "framer-motion". If you need utility helpers, include "clsx" and "tailwind-merge". If you need specific components, include them here.
 
 Do not include markdown. Just valid JSON.
 `;

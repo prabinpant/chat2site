@@ -52,6 +52,12 @@ export class GenerationRunner {
     const netlifySiteName = `${safeBaseName}-${shortId}`;
 
     const sitePath = this.workspaceManager.createSiteWorkspace(localFolderName);
+    
+    if (spec.extraDependencies && Object.keys(spec.extraDependencies).length > 0) {
+      onProgress('🔧 Configuring project dependencies...');
+      this.workspaceManager.updateDependencies(sitePath, spec.extraDependencies);
+    }
+
     this.workspaceManager.injectCode(sitePath, generatedCode);
 
     onProgress('📦 Installing dependencies (this takes a moment)...');

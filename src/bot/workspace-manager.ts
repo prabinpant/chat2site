@@ -55,4 +55,17 @@ export class WorkspaceManager {
     const appTsxPath = path.join(sitePath, 'src/App.tsx');
     fs.writeFileSync(appTsxPath, code);
   }
+
+  updateDependencies(sitePath: string, extraDeps: Record<string, string>) {
+    const pkgPath = path.join(sitePath, 'package.json');
+    if (!fs.existsSync(pkgPath)) return;
+    
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+    pkg.dependencies = {
+      ...pkg.dependencies,
+      ...extraDeps
+    };
+    
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+  }
 }
