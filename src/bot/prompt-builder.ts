@@ -19,6 +19,9 @@ export class PromptBuilder {
     };
 
     return `
+You are the **Lead Architect** for this project. You have full creative autonomy to make best-in-class design and technical decisions. 
+Your goal is to build a high-fidelity, production-ready website that exceeds all typical expectations for quality and creativity. Do not wait for further instructions; decide and execute.
+
 Generate a single-file React component (App.tsx) for a premium website named "${spec.name}".
 
 ### Design Identity

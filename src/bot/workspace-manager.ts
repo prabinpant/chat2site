@@ -19,6 +19,29 @@ export class WorkspaceManager {
     }
   }
 
+  cleanupOldSites(keepCount: number = 5) {
+    try {
+      const projects = fs.readdirSync(this.baseDir)
+        .map(name => ({
+          name,
+          path: path.join(this.baseDir, name),
+          time: fs.statSync(path.join(this.baseDir, name)).mtime.getTime()
+        }))
+        .filter(p => fs.lstatSync(p.path).isDirectory())
+        .sort((a, b) => b.time - a.time);
+
+      if (projects.length > keepCount) {
+        const toDelete = projects.slice(keepCount);
+        console.log(`🧹 Cleaning up ${toDelete.length} old projects...`);
+        for (const p of toDelete) {
+          fs.rmSync(p.path, { recursive: true, force: true });
+        }
+      }
+    } catch (e) {
+      console.error('Failed to cleanup old sites:', e);
+    }
+  }
+
   async initScratchProject(siteName: string): Promise<string> {
     const sitePath = path.join(this.baseDir, siteName);
     if (fs.existsSync(sitePath)) {

@@ -24,6 +24,8 @@ export class GenerationRunner {
   }
 
   async run(initialSpec: SiteSpec, onProgress: (status: string) => void): Promise<{ sitePath: string; url?: string; deployedUrl?: string; expandedSpec: SiteSpec }> {
+    this.workspaceManager.cleanupOldSites(5); // Keep only last 5 sites to save disk space
+    
     onProgress('🧠 Brainstorming site structure and creative direction...');
     const expandedSpec = await this.specExpansionService.expand(initialSpec.description);
     
