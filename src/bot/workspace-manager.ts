@@ -1,4 +1,3 @@
-import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,11 +7,9 @@ const __dirname = path.dirname(__filename);
 
 export class WorkspaceManager {
   private baseDir: string;
-  private templateDir: string;
 
   constructor() {
     this.baseDir = path.resolve(__dirname, '../../generated-sites');
-    this.templateDir = path.resolve(__dirname, '../templates/react-vite');
     
     if (!fs.existsSync(this.baseDir)) {
       fs.mkdirSync(this.baseDir, { recursive: true });
@@ -21,6 +18,7 @@ export class WorkspaceManager {
 
   cleanupOldSites(keepCount: number = 5) {
     try {
+      if (!fs.existsSync(this.baseDir)) return;
       const projects = fs.readdirSync(this.baseDir)
         .map(name => ({
           name,
@@ -42,106 +40,19 @@ export class WorkspaceManager {
     }
   }
 
-  async initScratchProject(siteName: string): Promise<string> {
+  prepareSiteDirectory(siteName: string): string {
     const sitePath = path.join(this.baseDir, siteName);
     if (fs.existsSync(sitePath)) {
       fs.rmSync(sitePath, { recursive: true, force: true });
     }
-    
-    fs.mkdirSync(this.baseDir, { recursive: true });
-    
-    // Initialize Vite project from scratch
-    // Use --template react-ts for a clean TypeScript React setup
-    execSync(`npm create vite@latest . -- --template react-ts`, { 
-      cwd: this.baseDir, 
-      stdio: 'inherit',
-      env: { ...process.env, npm_config_yes: 'true' } 
-    });
-
-    // Rename the folder (create vite makes it in 'baseDir' if '.' is used, but we want it in 'sitePath')
-    // Actually, create vite@latest . creates it in the CWD. 
-    // Let's create the folder first and run it inside.
     fs.mkdirSync(sitePath, { recursive: true });
-    execSync(`npm create vite@latest . -- --template react-ts`, { 
-      cwd: sitePath, 
-      stdio: 'inherit',
-      env: { ...process.env, npm_config_yes: 'true' } 
-    });
-
-    // Clean up default Vite boilerplate
-    const toRemove = [
-      'src/App.css',
-      'src/assets',
-      'public/vite.svg'
-    ];
-    for (const item of toRemove) {
-      const p = path.join(sitePath, item);
-      if (fs.existsSync(p)) {
-        fs.rmSync(p, { recursive: true, force: true });
-      }
-    }
-
     return sitePath;
   }
 
-  setupTailwind(sitePath: string) {
-    // Create tailwind.config.js
-    const tailwindConfig = `
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-`;
-    fs.writeFileSync(path.join(sitePath, 'tailwind.config.js'), tailwindConfig);
-
-    // Create postcss.config.js
-    const postcssConfig = `
-export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-}
-`;
-    fs.writeFileSync(path.join(sitePath, 'postcss.config.js'), postcssConfig);
-
-    // Create index.css with tailwind directives
-    const indexCss = `
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-}
-`;
-    fs.writeFileSync(path.join(sitePath, 'src/index.css'), indexCss);
-  }
-
   injectCode(sitePath: string, code: string) {
-    const appTsxPath = path.join(sitePath, 'src/App.tsx');
+    const srcDir = path.join(sitePath, 'src');
+    if (!fs.existsSync(srcDir)) fs.mkdirSync(srcDir, { recursive: true });
+    const appTsxPath = path.join(srcDir, 'App.tsx');
     fs.writeFileSync(appTsxPath, code);
-  }
-
-  updateDependencies(sitePath: string, extraDeps: Record<string, string>) {
-    const pkgPath = path.join(sitePath, 'package.json');
-    if (!fs.existsSync(pkgPath)) return;
-    
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-    pkg.dependencies = {
-      ...pkg.dependencies,
-      ...extraDeps
-    };
-    
-    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
   }
 }

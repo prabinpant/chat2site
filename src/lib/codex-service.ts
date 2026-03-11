@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import { tmpdir } from 'os';
@@ -45,6 +45,54 @@ export class CodexService {
       } catch (err) {
         console.warn('Failed to clean up temp files:', err);
       }
+    }
+  }
+
+  async executeAutonomousBuild(prompt: string, sitePath: string): Promise<string> {
+    try {
+      console.log(`[AutonomousCodex] Handing over keys to AI in ${sitePath}...`);
+      
+      return new Promise((resolve, reject) => {
+        const cp = spawn('codex', ['exec', '--dangerously-bypass-approvals-and-sandbox', '--skip-git-repo-check'], {
+          cwd: sitePath,
+          shell: true,
+          env: { 
+            ...process.env, 
+            NETLIFY_AUTH_TOKEN: process.env.NETLIFY_AUTH_TOKEN 
+          }
+        });
+
+        // Feed prompt directly via stdin
+        if (cp.stdin) {
+          cp.stdin.write(prompt);
+          cp.stdin.end();
+        }
+
+        cp.stdout?.on('data', (data: Buffer | string) => {
+          process.stdout.write(data);
+        });
+
+        cp.stderr?.on('data', (data: Buffer | string) => {
+          process.stderr.write(data);
+        });
+
+        cp.on('close', (code: number) => {
+          if (code === 0) {
+            resolve("Build completed successfully by Codex");
+          } else {
+            console.error(`[AutonomousCodex] Failed with code ${code}`);
+            reject(new Error(`Autonomous Codex Build failed with code ${code}`));
+          }
+        });
+
+        cp.on('error', (err: Error) => {
+          console.error('[AutonomousCodex] Spawn error:', err);
+          reject(err);
+        });
+      });
+    } catch (error) {
+      console.error('Autonomous Codex Build failed:', error);
+      throw error;
     }
   }
 

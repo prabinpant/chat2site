@@ -1,6 +1,5 @@
 import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
-import path from 'path';
 import { WorkspaceManager } from './workspace-manager.js';
 import { PromptBuilder } from './prompt-builder.js';
 import { SiteSpec } from './types.js';
@@ -36,16 +35,6 @@ export class GenerationRunner {
       description: initialSpec.description
     };
 
-    onProgress('🧠 Generating premium code with Codex...');
-    
-    // Potential for AI image generation here based on spec.imagery.keywords
-    // For now we'll pass the intent to the prompt as well
-    const prompt = PromptBuilder.build(spec);
-    const generatedCode = await this.codexService.generateCode(prompt);
-
-    onProgress('📂 Creating workspace...');
-    
-    // Generate a unique identifier for local folder and Netlify site
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
     const shortId = Math.random().toString(36).substring(2, 7);
     const safeBaseName = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'site';
@@ -53,31 +42,14 @@ export class GenerationRunner {
     const localFolderName = `${safeBaseName}_${timestamp}_${shortId}`;
     const netlifySiteName = `${safeBaseName}-${shortId}`;
 
-    const sitePath = await this.workspaceManager.initScratchProject(localFolderName);
+    const sitePath = this.workspaceManager.prepareSiteDirectory(localFolderName);
     
-    // Automatically add core design dependencies for the scratch project
-    const coreDeps = {
-      "tailwindcss": "^3.4.1",
-      "postcss": "^8.4.35",
-      "autoprefixer": "^10.4.18",
-      "lucide-react": "^0.344.0",
-      ...spec.extraDependencies
-    };
-
-    onProgress('🔧 Configuring project dependencies and Tailwind...');
-    this.workspaceManager.updateDependencies(sitePath, coreDeps);
-    this.workspaceManager.setupTailwind(sitePath);
-
-    this.workspaceManager.injectCode(sitePath, generatedCode);
-
-    onProgress('📦 Installing dependencies (scratch init takes longer)...');
-    await this.installDependencies(sitePath);
+    onProgress('🚀 Autonomous Agent is building your site lifecycle (init, config, install, code, build)...');
+    const pronto = PromptBuilder.build(spec);
+    await this.codexService.executeAutonomousBuild(pronto, sitePath);
 
     onProgress('🚀 Starting development server...');
     const url = await this.startDevServer(sitePath);
-
-    onProgress('🔨 Building site for production...');
-    await this.buildSite(sitePath);
 
     onProgress('🌐 Deploying to Netlify...');
     const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
@@ -85,25 +57,9 @@ export class GenerationRunner {
     return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec };
   }
 
-  private async buildSite(sitePath: string): Promise<void> {
-    try {
-      await execAsync('npm run build', { cwd: sitePath });
-    } catch (error) {
-      console.error('Failed to build site:', error);
-      throw new Error('Site build failed');
-    }
-  }
-
-  private async installDependencies(sitePath: string): Promise<void> {
-    try {
-      await execAsync('npm install', { cwd: sitePath });
-    } catch (error) {
-      console.error('Failed to install dependencies:', error);
-      throw new Error('Dependency installation failed');
-    }
-  }
-
+  // startDevServer remains same as it needs specialized URL detection logic
   private async startDevServer(sitePath: string): Promise<string> {
+    // ... (rest of startDevServer)
     return new Promise((resolve, reject) => {
       const server = spawn('npm', ['run', 'dev'], { 
         cwd: sitePath,
