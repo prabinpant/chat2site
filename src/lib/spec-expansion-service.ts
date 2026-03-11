@@ -10,32 +10,57 @@ export class SpecExpansionService {
 
   async expand(prompt: string): Promise<SiteSpec> {
     const systemPrompt = `
-You are a creative UI/UX designer and site architect. 
-Your task is to take a generic website prompt and expand it into a detailed, high-quality site specification.
-Be creative and avoid generic "features" lists. Think about sections that would make this specific site unique and premium.
+You are a master UI/UX designer specializing in high-end, premium web experiences.
+Your goal is to turn a generic prompt into a sophisticated, minimalist, and creative site specification.
+Avoid clutter. Prioritize breathing room, clear hierarchy, and unique layouts.
 
 Input Prompt: "${prompt}"
 
 Return ONLY a JSON object following this interface:
 {
-  "name": "Creative site name",
-  "description": "Engaging site description",
-  "features": ["Specific feature 1", "Specific feature 2", ...],
+  "name": "A creative, unique name",
+  "description": "Engaging description of the brand/persona",
+  "features": ["3-5 high-value features"],
   "theme": {
-    "primaryColor": "hex_code_without_hash",
-    "darkMode": false
+    "primaryColor": "main_accent_color_hex",
+    "darkMode": false,
+    "palette": {
+      "background": "soft_base_background_hex",
+      "surface": "slightly_contrasting_surface_hex",
+      "accent": "vibrant_accent_hex",
+      "text": "high_readability_text_hex"
+    },
+    "spacing": "Choose one: airy | standard | compact",
+    "layoutStrategy": "Choose one: bento-grid | editorial-stacked | fluid-storytelling"
   },
   "sections": [
-    { "title": "Section Title", "description": "What should be in this section" },
-    ...
+    { 
+      "title": "Clear Section Title", 
+      "description": "Specific content purpose",
+      "layoutHint": "e.g., asymmetrical split | full-width feature | 3-column masonry"
+    }
   ],
   "branding": {
-    "tone": "e.g. Elegant and minimalist / Energetic and bold",
-    "aesthetic": "e.g. Glassmorphism with soft shadows / Swiss brutalism with high contrast"
+    "tone": "e.g. Sophisticated & Quiet-Luxury",
+    "aesthetic": "e.g. Soft-shadow glassmorphism with delicate typography",
+    "typography": {
+      "heading": "Suggest a Google Font category (e.g. Serif Display, Geometric Sans)",
+      "body": "Suggest a Google Font category"
+    }
+  },
+  "imagery": {
+    "style": "e.g. Minimalist architectural photography | Abstract 3D gradients",
+    "keywords": ["5 specific keywords for image generation"]
   }
 }
 
-Do not include markdown formatting or explanations. Just the JSON.
+Guidelines:
+1. Palette must be Harmonious. Use sophisticated colors (soft neutrals, deep accents).
+2. Layout Strategy should prevent generic "box" look.
+3. Sections should flow like a story.
+4. If imagery is needed, provide precise keywords.
+
+Do not include markdown. Just valid JSON.
 `;
 
     const response = await this.codexService.generateCode(systemPrompt);

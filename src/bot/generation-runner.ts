@@ -35,6 +35,9 @@ export class GenerationRunner {
     };
 
     onProgress('🧠 Generating premium code with Codex...');
+    
+    // Potential for AI image generation here based on spec.imagery.keywords
+    // For now we'll pass the intent to the prompt as well
     const prompt = PromptBuilder.build(spec);
     const generatedCode = await this.codexService.generateCode(prompt);
 

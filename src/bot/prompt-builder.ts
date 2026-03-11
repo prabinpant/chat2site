@@ -3,39 +3,56 @@ import { SiteSpec } from './types.js';
 export class PromptBuilder {
   static build(spec: SiteSpec): string {
     const sectionsText = spec.sections 
-      ? spec.sections.map(s => `• ${s.title}: ${s.description}`).join('\n')
+      ? spec.sections.map(s => `• ${s.title}: ${s.description} (Layout: ${s.layoutHint || 'standard'})`).join('\n')
       : '- Hero section\n- Features section\n- Footer';
 
-    const brandingText = spec.branding 
-      ? `Tone: ${spec.branding.tone}\nAesthetic: ${spec.branding.aesthetic}`
-      : 'Modern, clean, and professional.';
+    const palette = spec.theme.palette || {
+      background: 'ffffff',
+      surface: 'f8fafc',
+      accent: spec.theme.primaryColor,
+      text: '0f172a'
+    };
+
+    const typography = spec.branding?.typography || {
+      heading: 'Sans-serif',
+      body: 'Sans-serif'
+    };
 
     return `
-Generate a single-file React component (App.tsx) for a website named "${spec.name}".
+Generate a single-file React component (App.tsx) for a premium website named "${spec.name}".
 
-Context & Branding:
+### Design Identity
+- **Tone**: ${spec.branding?.tone || 'Professional & Modern'}
+- **Aesthetic**: ${spec.branding?.aesthetic || 'Clean and minimal'}
+- **Layout Strategy**: ${spec.theme.layoutStrategy || 'editorial-stacked'}
+- **Spacing Ethos**: ${spec.theme.spacing || 'airy'}
+- **Palette**: 
+  - Background: #${palette.background}
+  - Surface/Cards: #${palette.surface}
+  - Accent: #${palette.accent}
+  - Text: #${palette.text}
+- **Typography**: Heading: ${typography.heading}, Body: ${typography.body}
+
+### Site Narrative & Structure
 ${spec.description}
-${brandingText}
 
-Requested Sections & Storytelling:
+Requested Sections:
 ${sectionsText}
 
-Key Features:
-${spec.features.map(f => `- ${f}`).join('\n')}
+### Core Principles for the AI
+1. **NEGATIVE SPACE**: Prioritize "breathing room". Use large margins (e.g., mt-32, py-24). Avoid cramming elements.
+2. **LAYOUT MASTERY**: Avoid generic 1-column stacks. Use the requested strategy (${spec.theme.layoutStrategy}).
+3. **IMAGERY**: Use high-quality placeholders from Unsplash (https://images.unsplash.com/...) relevant to these keywords: ${spec.imagery?.keywords.join(', ') || 'modern architecture, clean design'}. 
+4. **COLOR & HIERARCHY**: Use the palette strictly. Background should be clean. Contrast should be intentional.
+5. **MOTION**: Include subtle Framer-Motion style entry animations or smooth transitions.
+6. **VISUAL POLISH**: Use delicate borders (border-slate-100), soft shadows (shadow-sm), and rounded corners (rounded-3xl).
 
-Technical Requirements:
+### Technical Requirements
 - Use React with TypeScript.
-- Use Tailwind CSS for all styling (prefer utility classes).
-- Use Lucide-react for high-quality icons.
-- Implement smooth micro-interactions and transitions where appropriate.
-- Primary color: #${spec.theme.primaryColor}
-- Dark mode: ${spec.theme.darkMode ? 'Supported' : 'Light theme only'}
-
-Visual Polish Guidelines:
-- Prioritize high-end aesthetics: generous white space, consistent padding, and elegant typography.
-- Avoid generic layouts. Use creative grid systems or flexbox patterns.
-- Ensure the interface feels "alive" with subtle hover states or entry animations.
-- The entire site must be contained in a single App.tsx file.
+- Use Tailwind CSS for all styling. Define the custom palette in a style tag if needed or use inline hex colors appropriately.
+- Use Lucide-react for elegant icons.
+- Ensure the site is fully responsive and mobile-optimized.
+- The entire site must be in one file: App.tsx.
 
 Return ONLY the code for App.tsx. Ensure all imports are used.
 `;
