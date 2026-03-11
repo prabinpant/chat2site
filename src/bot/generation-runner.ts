@@ -26,7 +26,8 @@ export class GenerationRunner {
     const generatedCode = await this.codexService.generateCode(prompt);
 
     onProgress('📂 Creating workspace...');
-    const sitePath = this.workspaceManager.createSiteWorkspace(spec.name.toLowerCase().replace(/\s+/g, '-'));
+    const safeName = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `site-${Date.now()}`;
+    const sitePath = this.workspaceManager.createSiteWorkspace(safeName);
     this.workspaceManager.injectCode(sitePath, generatedCode);
 
     onProgress('📦 Installing dependencies (this takes a moment)...');
@@ -39,7 +40,7 @@ export class GenerationRunner {
     await this.buildSite(sitePath);
 
     onProgress('🌐 Deploying to Netlify...');
-    const deployment = await this.deploymentService.deploy(sitePath, spec.name.toLowerCase().replace(/\s+/g, '-'));
+    const deployment = await this.deploymentService.deploy(sitePath, safeName);
 
     return { sitePath, url, deployedUrl: deployment.url };
   }

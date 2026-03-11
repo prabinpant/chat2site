@@ -1,141 +1,267 @@
-const navItems = [
-  { label: 'About', href: '#about' },
-  { label: 'Features', href: '#features' },
-  { label: 'Menu', href: '#menu' },
-  { label: 'Gallery', href: '#gallery' },
-  { label: 'Reserve', href: '#reservation' },
-  { label: 'Contact', href: '#contact' },
+import {
+  ArrowUpRight,
+  ChevronRight,
+  Clock3,
+  Command,
+  Cpu,
+  Database,
+  FileCode2,
+  FolderGit2,
+  Github,
+  Layers3,
+  Linkedin,
+  Mail,
+  Search,
+  Sparkles,
+  Terminal,
+  Workflow,
+  Wrench,
+  X,
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+
+type Project = {
+  name: string
+  description: string
+  language: string
+  updated: string
+  tags: string[]
+  problem: string
+  architecture: string
+  screenshots: string[]
+  github: string
+  demo?: string
+}
+
+type Experiment = {
+  name: string
+  path: string
+  concept: string
+  explored: string
+  insight: string
+}
+
+type StackGroup = {
+  label: string
+  icon: typeof FileCode2
+  items: string[]
+}
+
+const bootLines = [
+  'bootloader:init devos@aaryash-shakya',
+  'kernel:mount /projects /experiments /notes',
+  'service:sync github profile metadata',
+  'module:load repository explorer',
+  'module:load command palette',
+  'session:ready',
 ]
 
-const features = [
+const projects: Project[] = [
   {
-    title: 'Rooted in tradition',
-    description:
-      'Recipes draw from Nepali kitchens, mountain spice routes, and celebratory family feasts.',
+    name: 'build-mcp-server',
+    description: 'Convert a project idea into a custom MCP server workflow.',
+    language: 'TypeScript',
+    updated: 'recently updated',
+    tags: ['mcp', 'tooling', 'automation', 'ai'],
+    problem:
+      'Removes repetitive setup around standing up custom MCP servers by turning intent into a working system entrypoint faster.',
+    architecture:
+      'A TypeScript-first workflow that treats project intent as input, then composes server scaffolding, tool wiring, and execution surfaces around it.',
+    screenshots: ['prompt-schema.ts', 'server-runtime.ts', 'transport-bridge.ts'],
+    github: 'https://github.com/Aaryash-Shakya',
   },
   {
-    title: 'Local seasonal sourcing',
-    description:
-      'Fresh herbs, regional vegetables, and carefully selected meats shape a menu with real depth.',
-  },
-  {
-    title: 'Warm modern dining',
-    description:
-      'A refined room with handcrafted details, soft lighting, and polished service from lunch through late dinner.',
-  },
-]
-
-const menuCategories = [
-  {
-    title: 'Starters',
-    items: [
-      {
-        name: 'Timur Crispy Potatoes',
-        description: 'Golden potatoes, roasted garlic aioli, toasted timur pepper, fresh coriander.',
-        price: '$8',
-      },
-      {
-        name: 'Smoked Tomato Choila',
-        description: 'Charred tomato relish with mustard oil, sesame, chili, and flatbread shards.',
-        price: '$9',
-      },
-    ],
-  },
-  {
-    title: 'Momos',
-    items: [
-      {
-        name: 'Buff Momos',
-        description: 'Classic Kathmandu-style dumplings with chili sesame chutney.',
-        price: '$12',
-      },
-      {
-        name: 'Himalayan Mushroom Momos',
-        description: 'Wild mushroom filling, scallion oil, and a light roasted tomato broth.',
-        price: '$11',
-      },
-    ],
-  },
-  {
-    title: 'Main Dishes',
-    items: [
-      {
-        name: 'Mustang Lamb Curry',
-        description: 'Slow-braised lamb, black cardamom, fenugreek, and saffron basmati rice.',
-        price: '$22',
-      },
-      {
-        name: 'Everest Thakali Plate',
-        description: 'Dal, seasonal tarkari, achar, saag, rice, and grilled market protein.',
-        price: '$24',
-      },
-    ],
-  },
-  {
-    title: 'Desserts',
-    items: [
-      {
-        name: 'Juju Dhau Cheesecake',
-        description: 'Creamy Bhaktapur yogurt cheesecake with honey and pistachio crumble.',
-        price: '$9',
-      },
-      {
-        name: 'Spiced Kheer Brulee',
-        description: 'Rice pudding custard with cardamom caramel and almond brittle.',
-        price: '$8',
-      },
-    ],
-  },
-  {
-    title: 'Drinks',
-    items: [
-      {
-        name: 'Himalayan Masala Chiya',
-        description: 'Slow-brewed milk tea with cardamom, cinnamon, and mountain honey.',
-        price: '$5',
-      },
-      {
-        name: 'Sea Buckthorn Spritz',
-        description: 'Bright citrus, herbal soda, and a chilled golden finish.',
-        price: '$7',
-      },
-    ],
+    name: 'experiments-index',
+    description: 'A structured surface for testing developer workflows, interfaces, and system ideas.',
+    language: 'JavaScript',
+    updated: 'active lab',
+    tags: ['prototypes', 'ui', 'systems'],
+    problem:
+      'Keeps experimentation visible instead of burying prototypes behind finished-product polish.',
+    architecture:
+      'Organized as lightweight modules, each isolating one idea, one constraint, and one engineering question to validate quickly.',
+    screenshots: ['lab-shell.tsx', 'command-router.ts', 'results-log.md'],
+    github: 'https://github.com/Aaryash-Shakya',
   },
 ]
 
-const galleryImages = [
+const experiments: Experiment[] = [
   {
-    src: 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80',
-    alt: 'Nepali platter with curries and rice',
+    name: 'protocol-surface',
+    path: 'lab/protocol-surface.ts',
+    concept: 'How interfaces behave when command-first navigation is the default.',
+    explored: 'Terminal patterns, palette routing, and low-friction developer UX.',
+    insight: 'The fastest interfaces often win by reducing explanation, not adding decoration.',
   },
   {
-    src: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80',
-    alt: 'Restaurant dining room with warm lighting',
+    name: 'repo-as-product',
+    path: 'lab/repo-as-product.md',
+    concept: 'Presenting work as an inspectable system instead of a sales page.',
+    explored: 'Repository metaphors, markdown rendering, and system-state storytelling.',
+    insight: 'Engineering depth reads better when visitors can inspect structure, dependencies, and decisions.',
   },
   {
-    src: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=900&q=80',
-    alt: 'Steamed momos served with dipping sauce',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=80',
-    alt: 'Chef plating a dish in a modern kitchen',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1515003197210-e0cd71810b5f?auto=format&fit=crop&w=900&q=80',
-    alt: 'Cocktail and dessert on a restaurant table',
-  },
-  {
-    src: 'https://images.unsplash.com/photo-1529042410759-befb1204b468?auto=format&fit=crop&w=900&q=80',
-    alt: 'Guests sharing food around a table',
+    name: 'ai-tooling-loop',
+    path: 'lab/ai-tooling-loop.ts',
+    concept: 'Shortening the path from idea to tool using AI-assisted infrastructure.',
+    explored: 'Prompt-driven generation, automation layers, and dev tooling feedback loops.',
+    insight: 'The leverage is not only generation speed; it is how quickly the loop exposes design mistakes.',
   },
 ]
+
+const timeline = [
+  { year: 'System Event 01', text: 'Shift toward building tools, not just interfaces.' },
+  { year: 'System Event 02', text: 'Started exploring AI-assisted workflows and protocol-driven developer tooling.' },
+  { year: 'System Event 03', text: 'Built and shipped experimentation-first projects with repository-style thinking.' },
+  { year: 'System Event 04', text: 'Continues iterating on systems, prototypes, and dev-centric interfaces.' },
+]
+
+const stackGroups: StackGroup[] = [
+  { label: 'Frontend', icon: FileCode2, items: ['React', 'TypeScript', 'Tailwind CSS', 'UI Systems'] },
+  { label: 'Backend', icon: Cpu, items: ['Node.js', 'API Workflows', 'Automation', 'Protocol Design'] },
+  { label: 'Databases', icon: Database, items: ['Structured Data Models', 'Persistence Layers', 'Data Flows'] },
+  { label: 'Developer Tools', icon: Wrench, items: ['GitHub', 'CLI UX', 'Build Pipelines', 'Repository Tooling'] },
+  { label: 'AI / Experimental', icon: Sparkles, items: ['MCP', 'LLM Workflows', 'Rapid Prototyping', 'Human-in-the-loop Tools'] },
+]
+
+const featureCards = [
+  {
+    title: 'Repository Explorer',
+    description: 'Projects are surfaced like repos with languages, tags, update state, and drill-down architecture notes.',
+    icon: FolderGit2,
+  },
+  {
+    title: 'Command Navigation',
+    description: 'A palette and mini terminal route visitors through the site using verbs instead of standard CTA buttons.',
+    icon: Command,
+  },
+  {
+    title: 'README Rendering',
+    description: 'The about section reads like documentation: precise, inspectable, and oriented around how things are built.',
+    icon: FileCode2,
+  },
+]
+
+const commandHints = ['about', 'projects', 'experiments', 'timeline', 'stack', 'contact', 'github']
 
 function App() {
+  const [bootIndex, setBootIndex] = useState(0)
+  const [bootComplete, setBootComplete] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [commandInput, setCommandInput] = useState('')
+  const [terminalInput, setTerminalInput] = useState('')
+  const [selectedProject, setSelectedProject] = useState<Project | null>(projects[0])
+  const [terminalLog, setTerminalLog] = useState<string[]>([
+    '$ help',
+    'available commands: about, projects, experiments, timeline, stack, contact, github',
+  ])
+
+  useEffect(() => {
+    if (bootComplete) {
+      return
+    }
+
+    if (bootIndex < bootLines.length) {
+      const timer = window.setTimeout(() => {
+        setBootIndex((current) => current + 1)
+      }, 360)
+
+      return () => window.clearTimeout(timer)
+    }
+
+    const completeTimer = window.setTimeout(() => {
+      setBootComplete(true)
+    }, 520)
+
+    return () => window.clearTimeout(completeTimer)
+  }, [bootComplete, bootIndex])
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setPaletteOpen((open) => !open)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  const filteredCommands = useMemo(() => {
+    const normalized = commandInput.trim().toLowerCase()
+    if (!normalized) {
+      return commandHints
+    }
+
+    return commandHints.filter((command) => command.includes(normalized))
+  }, [commandInput])
+
+  const runCommand = (rawCommand: string) => {
+    const command = rawCommand.trim().toLowerCase()
+    if (!command) {
+      return
+    }
+
+    const scrollTo = (id: string) => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+
+    const openUrl = (url: string) => {
+      window.open(url, '_blank', 'noopener,noreferrer')
+    }
+
+    if (command === 'about') {
+      scrollTo('about')
+    } else if (command === 'projects') {
+      scrollTo('projects')
+    } else if (command === 'experiments') {
+      scrollTo('experiments')
+    } else if (command === 'timeline') {
+      scrollTo('timeline')
+    } else if (command === 'stack') {
+      scrollTo('stack')
+    } else if (command === 'contact') {
+      scrollTo('contact')
+    } else if (command === 'github') {
+      openUrl('https://github.com/Aaryash-Shakya')
+    } else {
+      setTerminalLog((current) => [...current, `$ ${rawCommand}`, `command not found: ${rawCommand}`])
+      return
+    }
+
+    setTerminalLog((current) => [...current, `$ ${rawCommand}`, `executed: ${command}`])
+  }
+
+  const handlePaletteSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    runCommand(commandInput)
+    setPaletteOpen(false)
+    setCommandInput('')
+  }
+
+  const handleTerminalSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    runCommand(terminalInput)
+    setTerminalInput('')
+  }
+
   return (
-    <div className="bg-[#f7efe3] text-[#2d1c18]">
+    <div className="min-h-screen bg-[#050816] text-slate-100">
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
         :root {
-          color-scheme: light;
+          color-scheme: dark;
+          --bg: #050816;
+          --panel: rgba(8, 15, 32, 0.78);
+          --panel-strong: rgba(10, 18, 38, 0.96);
+          --line: rgba(148, 163, 184, 0.18);
+          --soft: rgba(59, 130, 246, 0.16);
+          --brand: #3b82f6;
+          --text: #e2e8f0;
+          --muted: #94a3b8;
         }
 
         html {
@@ -145,401 +271,624 @@ function App() {
         body {
           margin: 0;
           min-width: 320px;
-          background: #f7efe3;
-          color: #2d1c18;
-          font-family: Georgia, "Times New Roman", serif;
+          background:
+            radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 28%),
+            radial-gradient(circle at top right, rgba(15, 23, 42, 0.9), transparent 35%),
+            linear-gradient(180deg, #040712 0%, #050816 45%, #030611 100%);
+          color: var(--text);
+          font-family: 'Geist', 'Segoe UI', sans-serif;
         }
 
         * {
           box-sizing: border-box;
         }
+
+        .font-mono-ui {
+          font-family: 'IBM Plex Mono', 'SFMono-Regular', monospace;
+        }
       `}</style>
 
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(circle_at_top,rgba(142,32,38,0.22),transparent_55%)]" />
-        <div className="absolute inset-x-0 top-40 h-[28rem] bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.12),transparent_60%)]" />
+      <div className="pointer-events-none fixed inset-0 opacity-60">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.06)_1px,transparent_1px)] bg-[size:32px_32px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.12),transparent_42%)]" />
+      </div>
 
-        <header className="sticky top-0 z-50 border-b border-[#8f5f39]/15 bg-[#f7efe3]/90 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8">
+      {!bootComplete ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#030611]/95 px-4">
+          <div className="w-full max-w-3xl rounded-[28px] border border-white/10 bg-[rgba(5,8,22,0.94)] p-5 shadow-[0_40px_120px_rgba(2,6,23,0.75)] backdrop-blur-xl sm:p-8">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="font-mono-ui text-xs uppercase tracking-[0.35em] text-blue-300">boot interface</p>
+                <h1 className="mt-2 text-2xl font-semibold text-white sm:text-4xl">Aaryash Shakya DevOS</h1>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBootComplete(true)}
+                className="font-mono-ui rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 transition hover:border-blue-400/40 hover:text-white"
+              >
+                skip boot
+              </button>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-black/30 p-4 sm:p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+                <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                <span className="ml-3 font-mono-ui text-xs text-slate-500">/build me/devos.boot</span>
+              </div>
+
+              <div className="space-y-2 font-mono-ui text-sm text-slate-300">
+                {bootLines.slice(0, bootIndex).map((line) => (
+                  <div key={line} className="flex gap-3">
+                    <span className="text-blue-400">$</span>
+                    <span>{line}</span>
+                  </div>
+                ))}
+                <div className="flex gap-3 text-blue-300">
+                  <span>$</span>
+                  <span className="inline-block h-5 w-2 animate-pulse rounded-sm bg-blue-400/80" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {paletteOpen ? (
+        <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/70 px-4 pt-24 backdrop-blur-md">
+          <div className="w-full max-w-2xl rounded-[28px] border border-white/10 bg-[rgba(8,15,32,0.94)] shadow-[0_40px_120px_rgba(2,6,23,0.7)]">
+            <form onSubmit={handlePaletteSubmit} className="border-b border-white/10 p-4 sm:p-5">
+              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                <Search className="h-4 w-4 text-slate-500" />
+                <input
+                  value={commandInput}
+                  onChange={(event) => setCommandInput(event.target.value)}
+                  placeholder="Type a command..."
+                  autoFocus
+                  className="font-mono-ui w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPaletteOpen(false)}
+                  className="rounded-full p-1 text-slate-500 transition hover:bg-white/5 hover:text-white"
+                  aria-label="Close command palette"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </form>
+
+            <div className="p-3">
+              {filteredCommands.map((command) => (
+                <button
+                  key={command}
+                  type="button"
+                  onClick={() => {
+                    runCommand(command)
+                    setPaletteOpen(false)
+                    setCommandInput('')
+                  }}
+                  className="flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition hover:bg-white/5"
+                >
+                  <div>
+                    <p className="font-mono-ui text-sm text-white">{command}</p>
+                    <p className="text-xs text-slate-500">navigate DevOS</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-slate-500" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="relative z-10">
+        <header className="sticky top-0 z-30 border-b border-white/10 bg-[rgba(5,8,22,0.82)] backdrop-blur-xl">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <a href="#top" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#8f5f39]/25 bg-[#7a2e2a] text-sm font-semibold uppercase tracking-[0.35em] text-[#f8ead2]">
-                HS
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-400/30 bg-blue-500/10 text-blue-300 shadow-[0_0_0_1px_rgba(59,130,246,0.08),0_20px_60px_rgba(59,130,246,0.15)]">
+                <Terminal className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[0.65rem] uppercase tracking-[0.38em] text-[#8f5f39]">
-                  Kathmandu, Nepal
-                </p>
-                <p className="font-sans text-lg font-semibold tracking-[0.08em] text-[#2d1c18]">
-                  Himalayan Spice
-                </p>
+                <p className="font-mono-ui text-xs uppercase tracking-[0.34em] text-blue-300">devos</p>
+                <p className="text-sm text-slate-300">Aaryash Shakya</p>
               </div>
             </a>
 
             <nav className="hidden items-center gap-6 lg:flex">
-              {navItems.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="font-sans text-sm font-medium text-[#5b3a2f] transition hover:text-[#7a2e2a]"
-                >
-                  {item.label}
+              {[
+                ['about', 'README'],
+                ['projects', 'Repos'],
+                ['experiments', 'Lab'],
+                ['timeline', 'Timeline'],
+                ['contact', 'Contact'],
+              ].map(([href, label]) => (
+                <a key={href} href={`#${href}`} className="font-mono-ui text-xs uppercase tracking-[0.24em] text-slate-400 transition hover:text-white">
+                  {label}
                 </a>
               ))}
             </nav>
 
-            <a
-              href="#reservation"
-              className="rounded-full bg-[#3b82f6] px-5 py-2.5 font-sans text-sm font-semibold text-white shadow-[0_16px_40px_rgba(59,130,246,0.25)] transition hover:bg-[#2563eb]"
+            <button
+              type="button"
+              onClick={() => setPaletteOpen(true)}
+              className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300 transition hover:border-blue-400/40 hover:text-white"
             >
-              Reserve Table
-            </a>
+              <Command className="h-4 w-4" />
+              <span className="font-mono-ui hidden sm:inline">command</span>
+              <span className="font-mono-ui rounded-md border border-white/10 px-1.5 py-0.5 text-[10px] text-slate-500">cmd+k</span>
+            </button>
           </div>
         </header>
 
-        <main id="top">
-          <section className="relative isolate">
-            <div className="absolute inset-0">
-              <img
-                src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=1600&q=80"
-                alt="Nepali cuisine served in a warm restaurant setting"
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(33,20,16,0.84)_0%,rgba(33,20,16,0.62)_45%,rgba(33,20,16,0.5)_100%)]" />
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(122,46,42,0.18),rgba(33,20,16,0.12)_35%,rgba(33,20,16,0.72)_100%)]" />
-            </div>
+        <main id="top" className="mx-auto max-w-7xl px-4 pb-16 pt-6 sm:px-6 lg:px-8 lg:pb-24">
+          <section className="grid gap-6 pt-6 lg:grid-cols-[1.12fr_0.88fr] lg:pt-10">
+            <div className="rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(8,15,32,0.92),rgba(4,7,18,0.92))] p-6 shadow-[0_30px_120px_rgba(2,6,23,0.5)] sm:p-8">
+              <div className="mb-6 flex items-center gap-3">
+                <span className="rounded-full border border-blue-400/20 bg-blue-500/10 px-3 py-1 font-mono-ui text-[11px] uppercase tracking-[0.3em] text-blue-300">
+                  boot complete
+                </span>
+                <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 font-mono-ui text-[11px] uppercase tracking-[0.3em] text-emerald-300">
+                  session active
+                </span>
+              </div>
 
-            <div className="relative mx-auto grid min-h-[calc(100vh-81px)] max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-24">
-              <div className="max-w-3xl">
-                <div className="inline-flex rounded-full border border-[#d4af37]/30 bg-[#d4af37]/10 px-4 py-2 font-sans text-xs font-semibold uppercase tracking-[0.32em] text-[#f8ead2]">
-                  Authentic Nepali & Himalayan fusion
-                </div>
-                <h1 className="mt-8 text-5xl font-semibold leading-none tracking-[-0.05em] text-[#fff4e8] sm:text-6xl lg:text-7xl">
-                  Himalayan Spice
-                </h1>
-                <p className="mt-5 font-sans text-lg uppercase tracking-[0.38em] text-[#f0d5b0]">
-                  Authentic Himalayan Flavors
-                </p>
-                <p className="mt-8 max-w-2xl font-sans text-base leading-8 text-[#f5e6d2]/88 sm:text-lg">
-                  A contemporary restaurant inspired by Kathmandu&apos;s bustling food culture,
-                  handcrafted momos, slow-cooked curries, and the warmth of Himalayan hospitality.
-                </p>
+              <p className="font-mono-ui text-xs uppercase tracking-[0.36em] text-slate-500">/build me a site</p>
+              <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-[-0.05em] text-white sm:text-6xl">
+                A developer portfolio that feels more like inspecting a live system than browsing a resume.
+              </h1>
+              <p className="mt-6 max-w-3xl text-lg leading-8 text-slate-300">
+                DevOS is a repository-like interface for exploring how Aaryash Shakya builds: tool-first thinking,
+                experiments in progress, and an engineering mindset centered on systems, iteration, and developer UX.
+              </p>
 
-                <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                  <a
-                    href="#menu"
-                    className="inline-flex items-center justify-center rounded-full bg-[#7a2e2a] px-7 py-3.5 font-sans text-sm font-semibold uppercase tracking-[0.16em] text-[#fff4e8] transition hover:bg-[#642521]"
+              <div className="mt-8 flex flex-wrap gap-3">
+                {[
+                  ['explore projects', 'projects'],
+                  ['view experiments', 'experiments'],
+                  ['about developer', 'about'],
+                  ['contact', 'contact'],
+                ].map(([label, target]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => runCommand(target)}
+                    className="font-mono-ui rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-400/30 hover:bg-blue-500/10 hover:text-white"
                   >
-                    View Menu
-                  </a>
-                  <a
-                    href="#reservation"
-                    className="inline-flex items-center justify-center rounded-full border border-[#f0d5b0]/40 bg-white/10 px-7 py-3.5 font-sans text-sm font-semibold uppercase tracking-[0.16em] text-[#fff4e8] backdrop-blur transition hover:bg-white/15"
-                  >
-                    Reserve Table
-                  </a>
-                </div>
-              </div>
-
-              <div className="lg:justify-self-end">
-                <div className="rounded-[2rem] border border-white/15 bg-[rgba(52,29,24,0.56)] p-6 shadow-2xl shadow-black/30 backdrop-blur-md">
-                  <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-                    {[
-                      ['Signature', 'Hand-folded momos'],
-                      ['Location', 'Lazimpat, Kathmandu'],
-                      ['Hours', '11:00 AM - 11:00 PM'],
-                    ].map(([label, value]) => (
-                      <div key={label} className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
-                        <p className="font-sans text-xs uppercase tracking-[0.28em] text-[#d4af37]">
-                          {label}
-                        </p>
-                        <p className="mt-3 text-xl font-semibold text-[#fff4e8]">{value}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section id="about" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
-            <div className="grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-              <div className="relative">
-                <div className="absolute -left-6 top-8 hidden h-32 w-32 rounded-full border border-[#d4af37]/35 lg:block" />
-                <img
-                  src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1200&q=80"
-                  alt="Chef working in the kitchen"
-                  className="relative h-[28rem] w-full rounded-[2rem] object-cover shadow-[0_28px_90px_rgba(74,39,20,0.18)]"
-                />
-              </div>
-
-              <div>
-                <p className="font-sans text-sm font-semibold uppercase tracking-[0.3em] text-[#8f5f39]">
-                  About Us
-                </p>
-                <h2 className="mt-4 max-w-xl text-4xl font-semibold leading-tight tracking-[-0.04em] text-[#2d1c18] sm:text-5xl">
-                  Himalayan traditions, retold with a modern Kathmandu rhythm.
-                </h2>
-                <p className="mt-6 max-w-2xl font-sans text-base leading-8 text-[#5b3a2f] sm:text-lg">
-                  Himalayan Spice began with a simple idea: present the comfort of Nepali home
-                  cooking in a refined dining room without losing its soul. Our kitchen works with
-                  local vegetables, mountain herbs, house-ground masalas, and time-honored methods
-                  that let every broth, achar, and curry develop real character.
-                </p>
-                <p className="mt-5 max-w-2xl font-sans text-base leading-8 text-[#5b3a2f] sm:text-lg">
-                  From steamed momos to slow-braised lamb, each plate balances memory and
-                  innovation, celebrating the warmth of Himalayan hospitality in the heart of
-                  Kathmandu.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section id="features" className="bg-[#2d1c18] py-20 text-[#f8ead2]">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div className="max-w-2xl">
-                  <p className="font-sans text-sm font-semibold uppercase tracking-[0.32em] text-[#d4af37]">
-                    Features
-                  </p>
-                  <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
-                    Crafted for guests who want warmth, elegance, and depth in every course.
-                  </h2>
-                </div>
-                <p className="max-w-xl font-sans text-base leading-8 text-[#ead8c0]/75">
-                  Clean lines, earthy textures, and subtle Nepali inspiration shape a dining
-                  experience that feels both elevated and grounded.
-                </p>
-              </div>
-
-              <div className="mt-12 grid gap-5 md:grid-cols-3">
-                {features.map((feature) => (
-                  <article
-                    key={feature.title}
-                    className="rounded-[1.75rem] border border-white/10 bg-white/5 p-7 transition hover:-translate-y-1 hover:bg-white/10"
-                  >
-                    <div className="h-1.5 w-16 rounded-full bg-[#d4af37]" />
-                    <h3 className="mt-6 text-2xl font-semibold">{feature.title}</h3>
-                    <p className="mt-4 font-sans text-base leading-8 text-[#ead8c0]/78">
-                      {feature.description}
-                    </p>
-                  </article>
+                    $ {label}
+                  </button>
                 ))}
-              </div>
-            </div>
-          </section>
-
-          <section id="menu" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
-            <div className="max-w-3xl">
-              <p className="font-sans text-sm font-semibold uppercase tracking-[0.3em] text-[#8f5f39]">
-                Featured Menu
-              </p>
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#2d1c18] sm:text-5xl">
-                Signature dishes from the Himalayan table.
-              </h2>
-              <p className="mt-5 font-sans text-base leading-8 text-[#5b3a2f] sm:text-lg">
-                Built around bold spice, regional ingredients, and polished presentation.
-              </p>
-            </div>
-
-            <div className="mt-12 grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-              {menuCategories.map((category) => (
-                <article
-                  key={category.title}
-                  className="rounded-[1.75rem] border border-[#8f5f39]/15 bg-[#fffaf3] p-7 shadow-[0_18px_45px_rgba(94,56,34,0.08)]"
+                <a
+                  href="https://github.com/Aaryash-Shakya"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-mono-ui inline-flex items-center gap-2 rounded-2xl border border-blue-400/25 bg-blue-500/10 px-4 py-3 text-sm text-blue-200 transition hover:bg-blue-500/15"
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <h3 className="text-2xl font-semibold text-[#2d1c18]">{category.title}</h3>
-                    <span className="rounded-full bg-[#d4af37]/12 px-3 py-1 font-sans text-xs font-semibold uppercase tracking-[0.24em] text-[#8f5f39]">
-                      Chef&apos;s pick
-                    </span>
-                  </div>
+                  $ open GitHub
+                  <ArrowUpRight className="h-4 w-4" />
+                </a>
+              </div>
 
-                  <div className="mt-7 space-y-6">
-                    {category.items.map((item) => (
-                      <div key={item.name} className="border-b border-[#8f5f39]/10 pb-6 last:border-b-0 last:pb-0">
-                        <div className="flex items-start justify-between gap-4">
-                          <h4 className="text-lg font-semibold text-[#2d1c18]">{item.name}</h4>
-                          <span className="font-sans text-sm font-semibold text-[#7a2e2a]">
-                            {item.price}
-                          </span>
-                        </div>
-                        <p className="mt-2 font-sans text-sm leading-7 text-[#5b3a2f]">
-                          {item.description}
-                        </p>
+              <div className="mt-10 grid gap-4 md:grid-cols-3">
+                {featureCards.map((item) => {
+                  const Icon = item.icon
+
+                  return (
+                    <div key={item.title} className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
+                      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-500/10 text-blue-300">
+                        <Icon className="h-5 w-5" />
                       </div>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section id="gallery" className="bg-[#efe2cf] py-20">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="max-w-2xl">
-                <p className="font-sans text-sm font-semibold uppercase tracking-[0.3em] text-[#8f5f39]">
-                  Gallery
-                </p>
-                <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#2d1c18] sm:text-5xl">
-                  A closer look at the room, the kitchen, and the plates.
-                </h2>
-              </div>
-
-              <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {galleryImages.map((image, index) => (
-                  <div
-                    key={image.src}
-                    className={`group relative overflow-hidden rounded-[1.75rem] ${
-                      index % 3 === 1 ? 'sm:translate-y-8' : ''
-                    }`}
-                  >
-                    <img
-                      src={image.src}
-                      alt={image.alt}
-                      className="h-72 w-full object-cover transition duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_20%,rgba(45,28,24,0.72)_100%)] opacity-80 transition group-hover:opacity-95" />
-                    <p className="absolute bottom-5 left-5 right-5 font-sans text-sm font-medium tracking-[0.08em] text-[#fff4e8]">
-                      {image.alt}
-                    </p>
-                  </div>
-                ))}
+                      <h2 className="text-lg font-medium text-white">{item.title}</h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-400">{item.description}</p>
+                    </div>
+                  )
+                })}
               </div>
             </div>
-          </section>
 
-          <section id="reservation" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
-            <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-              <div>
-                <p className="font-sans text-sm font-semibold uppercase tracking-[0.3em] text-[#8f5f39]">
-                  Reservation
-                </p>
-                <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#2d1c18] sm:text-5xl">
-                  Reserve your table for an evening of Himalayan flavor.
-                </h2>
-                <p className="mt-6 max-w-xl font-sans text-base leading-8 text-[#5b3a2f] sm:text-lg">
-                  Ideal for intimate dinners, family celebrations, and business meals in a warm,
-                  design-forward setting.
-                </p>
+            <div className="space-y-6">
+              <div className="overflow-hidden rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.84)] shadow-[0_30px_100px_rgba(2,6,23,0.5)] backdrop-blur-xl">
+                <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                  </div>
+                  <p className="font-mono-ui text-xs text-slate-500">session/overview.json</p>
+                </div>
+
+                <div className="space-y-4 p-5">
+                  <div className="rounded-3xl border border-white/10 bg-black/20 p-4">
+                    <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">profile signal</p>
+                    <p className="mt-3 text-2xl font-semibold text-white">Builder of tools, interfaces, and experiments.</p>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+                      <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">current mode</p>
+                      <p className="mt-2 text-sm text-slate-200">Exploring developer tooling and system-driven product surfaces.</p>
+                    </div>
+                    <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+                      <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">primary color</p>
+                      <div className="mt-3 flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-xl bg-[#3b82f6]" />
+                        <span className="font-mono-ui text-sm text-slate-200">#3b82f6</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl border border-blue-400/20 bg-blue-500/10 p-4">
+                    <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-blue-200">command palette</p>
+                    <p className="mt-2 text-sm text-blue-50">Use `Cmd/Ctrl + K` or the terminal below to move through sections.</p>
+                  </div>
+                </div>
               </div>
 
               <form
-                className="rounded-[2rem] border border-[#8f5f39]/15 bg-[#fffaf3] p-6 shadow-[0_20px_50px_rgba(94,56,34,0.1)] sm:p-8"
-                onSubmit={(event) => event.preventDefault()}
+                onSubmit={handleTerminalSubmit}
+                className="overflow-hidden rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.84)] shadow-[0_30px_100px_rgba(2,6,23,0.45)]"
               >
-                <div className="grid gap-5 md:grid-cols-2">
-                  {[
-                    { label: 'Name', type: 'text', placeholder: 'Your full name' },
-                    { label: 'Email', type: 'email', placeholder: 'you@example.com' },
-                    { label: 'Phone', type: 'tel', placeholder: '+977 98XXXXXXXX' },
-                    { label: 'Date', type: 'date', placeholder: '' },
-                    { label: 'Time', type: 'time', placeholder: '' },
-                    { label: 'Guests', type: 'number', placeholder: '2' },
-                  ].map((field) => (
-                    <label key={field.label} className="block">
-                      <span className="font-sans text-sm font-semibold uppercase tracking-[0.14em] text-[#5b3a2f]">
-                        {field.label}
-                      </span>
-                      <input
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        min={field.type === 'number' ? 1 : undefined}
-                        className="mt-3 w-full rounded-2xl border border-[#8f5f39]/15 bg-white px-4 py-3.5 font-sans text-sm text-[#2d1c18] outline-none transition placeholder:text-[#a18472] focus:border-[#3b82f6] focus:ring-4 focus:ring-[#3b82f6]/10"
-                      />
-                    </label>
+                <div className="border-b border-white/10 px-5 py-4">
+                  <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">mini terminal</p>
+                </div>
+
+                <div className="space-y-2 px-5 py-4 font-mono-ui text-sm text-slate-300">
+                  {terminalLog.slice(-6).map((line, index) => (
+                    <p key={`${line}-${index}`}>{line}</p>
                   ))}
                 </div>
 
-                <button
-                  type="submit"
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-[#7a2e2a] px-6 py-3.5 font-sans text-sm font-semibold uppercase tracking-[0.18em] text-[#fff4e8] transition hover:bg-[#642521]"
-                >
-                  Confirm Reservation
-                </button>
+                <div className="border-t border-white/10 px-5 py-4">
+                  <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                    <span className="font-mono-ui text-blue-400">$</span>
+                    <input
+                      value={terminalInput}
+                      onChange={(event) => setTerminalInput(event.target.value)}
+                      placeholder="type a command"
+                      className="font-mono-ui w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+                    />
+                  </div>
+                </div>
               </form>
             </div>
           </section>
 
-          <section id="contact" className="bg-[#2d1c18] py-20 text-[#f8ead2]">
-            <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
-              <div>
-                <p className="font-sans text-sm font-semibold uppercase tracking-[0.3em] text-[#d4af37]">
-                  Contact
+          <section id="about" className="mt-8 overflow-hidden rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.82)] shadow-[0_30px_100px_rgba(2,6,23,0.45)]">
+            <div className="border-b border-white/10 px-5 py-4">
+              <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">README.md</p>
+            </div>
+
+            <div className="grid gap-8 p-6 lg:grid-cols-[0.82fr_1.18fr] lg:p-8">
+              <div className="space-y-4 rounded-[28px] border border-white/10 bg-black/20 p-5">
+                <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-blue-300">about developer</p>
+                <h2 className="text-3xl font-semibold tracking-[-0.04em] text-white">Documentation over self-promotion.</h2>
+                <p className="text-sm leading-7 text-slate-400">
+                  This portfolio is intentionally structured like a codebase. The point is not a polished list of achievements;
+                  it is the logic underneath the work.
                 </p>
-                <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] sm:text-5xl">
-                  Visit us in Kathmandu.
-                </h2>
-                <div className="mt-8 space-y-5 font-sans text-base leading-8 text-[#ead8c0]/82">
-                  <p>
-                    Address
-                    <br />
-                    Durbar Marg, Kathmandu, Nepal
+              </div>
+
+              <div className="prose prose-invert max-w-none">
+                <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5 text-slate-300">
+                  <p className="font-mono-ui text-sm text-slate-500"># Aaryash Shakya</p>
+                  <p className="mt-4 text-sm leading-7">
+                    Builds software that feels usable by developers first: tools, experiments, interfaces, and systems that
+                    reduce friction between an idea and a working implementation.
                   </p>
-                  <p>
-                    Phone
-                    <br />
-                    +977 1 4441234
+                  <p className="mt-4 text-sm leading-7">
+                    Interested in problems where workflow design matters as much as implementation detail: developer tooling,
+                    command surfaces, AI-assisted systems, and repository-like product experiences.
                   </p>
-                  <p>
-                    Email
-                    <br />
-                    hello@himalayanspice.com
-                  </p>
-                  <p>
-                    Opening Hours
-                    <br />
-                    Daily: 11:00 AM - 11:00 PM
+                  <p className="mt-4 text-sm leading-7">
+                    Curiosity leans toward software as an evolving lab. Ship something small, inspect the behavior, keep the
+                    useful abstractions, and repeat.
                   </p>
                 </div>
               </div>
+            </div>
+          </section>
 
-              <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-3">
-                <div className="flex h-full min-h-[22rem] items-center justify-center rounded-[1.5rem] border border-dashed border-[#d4af37]/35 bg-[linear-gradient(135deg,rgba(212,175,55,0.08),rgba(255,255,255,0.04))] px-6 text-center">
-                  <div>
-                    <p className="font-sans text-xs font-semibold uppercase tracking-[0.34em] text-[#d4af37]">
-                      Map Placeholder
-                    </p>
-                    <p className="mt-4 text-2xl font-semibold text-[#fff4e8]">
-                      Himalayan Spice
-                    </p>
-                    <p className="mt-3 font-sans text-base leading-8 text-[#ead8c0]/78">
-                      Positioned in the heart of Kathmandu with easy access for lunch meetings,
-                      evening dinners, and weekend gatherings.
-                    </p>
+          <section id="projects" className="mt-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.82)] p-5 shadow-[0_30px_100px_rgba(2,6,23,0.45)]">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">repository explorer</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-white">Projects</h2>
+                </div>
+                <FolderGit2 className="h-5 w-5 text-blue-300" />
+              </div>
+
+              <div className="space-y-4">
+                {projects.map((project) => (
+                  <button
+                    key={project.name}
+                    type="button"
+                    onClick={() => setSelectedProject(project)}
+                    className={`w-full rounded-[28px] border p-5 text-left transition ${
+                      selectedProject?.name === project.name
+                        ? 'border-blue-400/40 bg-blue-500/10'
+                        : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.05]'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="font-mono-ui text-sm text-white">{project.name}</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-400">{project.description}</p>
+                      </div>
+                      <ArrowUpRight className="mt-1 h-4 w-4 text-slate-500" />
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                      <span className="inline-flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-[#3b82f6]" />
+                        {project.language}
+                      </span>
+                      <span className="inline-flex items-center gap-2">
+                        <Clock3 className="h-3.5 w-3.5" />
+                        {project.updated}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {project.tags.map((tag) => (
+                        <span key={tag} className="font-mono-ui rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-slate-400">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.82)] shadow-[0_30px_100px_rgba(2,6,23,0.45)]">
+              <div className="border-b border-white/10 px-5 py-4">
+                <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">
+                  {selectedProject?.name ?? 'repo-preview'}
+                </p>
+              </div>
+
+              {selectedProject ? (
+                <div className="space-y-6 p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <h3 className="text-3xl font-semibold tracking-[-0.04em] text-white">{selectedProject.name}</h3>
+                      <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-400">{selectedProject.description}</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <a
+                        href={selectedProject.github}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-mono-ui inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs uppercase tracking-[0.22em] text-slate-200 transition hover:border-blue-400/30 hover:text-white"
+                      >
+                        <Github className="h-4 w-4" />
+                        GitHub
+                      </a>
+                      {selectedProject.demo ? (
+                        <a
+                          href={selectedProject.demo}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono-ui inline-flex items-center gap-2 rounded-2xl border border-blue-400/25 bg-blue-500/10 px-4 py-3 text-xs uppercase tracking-[0.22em] text-blue-200"
+                        >
+                          Demo
+                          <ArrowUpRight className="h-4 w-4" />
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+                      <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">problem solved</p>
+                      <p className="mt-3 text-sm leading-7 text-slate-300">{selectedProject.problem}</p>
+                    </div>
+                    <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+                      <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">architecture</p>
+                      <p className="mt-3 text-sm leading-7 text-slate-300">{selectedProject.architecture}</p>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+                    <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">screenshots / file views</p>
+                    <div className="mt-4 grid gap-4 md:grid-cols-3">
+                      {selectedProject.screenshots.map((shot) => (
+                        <div key={shot} className="rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-4">
+                          <div className="mb-4 flex items-center gap-2">
+                            <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+                            <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                            <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                          </div>
+                          <p className="font-mono-ui text-xs text-blue-300">{shot}</p>
+                          <div className="mt-4 space-y-2">
+                            <div className="h-2 rounded-full bg-white/10" />
+                            <div className="h-2 w-4/5 rounded-full bg-blue-400/30" />
+                            <div className="h-2 w-3/5 rounded-full bg-white/10" />
+                            <div className="h-2 w-2/5 rounded-full bg-white/10" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
+              ) : null}
+            </div>
+          </section>
+
+          <section id="experiments" className="mt-8 rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.82)] p-5 shadow-[0_30px_100px_rgba(2,6,23,0.45)] sm:p-6">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">lab / experiments</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white">Directory of ongoing exploration</h2>
+              </div>
+              <Workflow className="h-5 w-5 text-blue-300" />
+            </div>
+
+            <div className="space-y-4">
+              {experiments.map((experiment) => (
+                <div key={experiment.name} className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <p className="font-mono-ui text-sm text-blue-300">{experiment.path}</p>
+                      <h3 className="mt-2 text-lg font-medium text-white">{experiment.name}</h3>
+                    </div>
+                    <span className="font-mono-ui rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                      active
+                    </span>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 md:grid-cols-3">
+                    <div>
+                      <p className="font-mono-ui text-xs uppercase tracking-[0.2em] text-slate-500">concept</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-300">{experiment.concept}</p>
+                    </div>
+                    <div>
+                      <p className="font-mono-ui text-xs uppercase tracking-[0.2em] text-slate-500">explored</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-300">{experiment.explored}</p>
+                    </div>
+                    <div>
+                      <p className="font-mono-ui text-xs uppercase tracking-[0.2em] text-slate-500">key insight</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-300">{experiment.insight}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section id="timeline" className="mt-8 grid gap-6 lg:grid-cols-[0.86fr_1.14fr]">
+            <div className="rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.82)] p-6 shadow-[0_30px_100px_rgba(2,6,23,0.45)]">
+              <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">activity timeline</p>
+              <h2 className="mt-2 text-2xl font-semibold text-white">Growth through shipped systems.</h2>
+              <p className="mt-4 text-sm leading-7 text-slate-400">
+                The progression reads like a change log: projects launched, interfaces refined, experiments run, and tooling explored.
+              </p>
+            </div>
+
+            <div className="rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.82)] p-6 shadow-[0_30px_100px_rgba(2,6,23,0.45)]">
+              <div className="space-y-5">
+                {timeline.map((item, index) => (
+                  <div key={item.year} className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div className="h-3 w-3 rounded-full bg-blue-400" />
+                      {index !== timeline.length - 1 ? <div className="mt-2 h-full w-px bg-white/10" /> : null}
+                    </div>
+                    <div className="pb-5">
+                      <p className="font-mono-ui text-xs uppercase tracking-[0.22em] text-blue-300">{item.year}</p>
+                      <p className="mt-2 text-sm leading-7 text-slate-300">{item.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section id="stack" className="mt-8 rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.82)] p-5 shadow-[0_30px_100px_rgba(2,6,23,0.45)] sm:p-6">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">system modules</p>
+                <h2 className="mt-2 text-2xl font-semibold text-white">Tech stack as dependencies</h2>
+              </div>
+              <Layers3 className="h-5 w-5 text-blue-300" />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+              {stackGroups.map((group) => {
+                const Icon = group.icon
+
+                return (
+                  <div key={group.label} className="rounded-[28px] border border-white/10 bg-white/[0.03] p-5">
+                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-500/10 text-blue-300">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <h3 className="text-lg font-medium text-white">{group.label}</h3>
+                    <div className="mt-4 space-y-2">
+                      {group.items.map((item) => (
+                        <p key={item} className="font-mono-ui text-xs uppercase tracking-[0.16em] text-slate-400">
+                          {item}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+
+          <section id="contact" className="mt-8 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.82)] p-6 shadow-[0_30px_100px_rgba(2,6,23,0.45)]">
+              <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">terminal output</p>
+              <div className="mt-5 rounded-[28px] border border-white/10 bg-black/25 p-5 font-mono-ui text-sm text-slate-300">
+                <p>$ whois aaryash-shakya</p>
+                <p className="mt-3">developer: Aaryash Shakya</p>
+                <p>focus: tooling, systems, experimentation</p>
+                <p>status: open to interesting builds and technical conversations</p>
+                <p className="mt-3">$ contact --list</p>
+                <p>github: github.com/Aaryash-Shakya</p>
+                <p>email: hello@aaryash.dev</p>
+                <p>linkedin: linkedin.com/in/aaryash-shakya</p>
+              </div>
+            </div>
+
+            <div className="rounded-[32px] border border-white/10 bg-[rgba(8,15,32,0.82)] p-6 shadow-[0_30px_100px_rgba(2,6,23,0.45)]">
+              <p className="font-mono-ui text-xs uppercase tracking-[0.28em] text-slate-500">links</p>
+              <div className="mt-5 space-y-4">
+                <a
+                  href="https://github.com/Aaryash-Shakya"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between rounded-[24px] border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:border-blue-400/30 hover:bg-blue-500/10"
+                >
+                  <div className="flex items-center gap-3">
+                    <Github className="h-5 w-5 text-blue-300" />
+                    <div>
+                      <p className="text-sm font-medium text-white">GitHub</p>
+                      <p className="font-mono-ui text-xs text-slate-500">github.com/Aaryash-Shakya</p>
+                    </div>
+                  </div>
+                  <ArrowUpRight className="h-4 w-4 text-slate-500" />
+                </a>
+
+                <a
+                  href="mailto:hello@aaryash.dev"
+                  className="flex items-center justify-between rounded-[24px] border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:border-blue-400/30 hover:bg-blue-500/10"
+                >
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-blue-300" />
+                    <div>
+                      <p className="text-sm font-medium text-white">Email</p>
+                      <p className="font-mono-ui text-xs text-slate-500">hello@aaryash.dev</p>
+                    </div>
+                  </div>
+                  <ArrowUpRight className="h-4 w-4 text-slate-500" />
+                </a>
+
+                <a
+                  href="https://www.linkedin.com/in/aaryash-shakya"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between rounded-[24px] border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:border-blue-400/30 hover:bg-blue-500/10"
+                >
+                  <div className="flex items-center gap-3">
+                    <Linkedin className="h-5 w-5 text-blue-300" />
+                    <div>
+                      <p className="text-sm font-medium text-white">LinkedIn</p>
+                      <p className="font-mono-ui text-xs text-slate-500">linkedin.com/in/aaryash-shakya</p>
+                    </div>
+                  </div>
+                  <ArrowUpRight className="h-4 w-4 text-slate-500" />
+                </a>
               </div>
             </div>
           </section>
         </main>
 
-        <footer className="border-t border-[#8f5f39]/15 bg-[#f7efe3]">
-          <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#7a2e2a] text-xs font-semibold uppercase tracking-[0.3em] text-[#f8ead2]">
-                HS
-              </div>
-              <div>
-                <p className="font-sans text-sm font-semibold uppercase tracking-[0.22em] text-[#8f5f39]">
-                  Himalayan Spice
-                </p>
-                <p className="font-sans text-sm text-[#5b3a2f]">
-                  © 2026 Himalayan Spice. All rights reserved.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-5 font-sans text-sm font-medium text-[#5b3a2f]">
-              <a href="https://instagram.com" className="transition hover:text-[#7a2e2a]">
-                Instagram
-              </a>
-              <a href="https://facebook.com" className="transition hover:text-[#7a2e2a]">
-                Facebook
-              </a>
-              <a href="https://x.com" className="transition hover:text-[#7a2e2a]">
-                X
-              </a>
-            </div>
+        <footer className="border-t border-white/10">
+          <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 text-sm text-slate-500 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+            <p className="font-mono-ui">Aaryash Shakya DevOS / production build / dark interface / responsive shell</p>
+            <p className="font-mono-ui">navigate with commands: about projects experiments timeline stack contact github</p>
           </div>
         </footer>
       </div>

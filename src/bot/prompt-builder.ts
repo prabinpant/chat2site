@@ -18,6 +18,8 @@ Technical Requirements:
 - Dark mode support: ${spec.theme.darkMode ? 'Enabled' : 'Disabled'}
 
 Return ONLY the code for App.tsx. Do not include any explanations or markdown blocks.
+Ensure that ALL imported modules (like React and Lucide icons) are actually used in the code to avoid TypeScript build errors.
+The code must be valid, complete, and ready for a production build.
 `;
   }
 }
