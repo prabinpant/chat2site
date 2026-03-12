@@ -28,7 +28,7 @@ export class GenerationRunner {
     this.workspaceManager.cleanupOldSites(5); // Keep only last 5 sites to save disk space
     
     onProgress('🧠 Brainstorming site structure and creative direction...');
-    const expandedSpec = await this.specExpansionService.expand(initialSpec.description);
+    const expandedSpec = await this.specExpansionService.expand(initialSpec.description, initialSpec.assets || [], initialSpec.persona);
     
     // Merge initial context with expanded details
     const spec: SiteSpec = {

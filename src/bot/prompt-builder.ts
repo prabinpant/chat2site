@@ -72,6 +72,13 @@ ${galleryInstructions}
 
 **CRITICAL**: When using local assets from the \`public/\` folder, ALWAYS include the leading forward slash and the full extension (e.g., \`.png\`, \`.jpg\`). Reference them as absolute paths from the root, for example: \`<img src="/logo.png" />\`. Do NOT use relative paths like \`./public/...\` or omit the extension.
 
+### Visual Anchor: Asset Matching
+${logoAsset || galleryAssets.length > 0 ? `
+- **INCORPORATION**: You have been provided with specific brand assets. Analyze the palette, style, and "vibe" of the logo and images.
+- **COHESION**: Your design (colors, spacing, typography) MUST be a sophisticated extensions of these assets. 
+- **ALIGNMENT**: If the logo is minimalist, keep the UI minimalist. If the images are vibrant/organic, use similar gradients and shapes.
+` : '- **GENERIC ALIGNMENT**: Since no custom assets were provided, follow the Persona Style Guide strictly to create a cohesive brand from scratch.'}
+
 ### Visual Principles:
 - **NEGATIVE SPACE**: Use massive margins and padding. 
 - **MOTION**: Use Framer Motion for sophisticated entrance animations.

@@ -22,8 +22,12 @@ interface MySceneSession extends Scenes.WizardSessionData {
 interface MyContext extends Scenes.WizardContext<MySceneSession> {
 }
 
-const showPersonaMenu = async (ctx: MyContext) => {
-  await ctx.reply('🎨 Choose a Design Persona for your site:', {
+const showPersonaMenu = async (ctx: MyContext, isRefined: boolean = false) => {
+  const message = isRefined 
+    ? '✨ Great assets! Now, let\'s refine your Design Persona to perfectly match your logo and images:'
+    : '🎨 Choose a Design Persona for your site:';
+  
+  await ctx.reply(message, {
     reply_markup: {
       inline_keyboard: [
         [{ text: 'Minimalist 🕊️', callback_data: 'Minimalist' }, { text: 'Cyberpunk 🌆', callback_data: 'Cyberpunk' }],
@@ -129,7 +133,7 @@ const buildScene = new Scenes.WizardScene<MyContext>(
   async (ctx) => {
     const message = ctx.message as any;
     if (message.text === '/done') {
-      return startGeneration(ctx);
+      return showPersonaMenu(ctx, true);
     }
 
     if (message.photo) {
@@ -152,6 +156,19 @@ const buildScene = new Scenes.WizardScene<MyContext>(
     return;
   },
   async (ctx) => {
+    // Handle refined persona selection
+    let selection = '';
+    if (ctx.callbackQuery && 'data' in ctx.callbackQuery) {
+      selection = ctx.callbackQuery.data;
+      await ctx.answerCbQuery();
+    } else if (ctx.message && 'text' in ctx.message) {
+      selection = ctx.message.text;
+    }
+
+    if (selection && selection !== 'None') {
+      ctx.scene.session.spec.persona = selection;
+    }
+
     return startGeneration(ctx);
   }
 );

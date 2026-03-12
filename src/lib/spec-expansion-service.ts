@@ -1,5 +1,5 @@
 import { CodexService } from './codex-service.js';
-import { SiteSpec } from '../bot/types.js';
+import { SiteSpec, Asset } from '../bot/types.js';
 
 export class SpecExpansionService {
   private codexService: CodexService;
@@ -8,13 +8,23 @@ export class SpecExpansionService {
     this.codexService = new CodexService();
   }
 
-  async expand(prompt: string): Promise<SiteSpec> {
+  async expand(prompt: string, assets: Asset[] = [], persona?: string): Promise<SiteSpec> {
+    const assetContext = assets.length > 0 
+      ? `The user has provided the following visual assets:
+${assets.map(a => `- Type: ${a.type}, Content: ${a.content}`).join('\n')}
+Analyze these assets to influence your design decisions. If a logo is provided, extract its vibe/colors if possible. If images are provided, ensure the site's aesthetic complements them.`
+      : 'No visual assets provided yet. Use your creative judgment.';
+
+    const personaContext = persona ? `Selected Persona: ${persona}` : '';
+
     const systemPrompt = `
 You are a master UI/UX designer specializing in high-end, premium web experiences.
 Your goal is to turn a generic prompt into a sophisticated, minimalist, and creative site specification.
 Avoid clutter. Prioritize breathing room, clear hierarchy, and unique layouts.
 
 Input Prompt: "${prompt}"
+${personaContext}
+${assetContext}
 
 Return ONLY a JSON object following this interface:
 {
@@ -58,10 +68,10 @@ Return ONLY a JSON object following this interface:
 }
 
 Guidelines:
-1. Palette must be Harmonious. Use sophisticated colors (soft neutrals, deep accents).
-2. Layout Strategy should prevent generic "box" look.
+1. Palette must be Harmonious. Anchor the palette in the provided assets if they exist.
+2. Layout Strategy should prevent generic "box" look and match the "vibe" of the assets.
 3. Sections should flow like a story.
-4. If imagery is needed, provide precise keywords.
+4. If imagery is needed, provide precise keywords that complement the uploaded assets.
 5. **BE GENEROUS with extraDependencies**: If you plan to use Framer Motion, include "framer-motion". If you need utility helpers, include "clsx" and "tailwind-merge". If you need specific components, include them here.
 
 Do not include markdown. Just valid JSON.

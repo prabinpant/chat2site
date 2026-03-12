@@ -44,16 +44,48 @@ An autonomous AI system that transforms simple Telegram prompts into high-fideli
 - **`deployment-service.ts`**: Handles Netlify site creation and deployments with retry logic for name conflicts.
 - **`spec-expansion-service.ts`**: Expands raw user prompts into structured `SiteSpec` objects.
 
+## 🐳 Docker Setup
+
+Maintain a stable instance of the bot in the background:
+
+1. **Build and Start**:
+   ```bash
+   docker compose up -d
+   ```
+2. **View Logs**:
+   ```bash
+   docker compose logs -f
+   ```
+
+## 🛠️ Development Setup (Separate Folder)
+
+To work on new features without taking down the stable bot instance:
+
+1. **Clone the Project to a Dev Folder**:
+   ```bash
+   ./setup-dev.sh ~/path/to/dev-folder
+   ```
+2. **Configure the Dev Instance**:
+   - `cd ~/path/to/dev-folder`
+   - Edit the `.env` file and **change the `BOT_TOKEN`** to a different Telegram Bot Token.
+3. **Environment Isolation**:
+   - Run `npm install` in the dev folder.
+   - Start the dev bot: `npm run dev:bot`.
+   - Your dev instance will now run independently of the stable Docker container.
+
+---
+
 ## ⚙️ Environment Variables
 
 Create a `.env` file with the following:
 ```env
 BOT_TOKEN=your_telegram_bot_token
 NETLIFY_AUTH_TOKEN=your_netlify_personal_access_token
+# OPENAI_API_KEY=your_openai_key (if needed by your specific Codex setup)
 ```
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Manual)
 
 1. Install dependencies: `npm install`
 2. Ensure you have the `codex` CLI and `netlify-cli` installed globally.
-3. Start the bot: `npm run dev`
+3. Start the bot: `npm run dev:bot`

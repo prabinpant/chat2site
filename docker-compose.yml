@@ -1,0 +1,12 @@
+services:
+  bot:
+    build: .
+    container_name: prompt2site-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./generated-sites:/app/generated-sites
+    # If the bot ever needs to be accessed by a webhook:
+    # ports:
+    #   - "3000:3000"
