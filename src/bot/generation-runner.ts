@@ -57,17 +57,25 @@ export class GenerationRunner {
       for (let i = 0; i < spec.assets.length; i++) {
         const asset = spec.assets[i];
         if (asset.source === 'file') {
-          const extension = asset.type === 'logo' ? 'png' : 'jpg'; // Simple guess
+          const extension = asset.type === 'logo' ? 'png' : 'jpg'; 
           const fileName = asset.type === 'logo' ? `logo.${extension}` : `asset_${i}.${extension}`;
           const filePath = path.join(publicPath, fileName);
           
           try {
-            const response = await fetch(asset.content);
-            const arrayBuffer = await response.arrayBuffer();
-            await fs.writeFile(filePath, Buffer.from(arrayBuffer));
-            asset.content = `/${fileName}`; // Update to root-relative path for Vite public folder
+            let buffer: Buffer;
+            if (asset.content.startsWith('http')) {
+              const response = await fetch(asset.content);
+              const arrayBuffer = await response.arrayBuffer();
+              buffer = Buffer.from(arrayBuffer);
+            } else {
+              // Assume it's a local file path (if we pre-downloaded it)
+              buffer = await fs.readFile(asset.content);
+            }
+            
+            await fs.writeFile(filePath, buffer);
+            asset.content = `/${fileName}`; 
           } catch (e) {
-            console.error(`Failed to download asset ${asset.content}`, e);
+            console.error(`Failed to process asset ${asset.content}`, e);
           }
         }
       }

@@ -3,6 +3,12 @@ import { sessionManager } from './session-manager.js';
 import { GenerationRunner } from './generation-runner.js';
 import { WorkspaceManager } from './workspace-manager.js';
 import { SiteSpec, Asset } from './types.js';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const UPLOADS_DIR = path.join(process.cwd(), 'temp-uploads');
 
 export class ConversationCoordinator {
   private generationRunner = new GenerationRunner();
@@ -83,7 +89,8 @@ export class ConversationCoordinator {
         break;
       case 5: // Handle logo
         if (message.mediaUrl) {
-          session.spec.assets?.push({ type: 'logo', source: 'file', content: message.mediaUrl });
+          const localPath = await this.handleMediaUpload(message.mediaUrl, provider, 'logo');
+          session.spec.assets?.push({ type: 'logo', source: 'file', content: localPath });
           await provider.sendMessage(message.from, 'Logo received! Any other images? Send them or /done.');
         } else if (text && text !== '/skip') {
           session.spec.assets?.push({ type: 'logo', source: 'text', content: text });
@@ -97,7 +104,8 @@ export class ConversationCoordinator {
         if (text === '/done') {
           await this.startGeneration(message.from, session, provider);
         } else if (message.mediaUrl) {
-          session.spec.assets?.push({ type: 'image', source: 'file', content: message.mediaUrl });
+          const localPath = await this.handleMediaUpload(message.mediaUrl, provider, 'image');
+          session.spec.assets?.push({ type: 'image', source: 'file', content: localPath });
           await provider.sendMessage(message.from, 'Image added! Add more or /done.');
         } else if (text) {
           session.spec.assets?.push({ type: 'image', source: 'text', content: text });
@@ -127,7 +135,8 @@ export class ConversationCoordinator {
         if (text === '/done') {
           await this.startUpdate(message.from, session, provider);
         } else if (message.mediaUrl) {
-          session.spec.assets?.push({ type: 'image', source: 'file', content: message.mediaUrl });
+          const localPath = await this.handleMediaUpload(message.mediaUrl, provider, 'update');
+          session.spec.assets?.push({ type: 'image', source: 'file', content: localPath });
           await provider.sendMessage(message.from, 'Image received! More or /done.');
         } else if (text) {
           session.spec.assets?.push({ type: 'image', source: 'text', content: text });
@@ -208,6 +217,15 @@ export class ConversationCoordinator {
       await provider.sendMessage(to, '❌ Update failed.');
     }
     session.currentScene = 'IDLE';
+  }
+  private async handleMediaUpload(mediaSource: string, provider: MessagingProvider, prefix: string): Promise<string> {
+    const buffer = await provider.downloadMedia(mediaSource);
+    const fileName = `${prefix}_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
+    const filePath = path.join(UPLOADS_DIR, fileName);
+    
+    await fs.mkdir(UPLOADS_DIR, { recursive: true });
+    await fs.writeFile(filePath, buffer);
+    return filePath;
   }
 }
 

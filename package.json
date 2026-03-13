@@ -6,6 +6,7 @@
   "main": "src/bot/index.ts",
   "scripts": {
     "dev:bot": "tsx watch src/bot/index.ts",
+    "dev:whatsapp": "tsx watch src/bot/webhook-server.ts",
     "deploy:site": "tsx src/scripts/deploy-existing.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
