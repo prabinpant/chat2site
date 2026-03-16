@@ -6,6 +6,7 @@ import { SiteSpec, Asset } from './types.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { intentService } from '../lib/intent-service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.join(process.cwd(), 'temp-uploads');
@@ -16,37 +17,80 @@ export class ConversationCoordinator {
 
   async handleMessage(message: IncomingMessage, provider: MessagingProvider): Promise<void> {
     const session = await sessionManager.getSession(message.platform, message.from);
-    const text = message.text?.trim();
+    const text = message.text?.trim() || '';
 
-    // Command handling
-    if (text?.startsWith('/build')) {
-      session.currentScene = 'BUILD_SCENE';
-      session.sceneStep = 0;
-      session.spec = {
-        description: text.split(' ').slice(1).join(' '),
-        assets: [],
-        features: ['Modern UI', 'Responsive Design', 'Fast Performance'],
-        theme: { primaryColor: '3b82f6', darkMode: false }
-      };
+    // If an active scene is running, prioritize its flow
+    if (session.currentScene === 'BUILD_SCENE') {
       await this.runBuildScene(message, session, provider);
-    } else if (text?.startsWith('/update')) {
-      session.currentScene = 'UPDATE_SCENE';
-      session.sceneStep = 0;
-      session.spec = { assets: [] };
+      await sessionManager.saveSession(message.platform, message.from, session);
+      return;
+    }
+
+    if (session.currentScene === 'UPDATE_SCENE') {
       await this.runUpdateScene(message, session, provider);
-    } else if (text?.startsWith('/list')) {
-      await this.listSites(message, provider);
-    } else if (text?.startsWith('/help')) {
-      await this.sendHelp(message, provider);
-    } else {
-      // Logic for active scenes
-      if (session.currentScene === 'BUILD_SCENE') {
+      await sessionManager.saveSession(message.platform, message.from, session);
+      return;
+    }
+
+    // New conversation / No active scene: Use Intent Classification
+    const intent = await intentService.classify(text);
+    console.log(`[Intent] Classified as: ${intent.type} (confidence: ${intent.confidence})`);
+
+    switch (intent.type) {
+      case 'GENERATE_SITE':
+        session.currentScene = 'BUILD_SCENE';
+        session.sceneStep = 0;
+        session.spec = {
+          description: intent.parameters.description || text,
+          assets: [],
+          features: ['Modern UI', 'Responsive Design', 'Fast Performance'],
+          theme: { primaryColor: '3b82f6', darkMode: false }
+        };
+        await provider.sendMessage(message.from, `✨ Sure! I can help you build that.`);
         await this.runBuildScene(message, session, provider);
-      } else if (session.currentScene === 'UPDATE_SCENE') {
-        await this.runUpdateScene(message, session, provider);
-      } else {
-        await provider.sendMessage(message.from, "🤖 I'm sorry, I didn't quite get that. Try /build to start!");
-      }
+        break;
+
+      case 'UPDATE_SITE':
+        session.currentScene = 'UPDATE_SCENE';
+        session.sceneStep = 0;
+        session.siteId = intent.parameters.siteId;
+        session.instruction = intent.parameters.instruction;
+        session.spec = { assets: [] };
+        
+        if (session.siteId && session.instruction) {
+          await provider.sendMessage(message.from, `🔄 Okay, updating site ${session.siteId}...`);
+          await this.runUpdateScene(message, session, provider);
+        } else {
+          await provider.sendMessage(message.from, `I see you want to update a site. Which one should I modify?`);
+          session.sceneStep = 2; // Jump to siteId collection
+        }
+        break;
+
+      case 'LIST_SITES':
+        await this.listSites(message, provider);
+        break;
+
+      case 'HELP':
+        await this.sendHelp(message, provider);
+        break;
+
+      case 'CHAT':
+        await provider.sendMessage(message.from, intent.parameters.replyText || "Hello! I'm your AI Website Builder. How can I help you today?");
+        break;
+
+      default:
+        // Handle explicit commands as fallback
+        if (text.startsWith('/build')) {
+            session.currentScene = 'BUILD_SCENE';
+            session.sceneStep = 0;
+            session.spec = { description: text.replace('/build', '').trim(), assets: [], features: [], theme: { primaryColor: '3b82f6', darkMode: false } };
+            await this.runBuildScene(message, session, provider);
+        } else if (text.startsWith('/list')) {
+            await this.listSites(message, provider);
+        } else {
+            await provider.sendMessage(message.from, "🤖 I can help you build or update websites! Just tell me what you need.");
+        }
+        break;
     }
 
     await sessionManager.saveSession(message.platform, message.from, session);
@@ -70,46 +114,46 @@ export class ConversationCoordinator {
         await this.showPersonaMenu(message.from, provider);
         session.sceneStep = 2;
         break;
-      case 2: // Handle persona selection (simplified for now, since we don't have interactive buttons easily across platforms yet)
+      case 2: // Handle persona selection
         session.spec.persona = text || 'Modern';
         await provider.sendMessage(message.from, `Selected Style: ${session.spec.persona}. What should we call this project?`);
         session.sceneStep = 3;
         break;
       case 3: // Collect name
         session.spec.name = text || 'My Site';
-        await provider.sendMessage(message.from, 'Preferred deployment URL? (or /skip)');
+        await provider.sendMessage(message.from, 'Preferred deployment URL? (or say skip)');
         session.sceneStep = 4;
         break;
       case 4: // Collect subdomain
-        if (text && text !== '/skip') {
+        if (text && !text.toLowerCase().includes('skip')) {
           session.spec.preferredSubdomain = text.toLowerCase().replace(/[^a-z0-9-]/g, '');
         }
-        await provider.sendMessage(message.from, 'Got it. Now, do you have a logo? Send an image or description. Or /skip');
+        await provider.sendMessage(message.from, 'Got it. Now, do you have a logo? Send an image or description. Or say skip');
         session.sceneStep = 5;
         break;
       case 5: // Handle logo
         if (message.mediaUrl) {
           const localPath = await this.handleMediaUpload(message.mediaUrl, provider, 'logo');
           session.spec.assets?.push({ type: 'logo', source: 'file', content: localPath });
-          await provider.sendMessage(message.from, 'Logo received! Any other images? Send them or /done.');
-        } else if (text && text !== '/skip') {
+          await provider.sendMessage(message.from, 'Logo received! Any other images? Send them or say done.');
+        } else if (text && !text.toLowerCase().includes('skip')) {
           session.spec.assets?.push({ type: 'logo', source: 'text', content: text });
-          await provider.sendMessage(message.from, 'Description saved. Any other images? Send them or /done.');
+          await provider.sendMessage(message.from, 'Description saved. Any other images? Send them or say done.');
         } else {
-          await provider.sendMessage(message.from, 'No logo. Any other images? Send them or /done.');
+          await provider.sendMessage(message.from, 'No logo. Any other images? Send them or say done.');
         }
         session.sceneStep = 6;
         break;
       case 6: // Handle additional images
-        if (text === '/done') {
+        if (text?.toLowerCase().includes('done')) {
           await this.startGeneration(message.from, session, provider);
         } else if (message.mediaUrl) {
           const localPath = await this.handleMediaUpload(message.mediaUrl, provider, 'image');
           session.spec.assets?.push({ type: 'image', source: 'file', content: localPath });
-          await provider.sendMessage(message.from, 'Image added! Add more or /done.');
+          await provider.sendMessage(message.from, 'Image added! Add more or say done.');
         } else if (text) {
           session.spec.assets?.push({ type: 'image', source: 'text', content: text });
-          await provider.sendMessage(message.from, 'Image description added! Add more or /done.');
+          await provider.sendMessage(message.from, 'Image description added! Add more or say done.');
         }
         break;
     }
@@ -124,7 +168,7 @@ export class ConversationCoordinator {
         if (parts[0] === '/update' && parts.length >= 3) {
           session.siteId = parts[1];
           session.instruction = parts.slice(2).join(' ');
-          await provider.sendMessage(message.from, 'Got instructions! Upload images or /done.');
+          await provider.sendMessage(message.from, 'Got instructions! Upload images or say done.');
           session.sceneStep = 1;
         } else {
           await provider.sendMessage(message.from, 'Which site to update? (ID)');
@@ -132,15 +176,15 @@ export class ConversationCoordinator {
         }
         break;
       case 1: // Image collection
-        if (text === '/done') {
+        if (text?.toLowerCase().includes('done')) {
           await this.startUpdate(message.from, session, provider);
         } else if (message.mediaUrl) {
           const localPath = await this.handleMediaUpload(message.mediaUrl, provider, 'update');
           session.spec.assets?.push({ type: 'image', source: 'file', content: localPath });
-          await provider.sendMessage(message.from, 'Image received! More or /done.');
+          await provider.sendMessage(message.from, 'Image received! More or say done.');
         } else if (text) {
           session.spec.assets?.push({ type: 'image', source: 'text', content: text });
-          await provider.sendMessage(message.from, 'Description added. More or /done.');
+          await provider.sendMessage(message.from, 'Description added. More or say done.');
         }
         break;
       case 2: // Collect siteId if not in command
@@ -150,14 +194,14 @@ export class ConversationCoordinator {
         break;
       case 3: // Collect instruction
         session.instruction = text;
-        await provider.sendMessage(message.from, 'Images? Upload or /done.');
+        await provider.sendMessage(message.from, 'Images? Upload or say done.');
         session.sceneStep = 1;
         break;
     }
   }
 
   private async showPersonaMenu(to: string, provider: MessagingProvider) {
-    await provider.sendMessage(to, '🎨 Choose a Design Persona: Minimalist, Cyberpunk, Corporate, Modern, Retro, Eco-Friendly, Luxury, SaaS');
+    await provider.sendMessage(to, '🎨 Choose a Design Style: Minimalist, Cyberpunk, Corporate, Modern, Retro, Eco-Friendly, Luxury, SaaS, or any other vibe you prefer.');
   }
 
   private async listSites(message: IncomingMessage, provider: MessagingProvider) {
@@ -173,7 +217,7 @@ export class ConversationCoordinator {
   }
 
   private async sendHelp(message: IncomingMessage, provider: MessagingProvider) {
-    await provider.sendMessage(message.from, "📖 Help:\n/build - New site\n/update <siteId> <instr> - Edit site\n/list - Your sites");
+    await provider.sendMessage(message.from, "📖 Help:\nJust tell me what you want to build or update! For example:\n- 'Build me a site for a law firm'\n- 'Update site-xyz to fix the header'\n- 'Show me my projects'");
   }
 
   private async startGeneration(to: string, session: SessionData, provider: MessagingProvider) {
@@ -195,6 +239,7 @@ export class ConversationCoordinator {
     }
     
     session.currentScene = 'IDLE';
+    session.sceneStep = 0;
   }
 
   private async startUpdate(to: string, session: SessionData, provider: MessagingProvider) {
@@ -217,6 +262,7 @@ export class ConversationCoordinator {
       await provider.sendMessage(to, '❌ Update failed.');
     }
     session.currentScene = 'IDLE';
+    session.sceneStep = 0;
   }
   private async handleMediaUpload(mediaSource: string, provider: MessagingProvider, prefix: string): Promise<string> {
     const buffer = await provider.downloadMedia(mediaSource);
