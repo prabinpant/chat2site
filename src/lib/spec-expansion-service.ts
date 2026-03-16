@@ -8,32 +8,48 @@ export class SpecExpansionService {
     this.codexService = new CodexService();
   }
 
-  async expand(prompt: string, assets: Asset[] = [], persona?: string): Promise<SiteSpec> {
+  async expand(prompt: string, assets: Asset[] = [], referenceData?: any): Promise<SiteSpec> {
     const assetContext = assets.length > 0 
       ? `The user has provided the following visual assets:
 ${assets.map(a => `- Type: ${a.type}, Content: ${a.content}`).join('\n')}
 Analyze these assets to influence your design decisions. If a logo is provided, extract its vibe/colors if possible. If images are provided, ensure the site's aesthetic complements them.`
       : 'No visual assets provided yet. Use your creative judgment.';
 
-    const personaContext = persona ? `Selected Persona: ${persona}` : '';
+    const referenceContext = referenceData 
+      ? `### REFERENCE MATERIAL STUDY:
+The user provided an external reference (${referenceData.url}). 
+Extracted Text Content (Summary):
+"${referenceData.textContent.substring(0, 1000)}..."
+Extracted Image References: ${referenceData.extractedImages.slice(0, 3).join(', ')}
+
+Your instructions are to:
+1. Extract the core design values (e.g., minimalist, brutalist, organic, playful).
+2. Identify signature colors or typography vibes.
+3. Incorporate these into the refined spec without copying blindly.`
+      : '';
 
     const systemPrompt = `
-You are a master UI/UX designer specializing in high-end, premium web experiences.
-Your goal is to turn a generic prompt into a sophisticated, minimalist, and creative site specification.
-Avoid clutter. Prioritize breathing room, clear hierarchy, and unique layouts.
+You are a master UI/UX designer and Design Strategist.
+Your goal is to turn a generic prompt into a high-fidelity, premium site specification.
+
+### MISSION:
+Analyze the input prompt and any reference materials. Do NOT just use a generic style. 
+Instead, derive a unique **Design Persona** (e.g., "The Architectural Purist", "Neon-Noir Cyberpunk", "Organic Gardener") and a tailored **Style Guide** for this specific site.
 
 Input Prompt: "${prompt}"
-${personaContext}
+${referenceContext}
 ${assetContext}
 
 Return ONLY a JSON object following this interface:
 {
-  "name": "A creative, unique name",
+  "name": "A creative, unique name for the brand",
   "description": "Engaging description of the brand/persona",
+  "persona": "Define a unique name for this persona (e.g. 'The Modern Minimalist')",
+  "personaStyleGuide": "Detailed instructions on how to implement this persona (typography, spacing, vibe, shadow usage, etc.)",
   "features": ["3-5 high-value features"],
   "theme": {
     "primaryColor": "main_accent_color_hex",
-    "darkMode": false,
+    "darkMode": "boolean",
     "palette": {
       "background": "soft_base_background_hex",
       "surface": "slightly_contrasting_surface_hex",
@@ -41,38 +57,37 @@ Return ONLY a JSON object following this interface:
       "text": "high_readability_text_hex"
     },
     "spacing": "Choose one: airy | standard | compact",
-    "layoutStrategy": "Choose one: bento-grid | editorial-stacked | fluid-storytelling"
+    "layoutStrategy": "Define a specific strategy (e.g. bento-grid, masonry, editorial-split)"
   },
   "sections": [
     { 
       "title": "Clear Section Title", 
-      "description": "Specific content purpose",
-      "layoutHint": "e.g., asymmetrical split | full-width feature | 3-column masonry"
+      "description": "Specific content purpose and copy intent",
+      "layoutHint": "Specific layout instructions (e.g. glassmorphic cards, parallax scroll)"
     }
   ],
   "branding": {
-    "tone": "e.g. Sophisticated & Quiet-Luxury",
-    "aesthetic": "e.g. Soft-shadow glassmorphism with delicate typography",
+    "tone": "e.g. Sophisticated & Bold",
+    "aesthetic": "Refined design aesthetic description",
     "typography": {
-      "heading": "Suggest a Google Font category (e.g. Serif Display, Geometric Sans)",
-      "body": "Suggest a Google Font category"
+      "heading": "Specific Google Font or Category",
+      "body": "Specific Google Font or Category"
     }
   },
   "imagery": {
-    "style": "e.g. Minimalist architectural photography | Abstract 3D gradients",
-    "keywords": ["5 specific keywords for image generation"]
+    "style": "Specific visual style for placeholders",
+    "keywords": ["5-7 specific keywords"]
   },
   "extraDependencies": {
-    "package-name": "version (e.g. ^12.0.0)"
+    "package-name": "version"
   }
 }
 
 Guidelines:
-1. Palette must be Harmonious. Anchor the palette in the provided assets if they exist.
-2. Layout Strategy should prevent generic "box" look and match the "vibe" of the assets.
-3. Sections should flow like a story.
-4. If imagery is needed, provide precise keywords that complement the uploaded assets.
-5. **BE GENEROUS with extraDependencies**: If you plan to use Framer Motion, include "framer-motion". If you need utility helpers, include "clsx" and "tailwind-merge". If you need specific components, include them here.
+1. Define a solid persona. Don't be generic.
+2. If references are provided, let them weigh heavily on the persona's style.
+3. Be generous with dependencies (framer-motion, lucide-react, etc. are standard).
+4. Layout hints should be detailed and creative.
 
 Do not include markdown. Just valid JSON.
 `;
@@ -80,12 +95,10 @@ Do not include markdown. Just valid JSON.
     const response = await this.codexService.generateCode(systemPrompt);
     
     try {
-      // Sometimes LLMs wrap JSON in code blocks even if told not to
       const jsonString = response.replace(/```json|```/g, '').trim();
       return JSON.parse(jsonString) as SiteSpec;
     } catch (e) {
       console.error('Failed to parse expanded spec JSON:', response);
-      // Fallback to a basic spec if parsing fails
       return {
         name: prompt.split(' ').slice(0, 2).join(' ') || 'My Site',
         description: prompt,
@@ -94,7 +107,7 @@ Do not include markdown. Just valid JSON.
           primaryColor: '3b82f6',
           darkMode: false
         }
-      };
+      } as SiteSpec;
     }
   }
 }

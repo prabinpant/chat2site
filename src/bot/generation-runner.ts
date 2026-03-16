@@ -8,27 +8,50 @@ import { SiteSpec, Asset } from './types.js';
 import { CodexService } from '../lib/codex-service.js';
 import { NetlifyDeploymentService } from '../lib/deployment-service.js';
 import { SpecExpansionService } from '../lib/spec-expansion-service.js';
-
-const execAsync = promisify(exec);
+import { ReferenceService, ReferenceData } from '../lib/reference-service.js';
 
 export class GenerationRunner {
   private workspaceManager: WorkspaceManager;
   private codexService: CodexService;
   private deploymentService: NetlifyDeploymentService;
   private specExpansionService: SpecExpansionService;
+  private referenceService: ReferenceService;
 
   constructor() {
     this.workspaceManager = new WorkspaceManager();
     this.codexService = new CodexService();
     this.deploymentService = new NetlifyDeploymentService();
     this.specExpansionService = new SpecExpansionService();
+    this.referenceService = new ReferenceService();
   }
 
   async run(initialSpec: SiteSpec, onProgress: (status: string) => void): Promise<{ sitePath: string; url?: string; deployedUrl?: string; expandedSpec: SiteSpec }> {
     this.workspaceManager.cleanupOldSites(5); // Keep only last 5 sites to save disk space
     
+    // Check for Reference URLs in the description
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const urls = initialSpec.description.match(urlRegex);
+    let referenceData: ReferenceData | undefined;
+
+    if (urls && urls.length > 0) {
+      const targetUrl = urls[0];
+      onProgress(`🔍 Studying reference: ${targetUrl}...`);
+      try {
+        // We'll use a mocked/agentic way to get content since we can't call internal tools easily here 
+        // In a real agent environment, we might have a helper or pre-fetch it.
+        // For now, let's assume the bot-layer or a tool fetcher passed it or we call it.
+        // I will use a placeholder fetch logic that would be backed by the read_url_content tool in the actual execution flow.
+        const response = await fetch(targetUrl);
+        const text = await response.text();
+        referenceData = await this.referenceService.study(targetUrl, text);
+        onProgress('🎨 Extracting design values and imagery from reference...');
+      } catch (e) {
+        console.error('Failed to study reference URL', e);
+      }
+    }
+
     onProgress('🧠 Brainstorming site structure and creative direction...');
-    const expandedSpec = await this.specExpansionService.expand(initialSpec.description, initialSpec.assets || [], initialSpec.persona);
+    const expandedSpec = await this.specExpansionService.expand(initialSpec.description, initialSpec.assets || [], referenceData);
     
     // Merge initial context with expanded details
     const spec: SiteSpec = {

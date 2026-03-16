@@ -11,6 +11,7 @@ export interface SiteSpec {
   description: string;
   preferredSubdomain?: string;
   persona?: string;
+  personaStyleGuide?: string;
   features: string[];
   theme: {
     primaryColor: string;
@@ -21,8 +22,8 @@ export interface SiteSpec {
       accent: string;
       text: string;
     };
-    spacing?: string; // e.g. "airy", "compact", "asymmetrical"
-    layoutStrategy?: string; // e.g. "bento-grid", "scroll-story", "classic-editorial"
+    spacing?: 'airy' | 'standard' | 'compact';
+    layoutStrategy?: string;
   };
   sections?: {
     title: string;
@@ -31,15 +32,11 @@ export interface SiteSpec {
   }[];
   branding?: {
     tone: string;
-    aesthetic: string;
+    aesthetic?: string;
     typography?: {
       heading: string;
       body: string;
     };
-  };
-  imagery?: {
-    style: string;
-    keywords: string[];
   };
   assets?: Asset[];
   extraDependencies?: Record<string, string>;

@@ -1,4 +1,5 @@
 import { SiteSpec, Asset } from './types.js';
+import { getDesignSkills } from '../lib/design-skills-context.js';
 
 export class PromptBuilder {
   static build(spec: SiteSpec): string {
@@ -36,6 +37,8 @@ export class PromptBuilder {
         }).join('\n')
       : '- **IMAGERY**: Use Unsplash URLs (https://images.unsplash.com/...) with context-aware keywords.';
 
+    const designSkills = getDesignSkills(spec.persona);
+
     return `
 You are an **Autonomous System Architect**. You have full shell access to the current directory.
 Your task is to build a premium, high-fidelity website named "${spec.name}" from scratch.
@@ -53,9 +56,11 @@ Your task is to build a premium, high-fidelity website named "${spec.name}" from
 
 **NOTE**: Your terminal terminal output is being streamed LIVE to the user. Provide clear status updates for each step to guide them through your progress.
 
+${designSkills}
+
 ### Design Identity to Implement:
 - **Tone**: ${spec.branding?.tone || 'Professional & Modern'}
-${spec.persona ? `- **Design Persona**: ${spec.persona}\n- **Persona Style Guide**: ${this.getPersonaInstructions(spec.persona)}` : ''}
+${spec.persona ? `- **Design Persona**: ${spec.persona}\n- **Persona Style Guide**: ${spec.personaStyleGuide || this.getPersonaInstructions(spec.persona)}` : ''}
 - **Palette**: 
   - Background: #${palette.background}
   - Surface/Cards: #${palette.surface}
@@ -93,6 +98,8 @@ Execute all commands, write all files, and finish with a successful build.
       return `- **NEW IMAGE ${i+1}**: Use local asset \`${a.content}\`. Reference as \`<img src="${a.content}" />\`.`;
     }).join('\n');
 
+    const designSkills = getDesignSkills(spec.persona);
+
     return `
 You are an **Autonomous System Architect** iterating on an existing Vite/React website named "${spec.name}".
 The project is already initialized and configured in the current directory.
@@ -105,6 +112,8 @@ ${newAssets.length > 0 ? `### NEW ASSETS PROVIDED:
 ${assetInstructions}
 Note: These assets are already placed in the \`public/\` directory. Reference them in your components as shown above.\n` : ''}
 
+${designSkills}
+
 ### CRITICAL SAFETY & ISOLATION CONSTRAINTS:
 1. **TARGETED MODIFICATIONS ONLY**: Only change the components and logic directly related to the user's request. DO NOT perform unrelated refactors or change stable parts of the code.
 2. **PRESERVE ASSETS**: DO NOT delete or rename files in the \`public/\` folder. The existing logo and images must remain accessible at their current paths.
@@ -116,7 +125,7 @@ Note: These assets are already placed in the \`public/\` directory. Reference th
 ### Design Identity Ref (Maintain Consistency):
 - **Tone**: ${spec.branding?.tone || 'Modern'}
 - **Palette**: Accent: #${spec.theme.primaryColor}
-${spec.persona ? `- **Persona Style**: ${spec.persona} (${this.getPersonaInstructions(spec.persona)})` : ''}
+${spec.persona ? `- **Persona Style**: ${spec.persona} (${spec.personaStyleGuide || this.getPersonaInstructions(spec.persona)})` : ''}
 
 Execute all commands, write all required files, and finish with a successful build.
 `;
