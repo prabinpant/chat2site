@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { tmpdir } from 'os';
 import { promisify } from 'util';
+import { config } from './config.js';
 
 const execAsync = promisify(exec);
 
@@ -59,7 +60,7 @@ export class CodexService {
           shell: true,
           env: { 
             ...process.env, 
-            NETLIFY_AUTH_TOKEN: process.env.NETLIFY_AUTH_TOKEN 
+            NETLIFY_AUTH_TOKEN: config.netlifyAuthToken 
           }
         });
 

@@ -1,4 +1,5 @@
-import 'dotenv/config';
+import '../lib/config.js';
+import { config } from '../lib/config.js';
 import express from 'express';
 import { WhatsAppProvider } from './whatsapp-provider.js';
 import { coordinator } from './conversation-coordinator.js';
@@ -16,7 +17,7 @@ app.get('/whatsapp/webhook', (req, res) => {
   const challenge = req.query['hub.challenge'];
 
   if (mode && token) {
-    if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
+    if (mode === 'subscribe' && token === config.whatsappVerifyToken) {
       console.log('WEBHOOK_VERIFIED');
       res.status(200).send(challenge);
     } else {
@@ -27,45 +28,50 @@ app.get('/whatsapp/webhook', (req, res) => {
 
 // 2. Message Handling
 app.post('/whatsapp/webhook', async (req, res) => {
-  const body = req.body;
+  try {
+    const body = req.body;
 
-  if (body.object === 'whatsapp_business_account') {
-    if (
-      body.entry &&
-      body.entry[0].changes &&
-      body.entry[0].changes[0].value.messages &&
-      body.entry[0].changes[0].value.messages[0]
-    ) {
-      const msg = body.entry[0].changes[0].value.messages[0];
-      const from = msg.from;
-      const messageId = msg.id;
+    if (body.object === 'whatsapp_business_account') {
+      if (
+        body.entry &&
+        body.entry[0].changes &&
+        body.entry[0].changes[0].value.messages &&
+        body.entry[0].changes[0].value.messages[0]
+      ) {
+        const msg = body.entry[0].changes[0].value.messages[0];
+        const from = msg.from;
+        const messageId = msg.id;
 
-      const incoming: IncomingMessage = {
-        from: from,
-        platform: 'whatsapp',
-        messageId: messageId,
-        timestamp: parseInt(msg.timestamp),
-      };
+        const incoming: IncomingMessage = {
+          from: from,
+          platform: 'whatsapp',
+          messageId: messageId,
+          timestamp: parseInt(msg.timestamp),
+        };
 
-      if (msg.type === 'text') {
-        incoming.text = msg.text.body;
-      } else if (msg.type === 'image') {
-        incoming.mediaUrl = msg.image.id; // Meta uses IDs, downloadMedia will handle it
-        incoming.mediaType = 'photo';
-        if (msg.image.caption) incoming.text = msg.image.caption;
-      } else if (msg.type === 'document') {
-        incoming.mediaUrl = msg.document.id;
-        incoming.mediaType = 'document';
-      } else if (msg.type === 'audio' || msg.type === 'voice') {
-        incoming.voiceId = msg.audio ? msg.audio.id : msg.voice.id;
-        incoming.voiceType = msg.type === 'audio' ? 'audio' : 'voice';
+        if (msg.type === 'text') {
+          incoming.text = msg.text.body;
+        } else if (msg.type === 'image') {
+          incoming.mediaUrl = msg.image.id; // Meta uses IDs, downloadMedia will handle it
+          incoming.mediaType = 'photo';
+          if (msg.image.caption) incoming.text = msg.image.caption;
+        } else if (msg.type === 'document') {
+          incoming.mediaUrl = msg.document.id;
+          incoming.mediaType = 'document';
+        } else if (msg.type === 'audio' || msg.type === 'voice') {
+          incoming.voiceId = msg.audio ? msg.audio.id : msg.voice.id;
+          incoming.voiceType = msg.type === 'audio' ? 'audio' : 'voice';
+        }
+
+        await coordinator.handleMessage(incoming, whatsappProvider);
       }
-
-      await coordinator.handleMessage(incoming, whatsappProvider);
+      res.status(200).send('EVENT_RECEIVED');
+    } else {
+      res.sendStatus(404);
     }
-    res.status(200).send('EVENT_RECEIVED');
-  } else {
-    res.sendStatus(404);
+  } catch (error) {
+    console.error('Error processing WhatsApp webhook:', error);
+    res.status(200).send('EVENT_RECEIVED'); // Still ack to Meta to avoid retries
   }
 });
 

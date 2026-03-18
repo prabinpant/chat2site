@@ -1,4 +1,5 @@
 import { MessagingProvider, MessageContent } from './messaging-service.js';
+import { config } from '../lib/config.js';
 
 export class WhatsAppProvider implements MessagingProvider {
   private accessToken: string;
@@ -6,9 +7,9 @@ export class WhatsAppProvider implements MessagingProvider {
   private version: string;
 
   constructor() {
-    this.accessToken = process.env.WHATSAPP_ACCESS_TOKEN || '';
-    this.phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || '';
-    this.version = process.env.WHATSAPP_API_VERSION || 'v22.0';
+    this.accessToken = config.whatsappAccessToken || '';
+    this.phoneNumberId = config.whatsappPhoneNumberId || '';
+    this.version = config.whatsappApiVersion || 'v22.0';
 
     if (!this.accessToken || !this.phoneNumberId) {
       throw new Error('WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID must be provided!');
@@ -48,6 +49,10 @@ export class WhatsAppProvider implements MessagingProvider {
 
     if (!response.ok) {
       const error = await response.json();
+      if (error.error?.type === 'OAuthException' && (error.error?.code === 190 || error.error?.error_subcode === 463)) {
+        console.error('CRITICAL: WhatsApp Access Token has expired or is invalid. Please update WHATSAPP_ACCESS_TOKEN in .env');
+        throw new Error('WhatsApp session expired. Please contact the administrator to refresh the token.');
+      }
       throw new Error(`Meta API error: ${JSON.stringify(error)}`);
     }
   }

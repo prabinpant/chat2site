@@ -15,9 +15,18 @@ const UPLOADS_DIR = path.join(process.cwd(), 'temp-uploads');
 export class ConversationCoordinator {
   private generationRunner = new GenerationRunner();
   private workspaceManager = new WorkspaceManager();
+  private isProcessing = false;
 
   async handleMessage(message: IncomingMessage, provider: MessagingProvider): Promise<void> {
     const session = await sessionManager.getSession(message.platform, message.from);
+    
+    // Check if we are already processing a long-running task for this user
+    if (this.isProcessing && (message.text?.toLowerCase() !== 'done' || session.currentScene !== 'BUILD_SCENE')) {
+        // Only allow "done" if we aren't already in the middle of a generation (though session lock is better)
+        // For now, let's just use a simple global lock as a safety measure
+        // await provider.sendMessage(message.from, "⏳ I'm still working on your previous request. Please wait a moment!");
+        // return;
+    }
     
     // If it's a voice message, transcribe it first
     if (message.voiceId) {
@@ -243,6 +252,12 @@ export class ConversationCoordinator {
   }
 
   private async startGeneration(to: string, session: SessionData, provider: MessagingProvider) {
+    if (this.isProcessing) {
+      await provider.sendMessage(to, "⏳ I'm already building a site. Please wait a moment until I'm finished!");
+      return;
+    }
+    
+    this.isProcessing = true;
     const spec = session.spec as SiteSpec;
     spec.name = spec.name || spec.description.split(' ').slice(0, 2).join(' ') || 'My Site';
     
@@ -257,14 +272,21 @@ export class ConversationCoordinator {
       if (deployedUrl) msg += `\n🚀 Live URL: ${deployedUrl}`;
       await provider.sendMessage(to, msg);
     } catch (error) {
-      await provider.sendMessage(to, '❌ Something went wrong.');
+      console.error('Generation failed:', error);
+      await provider.sendMessage(to, '❌ Something went wrong during generation.');
+    } finally {
+      this.isProcessing = false;
+      session.currentScene = 'IDLE';
+      session.sceneStep = 0;
     }
-    
-    session.currentScene = 'IDLE';
-    session.sceneStep = 0;
   }
 
   private async startUpdate(to: string, session: SessionData, provider: MessagingProvider) {
+    if (this.isProcessing) {
+      await provider.sendMessage(to, "⏳ I'm currently busy with another update. Please wait!");
+      return;
+    }
+
     const { siteId, instruction, spec } = session;
     const sitePath = this.workspaceManager.findSiteById(siteId!);
 
@@ -273,6 +295,7 @@ export class ConversationCoordinator {
       return;
     }
 
+    this.isProcessing = true;
     await provider.sendMessage(to, `🔄 Updating ${siteId}...`);
 
     try {
@@ -281,10 +304,13 @@ export class ConversationCoordinator {
       }, spec.assets as Asset[]);
       await provider.sendMessage(to, `✅ Updated! 🚀 ${deployedUrl}`);
     } catch (error) {
+      console.error('Update failed:', error);
       await provider.sendMessage(to, '❌ Update failed.');
+    } finally {
+      this.isProcessing = false;
+      session.currentScene = 'IDLE';
+      session.sceneStep = 0;
     }
-    session.currentScene = 'IDLE';
-    session.sceneStep = 0;
   }
   private async handleMediaUpload(mediaSource: string, provider: MessagingProvider, prefix: string): Promise<string> {
     const buffer = await provider.downloadMedia(mediaSource);

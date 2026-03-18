@@ -22,9 +22,23 @@ export class TelegramProvider implements MessagingProvider {
   }
 
   async downloadMedia(mediaId: string): Promise<Buffer> {
-    const link = await this.bot.telegram.getFileLink(mediaId);
-    const response = await fetch(link.toString());
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    try {
+      let url: string;
+      if (mediaId.startsWith('http')) {
+        url = mediaId;
+      } else {
+        const link = await this.bot.telegram.getFileLink(mediaId);
+        url = link.toString();
+      }
+      
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Failed to download media: ${response.statusText}`);
+      
+      const arrayBuffer = await response.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    } catch (error) {
+      console.error('Error in TelegramProvider.downloadMedia:', error);
+      throw error;
+    }
   }
 }

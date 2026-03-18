@@ -25,7 +25,7 @@ export class GenerationRunner {
     this.referenceService = new ReferenceService();
   }
 
-  async run(initialSpec: SiteSpec, onProgress: (status: string) => void): Promise<{ sitePath: string; url?: string; deployedUrl?: string; expandedSpec: SiteSpec }> {
+  async run(initialSpec: SiteSpec, onProgress: (status: string) => Promise<void> | void): Promise<{ sitePath: string; url?: string; deployedUrl?: string; expandedSpec: SiteSpec }> {
     this.workspaceManager.cleanupOldSites(5); // Keep only last 5 sites to save disk space
     
     // Check for Reference URLs in the description
@@ -35,7 +35,7 @@ export class GenerationRunner {
 
     if (urls && urls.length > 0) {
       const targetUrl = urls[0];
-      onProgress(`🔍 Studying reference: ${targetUrl}...`);
+      await onProgress(`🔍 Studying reference: ${targetUrl}...`);
       try {
         // We'll use a mocked/agentic way to get content since we can't call internal tools easily here 
         // In a real agent environment, we might have a helper or pre-fetch it.
@@ -44,13 +44,13 @@ export class GenerationRunner {
         const response = await fetch(targetUrl);
         const text = await response.text();
         referenceData = await this.referenceService.study(targetUrl, text);
-        onProgress('🎨 Extracting design values and imagery from reference...');
+        await onProgress('🎨 Extracting design values and imagery from reference...');
       } catch (e) {
         console.error('Failed to study reference URL', e);
       }
     }
 
-    onProgress('🧠 Brainstorming site structure and creative direction...');
+    await onProgress('🧠 Brainstorming site structure and creative direction...');
     const expandedSpec = await this.specExpansionService.expand(initialSpec.description, initialSpec.assets || [], referenceData);
     
     // Merge initial context with expanded details
@@ -73,7 +73,7 @@ export class GenerationRunner {
     
     // Handle Assets
     if (spec.assets && spec.assets.length > 0) {
-      onProgress('🖼️ Preparing your custom assets/logo...');
+      await onProgress('🖼️ Preparing your custom assets/logo...');
       const publicPath = path.join(sitePath, 'public');
       await fs.mkdir(publicPath, { recursive: true });
 
@@ -104,14 +104,14 @@ export class GenerationRunner {
       }
     }
 
-    onProgress('🚀 Autonomous Agent is building your site lifecycle (init, config, install, code, build)...');
+    await onProgress('🚀 Autonomous Agent is building your site lifecycle (init, config, install, code, build)...');
     const pronto = PromptBuilder.build(spec);
     await this.executeWithRepair(pronto, sitePath, onProgress);
 
-    onProgress('🚀 Starting development server...');
+    await onProgress('🚀 Starting development server...');
     const url = await this.startDevServer(sitePath);
 
-    onProgress('🌐 Deploying to Netlify...');
+    await onProgress('🌐 Deploying to Netlify...');
     const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
 
     // Save metadata for future iterations
@@ -121,14 +121,14 @@ export class GenerationRunner {
     return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec };
   }
 
-  async iterate(sitePath: string, instruction: string, onProgress: (status: string) => void, newAssets: Asset[] = []) {
-    onProgress('🔍 Loading site metadata...');
+  async iterate(sitePath: string, instruction: string, onProgress: (status: string) => Promise<void> | void, newAssets: Asset[] = []) {
+    await onProgress('🔍 Loading site metadata...');
     const spec = this.workspaceManager.loadMetadata(sitePath) as SiteSpec;
     if (!spec) throw new Error('Site metadata not found');
 
     // Handle New Assets for Iteration
     if (newAssets.length > 0) {
-      onProgress('🖼️ Processing new images for the update...');
+      await onProgress('🖼️ Processing new images for the update...');
       const publicPath = path.join(sitePath, 'public');
       await fs.mkdir(publicPath, { recursive: true });
 
@@ -150,17 +150,17 @@ export class GenerationRunner {
       }
     }
 
-    onProgress('🧠 Building update strategy...');
+    await onProgress('🧠 Building update strategy...');
     const prompt = PromptBuilder.buildIterationPrompt(spec, instruction, newAssets);
 
-    onProgress('🛠️  AI is applying specific changes...');
+    await onProgress('🛠️  AI is applying specific changes...');
     await this.executeWithRepair(prompt, sitePath, onProgress);
 
-    onProgress('🚀 Redeploying updates...');
+    await onProgress('🚀 Redeploying updates...');
     const siteName = spec.preferredSubdomain || path.basename(sitePath);
     const deployment = await this.deploymentService.deploy(sitePath, siteName);
 
-    onProgress('✅ Update complete!');
+    await onProgress('✅ Update complete!');
     return {
       url: deployment.url,
       deployedUrl: deployment.url
@@ -170,14 +170,14 @@ export class GenerationRunner {
   /**
    * Executes a build with a 1-retry repair loop if failure occurs
    */
-  private async executeWithRepair(prompt: string, sitePath: string, onProgress: (status: string) => void) {
+  private async executeWithRepair(prompt: string, sitePath: string, onProgress: (status: string) => Promise<void> | void) {
     try {
       await this.codexService.executeAutonomousBuild(prompt, sitePath);
     } catch (error: any) {
       const logs = error.output || 'No logs available';
       console.warn('First build attempt failed. Attempting automatic repair...', logs.slice(-200));
       
-      onProgress('🩹 Build failed. AI is analyzing logs and attempting an automatic repair...');
+      await onProgress('🩹 Build failed. AI is analyzing logs and attempting an automatic repair...');
       
       // Extract last 50 lines of logs for context
       const relevantLogs = logs.split('\n').slice(-50).join('\n');
@@ -185,9 +185,9 @@ export class GenerationRunner {
       
       try {
         await this.codexService.executeAutonomousBuild(repairPrompt, sitePath);
-        onProgress('✅ Repair successful!');
+        await onProgress('✅ Repair successful!');
       } catch (retryError) {
-        onProgress('❌ Repair attempt failed. Reporting final error.');
+        await onProgress('❌ Repair attempt failed. Reporting final error.');
         throw retryError;
       }
     }

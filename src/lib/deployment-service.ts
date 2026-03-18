@@ -4,6 +4,8 @@ import path from 'path';
 
 const execAsync = promisify(exec);
 
+import { config } from './config.js';
+
 export interface DeploymentResult {
   url: string;
   siteId?: string;
@@ -17,7 +19,7 @@ export class NetlifyDeploymentService implements DeploymentService {
   private authToken: string;
 
   constructor() {
-    const token = process.env.NETLIFY_AUTH_TOKEN;
+    const token = config.netlifyAuthToken;
     if (!token) {
       throw new Error('NETLIFY_AUTH_TOKEN is not set in environment variables');
     }
@@ -38,7 +40,7 @@ export class NetlifyDeploymentService implements DeploymentService {
         const cmd = `npx netlify deploy --dir="dist" --prod --site="${currentSiteName}" --auth="${this.authToken}" --no-build --json`;
         
         try {
-          const { stdout } = await execAsync(cmd, { cwd: sitePath });
+          const { stdout } = await execAsync(cmd, { cwd: sitePath, timeout: 300000 });
           const result = JSON.parse(stdout);
           return {
             url: result.url || result.deploy_url,
@@ -52,7 +54,7 @@ export class NetlifyDeploymentService implements DeploymentService {
           if (stderr.includes('Project not found') || stderr.includes('Could not find site')) {
             console.log(`[DeploymentService] Site ${currentSiteName} not found, creating new site...`);
             const createCmd = `npx netlify deploy --dir="dist" --prod --create-site="${currentSiteName}" --auth="${this.authToken}" --no-build --json`;
-            const { stdout: createStdout } = await execAsync(createCmd, { cwd: sitePath });
+            const { stdout: createStdout } = await execAsync(createCmd, { cwd: sitePath, timeout: 300000 });
             const result = JSON.parse(createStdout);
             return {
               url: result.url || result.deploy_url,
