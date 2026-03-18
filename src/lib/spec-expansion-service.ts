@@ -84,10 +84,11 @@ Return ONLY a JSON object following this interface:
 }
 
 Guidelines:
-1. Define a solid persona. Don't be generic.
+1. Define a solid, memorable persona. Don't be generic.
 2. If references are provided, let them weigh heavily on the persona's style.
 3. Be generous with dependencies (framer-motion, lucide-react, etc. are standard).
-4. Layout hints should be detailed and creative.
+4. Layout hints should be detailed, creative, and specific to the persona.
+5. **CREATIVE RISK**: For each site, choose one "Visual Anchor" (e.g., "brutalist typography", "organic liquid shapes", "ultra-minimalist monochrome") and lean into it. AVOID predictable patterns.
 
 Do not include markdown. Just valid JSON.
 `;

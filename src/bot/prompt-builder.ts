@@ -85,9 +85,10 @@ ${logoAsset || galleryAssets.length > 0 ? `
 ` : '- **GENERIC ALIGNMENT**: Since no custom assets were provided, follow the Persona Style Guide strictly to create a cohesive brand from scratch.'}
 
 ### Visual Principles:
-- **NEGATIVE SPACE**: Use massive margins and padding. 
-- **MOTION**: Use Framer Motion for sophisticated entrance animations.
-- **POLISH**: Use glassmorphism, soft gradients, and delicate borders.
+- **DESIGN COMMITMENT**: Follow the "${spec.persona || 'Modern Minimalist'}" identity with extreme conviction.
+- **SURPRISE ME**: Do not fall back to generic layouts. Use unexpected grid placements, overlapping elements, or custom-designed UI components that specifically fit this persona.
+- **MOTION & DEPTH**: Use Framer Motion and creative CSS (glassmorphism, gradients, noise) ONLY as dictated by the Persona Style Guide.
+- **ANTI-PATTERN**: AVOID the "generic AI startup" look (purple gradients on white, standard Inter font, 3-column feature grid) unless specifically required.
 
 Execute all commands, write all files, and finish with a successful build.
 `;
