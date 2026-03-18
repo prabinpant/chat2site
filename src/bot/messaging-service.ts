@@ -18,6 +18,7 @@ export interface IncomingMessage extends MessageContent {
 export interface MessagingProvider {
   sendMessage(to: string, content: string | MessageContent): Promise<void>;
   downloadMedia(mediaId: string): Promise<Buffer>;
+  sendTypingIndicator(to: string): Promise<void>;
 }
 
 export interface SessionData {

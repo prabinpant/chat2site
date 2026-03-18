@@ -10,6 +10,9 @@ export interface Intent {
     siteId?: string;
     instruction?: string;
     replyText?: string;
+    projectName?: string;
+    designStyle?: string;
+    subdomain?: string;
   };
 }
 
@@ -31,6 +34,8 @@ Classify the user's message into one of these intents:
 - CHAT: General greeting or non-functional conversation.
 - UNKNOWN: None of the above.
 
+Your goal is to be proactive. If the user provides details like the site name, style, or subdomain in their request, EXTRACT them.
+
 Current Conversation Context (if any):
 ${context || 'No active scene.'}
 
@@ -40,6 +45,9 @@ Format your response as a JSON object:
   "confidence": 0.0-1.0,
   "parameters": {
     "description": "extracted site description for GENERATE_SITE",
+    "projectName": "extracted site name if provided (e.g. 'DinoPark')",
+    "designStyle": "extracted design style/vibe if provided (e.g. 'Cyberpunk', 'Modern Minimalist')",
+    "subdomain": "extracted preferred subdomain if provided (e.g. 'dinopark-web')",
     "siteId": "extracted site ID for UPDATE_SITE",
     "instruction": "extracted update instruction for UPDATE_SITE",
     "replyText": "suggested friendly response if CHAT/HELP"

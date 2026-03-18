@@ -81,4 +81,10 @@ export class WhatsAppProvider implements MessagingProvider {
     const arrayBuffer = await response.arrayBuffer();
     return Buffer.from(arrayBuffer);
   }
+
+  async sendTypingIndicator(to: string): Promise<void> {
+    // WhatsApp Cloud API doesn't have a direct "typing" indicator in the same way as Telegram 
+    // for standard messages without specific business tools.
+    console.log(`[WhatsApp] Typing indicator requested for ${to}`);
+  }
 }

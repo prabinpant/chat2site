@@ -41,4 +41,12 @@ export class TelegramProvider implements MessagingProvider {
       throw error;
     }
   }
+
+  async sendTypingIndicator(to: string): Promise<void> {
+    try {
+      await this.bot.telegram.sendChatAction(to, 'typing');
+    } catch (error) {
+      console.error('Error sending Telegram typing indicator:', error);
+    }
+  }
 }
