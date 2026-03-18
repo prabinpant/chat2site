@@ -30,6 +30,12 @@ bot.on('message', async (ctx) => {
     const fileLink = await ctx.telegram.getFileLink(fileId);
     incoming.mediaUrl = fileLink.toString();
     incoming.mediaType = 'photo';
+  } else if (message.voice) {
+    incoming.voiceId = message.voice.file_id;
+    incoming.voiceType = 'voice';
+  } else if (message.audio) {
+    incoming.voiceId = message.audio.file_id;
+    incoming.voiceType = 'audio';
   }
 
   await coordinator.handleMessage(incoming, telegramProvider);

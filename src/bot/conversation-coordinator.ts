@@ -7,6 +7,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { intentService } from '../lib/intent-service.js';
+import { transcriptionService } from '../lib/transcription-service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.join(process.cwd(), 'temp-uploads');
@@ -17,6 +18,27 @@ export class ConversationCoordinator {
 
   async handleMessage(message: IncomingMessage, provider: MessagingProvider): Promise<void> {
     const session = await sessionManager.getSession(message.platform, message.from);
+    
+    // If it's a voice message, transcribe it first
+    if (message.voiceId) {
+      try {
+        const audioBuffer = await provider.downloadMedia(message.voiceId);
+        const tempPath = path.join(UPLOADS_DIR, `voice_${Date.now()}_${message.from}.ogg`);
+        await fs.mkdir(UPLOADS_DIR, { recursive: true });
+        await fs.writeFile(tempPath, audioBuffer);
+        
+        const transcribedText = await transcriptionService.transcribe(tempPath);
+        message.text = transcribedText;
+        
+        // Cleanup temp file
+        await fs.unlink(tempPath).catch(e => console.error('Failed to unlink temp voice file:', e));
+      } catch (error) {
+        console.error('Transcription failed:', error);
+        await provider.sendMessage(message.from, "⚠️ I heard your voice message but couldn't transcribe it. Could you please type it instead?");
+        return;
+      }
+    }
+
     const text = message.text?.trim() || '';
 
     // If an active scene is running, prioritize its flow

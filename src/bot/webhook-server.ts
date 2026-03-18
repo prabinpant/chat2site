@@ -56,6 +56,9 @@ app.post('/whatsapp/webhook', async (req, res) => {
       } else if (msg.type === 'document') {
         incoming.mediaUrl = msg.document.id;
         incoming.mediaType = 'document';
+      } else if (msg.type === 'audio' || msg.type === 'voice') {
+        incoming.voiceId = msg.audio ? msg.audio.id : msg.voice.id;
+        incoming.voiceType = msg.type === 'audio' ? 'audio' : 'voice';
       }
 
       await coordinator.handleMessage(incoming, whatsappProvider);

@@ -11,6 +11,8 @@ export interface IncomingMessage extends MessageContent {
   platform: 'telegram' | 'whatsapp';
   messageId: string;
   timestamp: number;
+  voiceId?: string;
+  voiceType?: 'voice' | 'audio';
 }
 
 export interface MessagingProvider {
