@@ -29,6 +29,9 @@ export class NetlifyDeploymentService implements DeploymentService {
   async deploy(sitePath: string, siteName: string): Promise<DeploymentResult> {
     const maxRetries = 3;
     let currentSiteName = siteName;
+    if (currentSiteName.length > 63) {
+      currentSiteName = currentSiteName.slice(0, 58) + '-' + Math.random().toString(36).substring(2, 6);
+    }
     let attempt = 0;
 
     while (attempt < maxRetries) {

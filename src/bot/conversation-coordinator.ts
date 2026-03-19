@@ -15,17 +15,17 @@ const UPLOADS_DIR = path.join(process.cwd(), 'temp-uploads');
 export class ConversationCoordinator {
   private generationRunner = new GenerationRunner();
   private workspaceManager = new WorkspaceManager();
-  private isProcessing = false;
 
   async handleMessage(message: IncomingMessage, provider: MessagingProvider): Promise<void> {
-    const session = await sessionManager.getSession(message.platform, message.from);
+    try {
+      const session = await sessionManager.getSession(message.platform, message.from);
     
     // Check if we are already processing a long-running task for this user
-    if (this.isProcessing && (message.text?.toLowerCase() !== 'done' || session.currentScene !== 'BUILD_SCENE')) {
-        // Only allow "done" if we aren't already in the middle of a generation (though session lock is better)
-        // For now, let's just use a simple global lock as a safety measure
-        // await provider.sendMessage(message.from, "⏳ I'm still working on your previous request. Please wait a moment!");
-        // return;
+    if (session.isProcessing && (message.text?.toLowerCase() !== 'done' || session.currentScene !== 'BUILD_SCENE')) {
+        // Only allow "done" if we aren't already in the middle of a generation
+        // For now, let's just use a simple session lock as a safety measure
+        await provider.sendMessage(message.from, "⏳ I'm still working on your previous request. Please wait a moment!");
+        return;
     }
     
     // If it's a voice message, transcribe it first
@@ -125,6 +125,14 @@ export class ConversationCoordinator {
     }
 
     await sessionManager.saveSession(message.platform, message.from, session);
+    } catch (error) {
+      console.error('Error in handleMessage:', error);
+      try {
+        await provider.sendMessage(message.from, "⚠️ Sorry, I encountered an internal error. You can try again or start a new command.");
+      } catch (msgErr) {
+        console.error('Failed to send error notification:', msgErr);
+      }
+    }
   }
 
   private async runBuildScene(message: IncomingMessage, session: SessionData, provider: MessagingProvider): Promise<void> {
@@ -165,7 +173,7 @@ export class ConversationCoordinator {
       
       case 3: // Set Subdomain
         if (text && session.sceneStep === 3) {
-          session.spec.preferredSubdomain = text.toLowerCase().replace(/[^a-z0-9-]/g, '');
+          session.spec.preferredSubdomain = text.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 60);
           session.sceneStep = 4;
         } else if (session.spec.preferredSubdomain) {
           session.sceneStep = 4;
@@ -275,12 +283,14 @@ export class ConversationCoordinator {
   }
 
   private async startGeneration(to: string, session: SessionData, provider: MessagingProvider) {
-    if (this.isProcessing) {
-      await provider.sendMessage(to, "⏳ I'm already building a site. Please wait a moment until I'm finished!");
+    if (session.isProcessing) {
+      await provider.sendMessage(to, "⏳ I'm already building a site for you. Please wait!");
       return;
     }
     
-    this.isProcessing = true;
+    session.isProcessing = true;
+    await sessionManager.saveSession(session.platform, to, session);
+
     const spec = session.spec as SiteSpec;
     spec.name = spec.name || ''; // LLM will decide if empty
     
@@ -288,7 +298,7 @@ export class ConversationCoordinator {
     
     try {
       const { url, deployedUrl, expandedSpec } = await this.generationRunner.run(spec, async (status) => {
-        await provider.sendMessage(to, `⏳ ${status}`);
+        await provider.sendMessage(to, `⏳ ${status}`).catch(() => {}); // Don't crash on status update failure
       });
       
       let msg = `✅ Success! "${expandedSpec.name}" is live!\n\n🔗 Preview: ${url}`;
@@ -296,17 +306,18 @@ export class ConversationCoordinator {
       await provider.sendMessage(to, msg);
     } catch (error) {
       console.error('Generation failed:', error);
-      await provider.sendMessage(to, '❌ Something went wrong during generation.');
+      await provider.sendMessage(to, '❌ Something went wrong during generation. You can try again soon.').catch(() => {});
     } finally {
-      this.isProcessing = false;
+      session.isProcessing = false;
       session.currentScene = 'IDLE';
       session.sceneStep = 0;
+      await sessionManager.saveSession(session.platform, to, session);
     }
   }
 
   private async startUpdate(to: string, session: SessionData, provider: MessagingProvider) {
-    if (this.isProcessing) {
-      await provider.sendMessage(to, "⏳ I'm currently busy with another update. Please wait!");
+    if (session.isProcessing) {
+      await provider.sendMessage(to, "⏳ I'm currently busy with your previous request. Please wait!");
       return;
     }
 
@@ -318,21 +329,24 @@ export class ConversationCoordinator {
       return;
     }
 
-    this.isProcessing = true;
+    session.isProcessing = true;
+    await sessionManager.saveSession(session.platform, to, session);
+
     await provider.sendMessage(to, `🔄 Updating ${siteId}...`);
 
     try {
       const { deployedUrl } = await this.generationRunner.iterate(sitePath, instruction!, async (status) => {
-        await provider.sendMessage(to, `⏳ ${status}`);
+        await provider.sendMessage(to, `⏳ ${status}`).catch(() => {});
       }, spec.assets as Asset[]);
       await provider.sendMessage(to, `✅ Updated! 🚀 ${deployedUrl}`);
     } catch (error) {
       console.error('Update failed:', error);
-      await provider.sendMessage(to, '❌ Update failed.');
+      await provider.sendMessage(to, '❌ Update failed.').catch(() => {});
     } finally {
-      this.isProcessing = false;
+      session.isProcessing = false;
       session.currentScene = 'IDLE';
       session.sceneStep = 0;
+      await sessionManager.saveSession(session.platform, to, session);
     }
   }
   private async handleMediaUpload(mediaSource: string, provider: MessagingProvider, prefix: string): Promise<string> {

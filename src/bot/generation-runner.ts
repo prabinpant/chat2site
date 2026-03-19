@@ -72,54 +72,59 @@ export class GenerationRunner {
 
     const sitePath = this.workspaceManager.prepareSiteDirectory(localFolderName);
     
-    // Handle Assets
-    if (spec.assets && spec.assets.length > 0) {
-      await onProgress('🖼️ Preparing your custom assets/logo...');
-      const publicPath = path.join(sitePath, 'public');
-      await fs.mkdir(publicPath, { recursive: true });
+    try {
+      // Handle Assets
+      if (spec.assets && spec.assets.length > 0) {
+        await onProgress('🖼️ Preparing your custom assets/logo...');
+        const publicPath = path.join(sitePath, 'public');
+        await fs.mkdir(publicPath, { recursive: true });
 
-      for (let i = 0; i < spec.assets.length; i++) {
-        const asset = spec.assets[i];
-        if (asset.source === 'file') {
-          const extension = asset.type === 'logo' ? 'png' : 'jpg'; 
-          const fileName = asset.type === 'logo' ? `logo.${extension}` : `asset_${i}.${extension}`;
-          const filePath = path.join(publicPath, fileName);
-          
-          try {
-            let buffer: Buffer;
-            if (asset.content.startsWith('http')) {
-              const response = await fetch(asset.content);
-              const arrayBuffer = await response.arrayBuffer();
-              buffer = Buffer.from(arrayBuffer);
-            } else {
-              // Assume it's a local file path (if we pre-downloaded it)
-              buffer = await fs.readFile(asset.content);
-            }
+        for (let i = 0; i < spec.assets.length; i++) {
+          const asset = spec.assets[i];
+          if (asset.source === 'file') {
+            const extension = asset.type === 'logo' ? 'png' : 'jpg'; 
+            const fileName = asset.type === 'logo' ? `logo.${extension}` : `asset_${i}.${extension}`;
+            const filePath = path.join(publicPath, fileName);
             
-            await fs.writeFile(filePath, buffer);
-            asset.content = `/${fileName}`; 
-          } catch (e) {
-            console.error(`Failed to process asset ${asset.content}`, e);
+            try {
+              let buffer: Buffer;
+              if (asset.content.startsWith('http')) {
+                const response = await fetch(asset.content);
+                const arrayBuffer = await response.arrayBuffer();
+                buffer = Buffer.from(arrayBuffer);
+              } else {
+                buffer = await fs.readFile(asset.content);
+              }
+              await fs.writeFile(filePath, buffer);
+              asset.content = `/${fileName}`; 
+            } catch (e) {
+              console.error(`Failed to process asset ${asset.content}`, e);
+            }
           }
         }
       }
+
+      await onProgress('🚀 Autonomous Agent is building your site lifecycle (init, config, install, code, build)...');
+      const pronto = PromptBuilder.build(spec);
+      await this.executeWithRepair(pronto, sitePath, onProgress);
+
+      await onProgress('🚀 Starting development server...');
+      const url = await this.startDevServer(sitePath);
+
+      await onProgress('🌐 Deploying to Netlify...');
+      const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
+
+      // Save metadata for future iterations
+      const finalSpec = { ...spec, preferredSubdomain: netlifySiteName };
+      this.workspaceManager.saveMetadata(sitePath, finalSpec);
+
+      return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec };
+    } catch (error) {
+       // Cleanup failed generation attempt to avoid cluttering disk with broken sites
+       console.error(`[GenerationRunner] Cleaning up failed site directory: ${sitePath}`);
+       this.workspaceManager.deleteSiteDirectory(sitePath);
+       throw error;
     }
-
-    await onProgress('🚀 Autonomous Agent is building your site lifecycle (init, config, install, code, build)...');
-    const pronto = PromptBuilder.build(spec);
-    await this.executeWithRepair(pronto, sitePath, onProgress);
-
-    await onProgress('🚀 Starting development server...');
-    const url = await this.startDevServer(sitePath);
-
-    await onProgress('🌐 Deploying to Netlify...');
-    const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
-
-    // Save metadata for future iterations
-    const finalSpec = { ...spec, preferredSubdomain: netlifySiteName };
-    this.workspaceManager.saveMetadata(sitePath, finalSpec);
-
-    return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec };
   }
 
   async iterate(sitePath: string, instruction: string, onProgress: (status: string) => Promise<void> | void, newAssets: Asset[] = []) {

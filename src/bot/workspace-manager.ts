@@ -107,4 +107,10 @@ export class WorkspaceManager {
     const appTsxPath = path.join(srcDir, 'App.tsx');
     fs.writeFileSync(appTsxPath, code);
   }
+
+  deleteSiteDirectory(sitePath: string) {
+    if (fs.existsSync(sitePath)) {
+      fs.rmSync(sitePath, { recursive: true, force: true });
+    }
+  }
 }

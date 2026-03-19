@@ -30,4 +30,5 @@ export interface SessionData {
   siteId?: string;
   instruction?: string;
   lastUpdate: number;
+  isProcessing?: boolean;
 }
