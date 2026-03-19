@@ -42,7 +42,7 @@ ${assetContext}
 
 Return ONLY a JSON object following this interface:
 {
-  "name": "A creative, unique name for the brand",
+  "name": "A short and sweet brand name (max 15 characters)",
   "description": "Engaging description of the brand/persona",
   "persona": "Define a unique name for this persona (e.g. 'The Modern Minimalist')",
   "personaStyleGuide": "Detailed instructions on how to implement this persona (typography, spacing, vibe, shadow usage, etc.)",

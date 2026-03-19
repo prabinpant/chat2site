@@ -54,9 +54,10 @@ export class GenerationRunner {
     const expandedSpec = await this.specExpansionService.expand(initialSpec.description, initialSpec.assets || [], referenceData);
     
     // Merge initial context with expanded details
+    // Prefer expandedSpec.name if initialSpec.name is suspiciously long or auto-generated
     const spec: SiteSpec = {
       ...expandedSpec,
-      name: initialSpec.name || expandedSpec.name,
+      name: (initialSpec.name && initialSpec.name.length <= 20) ? initialSpec.name : expandedSpec.name,
       description: initialSpec.description,
       preferredSubdomain: initialSpec.preferredSubdomain,
       assets: initialSpec.assets || []
@@ -64,7 +65,7 @@ export class GenerationRunner {
 
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
     const shortId = Math.random().toString(36).substring(2, 7);
-    const safeBaseName = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'site';
+    const safeBaseName = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 30) || 'site';
     
     const localFolderName = `${safeBaseName}_${timestamp}_${shortId}`;
     const netlifySiteName = spec.preferredSubdomain || `${safeBaseName}-${shortId}`;

@@ -10,6 +10,7 @@ export const config = {
   whatsappVerifyToken: process.env.WHATSAPP_VERIFY_TOKEN,
   whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v22.0',
   openaiApiKey: process.env.OPENAI_API_KEY,
+  codexModel: process.env.CODEX_MODEL,
 };
 
 // Validate critical variables

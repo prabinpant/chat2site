@@ -16,7 +16,8 @@ export class CodexService {
       // Write prompt to a temp file
       fs.writeFileSync(tempFile, prompt);
       
-      const cmd = `codex exec --skip-git-repo-check --sandbox workspace-write --output-last-message "${outputFile}" < "${tempFile}"`;
+      const modelFlag = config.codexModel ? `-m "${config.codexModel}"` : '';
+      const cmd = `codex exec ${modelFlag} --skip-git-repo-check --sandbox workspace-write --output-last-message "${outputFile}" < "${tempFile}"`;
       console.log(`Running: ${cmd}`);
       
       const generationDir = path.dirname(tempFile);
@@ -55,7 +56,12 @@ export class CodexService {
       
       return new Promise((resolve, reject) => {
         let output = '';
-        const cp = spawn('codex', ['exec', '--dangerously-bypass-approvals-and-sandbox', '--skip-git-repo-check'], {
+        const args = ['exec', '--dangerously-bypass-approvals-and-sandbox', '--skip-git-repo-check'];
+        if (config.codexModel) {
+          args.push('--model', config.codexModel);
+        }
+
+        const cp = spawn('codex', args, {
           cwd: sitePath,
           shell: true,
           env: { 

@@ -128,62 +128,85 @@ export class ConversationCoordinator {
   }
 
   private async runBuildScene(message: IncomingMessage, session: SessionData, provider: MessagingProvider): Promise<void> {
-    const text = message.text;
+    const text = message.text?.trim() || '';
     
     switch (session.sceneStep) {
-      case 0: // Collect description
-        if (!session.spec.description) {
-          await provider.sendMessage(message.from, 'What would you like to build? (e.g., "A modern law firm landing page")');
-          session.sceneStep = 1;
+      case 0: // Initial state after GENERATE_SITE intent
+        session.sceneStep = 1;
+        // Fallthrough to step 1
+      
+      case 1: // Set Project Name
+        if (text && session.sceneStep === 1) {
+          if (text.toLowerCase() === 'skip') {
+            session.spec.name = ''; 
+          } else {
+            session.spec.name = text;
+          }
+          session.sceneStep = 2;
+        } else if (session.spec.name !== undefined) {
+          session.sceneStep = 2;
+        } else {
+          await provider.sendMessage(message.from, "Great! What should we name this project? (Say 'skip' to let me choose)");
+          return;
+        }
+        // Fallthrough if name is set
+      
+      case 2: // Set Persona/Style
+        if (text && session.sceneStep === 2) {
+          session.spec.persona = text;
+          session.sceneStep = 3;
+        } else if (session.spec.persona) {
+          session.sceneStep = 3;
         } else {
           await this.showPersonaMenu(message.from, provider);
-          session.sceneStep = 2;
+          return;
         }
-        break;
-      case 1: // Handle description input
-        session.spec.description = text || '';
-        await this.showPersonaMenu(message.from, provider);
-        session.sceneStep = 2;
-        break;
-      case 2: // Handle persona selection
-        session.spec.persona = text || 'Modern';
-        await provider.sendMessage(message.from, `Selected Style: ${session.spec.persona}. What should we call this project?`);
-        session.sceneStep = 3;
-        break;
-      case 3: // Collect name
-        session.spec.name = text || 'My Site';
-        await provider.sendMessage(message.from, 'Preferred deployment URL? (or say skip)');
-        session.sceneStep = 4;
-        break;
-      case 4: // Collect subdomain
-        if (text && !text.toLowerCase().includes('skip')) {
+        // Fallthrough
+      
+      case 3: // Set Subdomain
+        if (text && session.sceneStep === 3) {
           session.spec.preferredSubdomain = text.toLowerCase().replace(/[^a-z0-9-]/g, '');
+          session.sceneStep = 4;
+        } else if (session.spec.preferredSubdomain) {
+          session.sceneStep = 4;
+        } else {
+          await provider.sendMessage(message.from, "Preferred subdomain for Netlify? (e.g. 'my-cool-site')");
+          return;
         }
-        await provider.sendMessage(message.from, 'Got it. Now, do you have a logo? Send an image or description. Or say skip');
+        // Fallthrough
+      
+      case 4: // Collect brand assets (Logo)
+        await provider.sendMessage(message.from, "Awesome. Now, do you have a logo? Send an image, provide a description, or say skip.");
         session.sceneStep = 5;
         break;
+
       case 5: // Handle logo
         if (message.mediaUrl) {
           const localPath = await this.handleMediaUpload(message.mediaUrl, provider, 'logo');
-          session.spec.assets?.push({ type: 'logo', source: 'file', content: localPath });
+          session.spec.assets = session.spec.assets || [];
+          session.spec.assets.push({ type: 'logo', source: 'file', content: localPath });
           await provider.sendMessage(message.from, 'Logo received! Any other images? Send them or say done.');
         } else if (text && !text.toLowerCase().includes('skip')) {
-          session.spec.assets?.push({ type: 'logo', source: 'text', content: text });
-          await provider.sendMessage(message.from, 'Description saved. Any other images? Send them or say done.');
+          session.spec.assets = session.spec.assets || [];
+          session.spec.assets.push({ type: 'logo', source: 'text', content: text });
+          await provider.sendMessage(message.from, 'Logo description saved. Any other images? Send them or say done.');
         } else {
           await provider.sendMessage(message.from, 'No logo. Any other images? Send them or say done.');
         }
         session.sceneStep = 6;
         break;
+
       case 6: // Handle additional images
-        if (text?.toLowerCase().includes('done')) {
+        if (text.toLowerCase().includes('done')) {
           await this.startGeneration(message.from, session, provider);
         } else if (message.mediaUrl) {
           const localPath = await this.handleMediaUpload(message.mediaUrl, provider, 'image');
-          session.spec.assets?.push({ type: 'image', source: 'file', content: localPath });
+          session.spec.assets = session.spec.assets || [];
+          session.spec.assets.push({ type: 'image', source: 'file', content: localPath });
           await provider.sendMessage(message.from, 'Image added! Add more or say done.');
         } else if (text) {
-          session.spec.assets?.push({ type: 'image', source: 'text', content: text });
+          session.spec.assets = session.spec.assets || [];
+          session.spec.assets.push({ type: 'image', source: 'text', content: text });
           await provider.sendMessage(message.from, 'Image description added! Add more or say done.');
         }
         break;
@@ -259,7 +282,7 @@ export class ConversationCoordinator {
     
     this.isProcessing = true;
     const spec = session.spec as SiteSpec;
-    spec.name = spec.name || spec.description.split(' ').slice(0, 2).join(' ') || 'My Site';
+    spec.name = spec.name || ''; // LLM will decide if empty
     
     await provider.sendMessage(to, '🚀 Starting generation... This will take a minute.');
     
