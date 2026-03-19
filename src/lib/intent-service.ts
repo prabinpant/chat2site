@@ -1,6 +1,6 @@
 import { CodexService } from './codex-service.js';
 
-export type IntentType = 'GENERATE_SITE' | 'UPDATE_SITE' | 'LIST_SITES' | 'HELP' | 'CHAT' | 'UNKNOWN';
+export type IntentType = 'GENERATE_SITE' | 'UPDATE_SITE' | 'LIST_SITES' | 'HELP' | 'CHAT' | 'CANCEL_BUILD' | 'UNKNOWN';
 
 export interface Intent {
   type: IntentType;
@@ -13,6 +13,8 @@ export interface Intent {
     projectName?: string;
     designStyle?: string;
     subdomain?: string;
+    isReady?: boolean;
+    skipField?: string;
   };
 }
 
@@ -25,23 +27,35 @@ export class IntentService {
 
   async classify(text: string, context?: string): Promise<Intent> {
     const systemPrompt = `
-You are an AI Intent Classifier for a website builder bot.
-Classify the user's message into one of these intents:
+You are a classifier for a Website Builder Bot.
+Identify the user's intent and extract relevant parameters.
+
+### INTENT TYPES:
 - GENERATE_SITE: User wants to build a new website.
 - UPDATE_SITE: User wants to modify an existing website.
-- LIST_SITES: User wants to see their existing websites.
-- HELP: User asks for help or how to use the bot.
-- CHAT: General greeting or non-functional conversation.
+- LIST_SITES: User wants to see their projects.
+- HELP: User asks for help or commands.
+- CHAT: General conversation, greetings, or questions.
+- CANCEL_BUILD: User wants to stop/cancel the current build or generation process.
 - UNKNOWN: None of the above.
 
-Your goal is to be proactive. If the user provides details like the site name, style, or subdomain in their request, EXTRACT them.
+### PARAMETERS TO EXTRACT (if applicable):
+- description: Brief description of the site (for GENERATE_SITE).
+- projectName: Name for the project.
+- designStyle: Preferred style (e.g. Modern, Minimalist, Cyberpunk).
+- subdomain: Preferred Netlify subdomain.
+- isReady: Set to true if the user implies they are finished giving info and want to start the build (e.g. "go ahead", "start", "build it now", "done").
+- skipField: The name of a field the user explicitly wants to skip (e.g. "skip name"). Valid fields: projectName, designStyle, subdomain.
+- siteId: ID of the site to update (for UPDATE_SITE).
+- instruction: What to change (for UPDATE_SITE).
+- replyText: A helpful conversational response (for CHAT).
 
-Current Conversation Context (if any):
-${context || 'No active scene.'}
+### CONTEXT:
+${context || 'No context provided.'}
 
-Format your response as a JSON object:
+Return JSON ONLY:
 {
-  "type": "INTENT_TYPE",
+  "type": "IntentType",
   "confidence": 0.0-1.0,
   "parameters": {
     "description": "extracted site description for GENERATE_SITE",
@@ -50,7 +64,9 @@ Format your response as a JSON object:
     "subdomain": "extracted preferred subdomain if provided (e.g. 'dinopark-web')",
     "siteId": "extracted site ID for UPDATE_SITE",
     "instruction": "extracted update instruction for UPDATE_SITE",
-    "replyText": "suggested friendly response if CHAT/HELP"
+    "replyText": "suggested friendly response if CHAT/HELP",
+    "isReady": boolean,
+    "skipField": "string"
   }
 }
 
