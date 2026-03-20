@@ -5,21 +5,22 @@ import fs from 'fs/promises';
 import { WorkspaceManager } from './workspace-manager.js';
 import { PromptBuilder } from './prompt-builder.js';
 import { SiteSpec, Asset } from './types.js';
-import { CodexService } from '../lib/codex-service.js';
+import { AIService } from '../lib/ai-service.js';
+import { AIServiceFactory } from '../lib/ai-service-factory.js';
 import { NetlifyDeploymentService } from '../lib/deployment-service.js';
 import { SpecExpansionService } from '../lib/spec-expansion-service.js';
 import { ReferenceService, ReferenceData } from '../lib/reference-service.js';
 
 export class GenerationRunner {
   private workspaceManager: WorkspaceManager;
-  private codexService: CodexService;
+  private aiService: AIService;
   private deploymentService: NetlifyDeploymentService;
   private specExpansionService: SpecExpansionService;
   private referenceService: ReferenceService;
 
   constructor() {
     this.workspaceManager = new WorkspaceManager();
-    this.codexService = new CodexService();
+    this.aiService = AIServiceFactory.create();
     this.deploymentService = new NetlifyDeploymentService();
     this.specExpansionService = new SpecExpansionService();
     this.referenceService = new ReferenceService();
@@ -187,7 +188,7 @@ export class GenerationRunner {
    */
   private async executeWithRepair(prompt: string, sitePath: string, onProgress: (status: string) => Promise<void> | void) {
     try {
-      await this.codexService.executeAutonomousBuild(prompt, sitePath);
+      await this.aiService.executeAutonomousBuild(prompt, sitePath);
     } catch (error: any) {
       const logs = error.output || 'No logs available';
       console.warn('First build attempt failed. Attempting automatic repair...', logs.slice(-200));
@@ -199,7 +200,7 @@ export class GenerationRunner {
       const repairPrompt = PromptBuilder.buildRepairPrompt(relevantLogs);
       
       try {
-        await this.codexService.executeAutonomousBuild(repairPrompt, sitePath);
+        await this.aiService.executeAutonomousBuild(repairPrompt, sitePath);
         await onProgress('✅ Repair successful!');
       } catch (retryError) {
         await onProgress('❌ Repair attempt failed. Reporting final error.');

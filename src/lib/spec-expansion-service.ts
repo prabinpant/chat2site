@@ -1,11 +1,12 @@
-import { CodexService } from './codex-service.js';
+import { AIService } from './ai-service.js';
+import { AIServiceFactory } from './ai-service-factory.js';
 import { SiteSpec, Asset } from '../bot/types.js';
 
 export class SpecExpansionService {
-  private codexService: CodexService;
+  private aiService: AIService;
 
   constructor() {
-    this.codexService = new CodexService();
+    this.aiService = AIServiceFactory.create();
   }
 
   async expand(prompt: string, assets: Asset[] = [], referenceData?: any): Promise<SiteSpec> {
@@ -93,7 +94,7 @@ Guidelines:
 Do not include markdown. Just valid JSON.
 `;
 
-    const response = await this.codexService.generateCode(systemPrompt);
+    const response = await this.aiService.generateCode(systemPrompt);
     
     try {
       const jsonString = response.replace(/```json|```/g, '').trim();

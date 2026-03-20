@@ -1,4 +1,5 @@
-import { CodexService } from './codex-service.js';
+import { AIService } from './ai-service.js';
+import { AIServiceFactory } from './ai-service-factory.js';
 
 export type IntentType = 'GENERATE_SITE' | 'UPDATE_SITE' | 'LIST_SITES' | 'HELP' | 'CHAT' | 'CANCEL_BUILD' | 'UNKNOWN';
 
@@ -20,10 +21,10 @@ export interface Intent {
 }
 
 export class IntentService {
-  private codexService: CodexService;
+  private aiService: AIService;
 
   constructor() {
-    this.codexService = new CodexService();
+    this.aiService = AIServiceFactory.create();
   }
 
   async classify(text: string, context?: string): Promise<Intent> {
@@ -75,7 +76,7 @@ Return JSON ONLY:
 User Message: "${text}"
 `;
 
-    const response = await this.codexService.generateCode(systemPrompt);
+    const response = await this.aiService.generateCode(systemPrompt);
     
     try {
       const jsonString = response.replace(/```json|```/g, '').trim();

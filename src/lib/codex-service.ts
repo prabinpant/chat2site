@@ -4,10 +4,11 @@ import * as path from 'path';
 import { tmpdir } from 'os';
 import { promisify } from 'util';
 import { config } from './config.js';
+import { AIService } from './ai-service.js';
 
 const execAsync = promisify(exec);
 
-export class CodexService {
+export class CodexService implements AIService {
   async generateCode(prompt: string): Promise<string> {
     const tempFile = path.join(tmpdir(), `codex-prompt-${Date.now()}.txt`);
     const outputFile = path.join(tmpdir(), `codex-out-${Date.now()}.txt`);

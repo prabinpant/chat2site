@@ -9,8 +9,8 @@ export const config = {
   whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
   whatsappVerifyToken: process.env.WHATSAPP_VERIFY_TOKEN,
   whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v22.0',
-  openaiApiKey: process.env.OPENAI_API_KEY,
   codexModel: process.env.CODEX_MODEL,
+  aiEngine: (process.env.AI_ENGINE || 'codex') as 'codex' | 'gemini',
 };
 
 // Validate critical variables
