@@ -93,7 +93,7 @@ ${logoAsset || galleryAssets.length > 0 ? `
 Execute all commands, write all files, and finish with a successful build.
 `;
   }
-  static buildIterationPrompt(spec: SiteSpec, instruction: string, newAssets: Asset[] = []): string {
+  static buildIterationPrompt(spec: SiteSpec, instruction: string, currentCode: string, newAssets: Asset[] = []): string {
     const assetInstructions = newAssets.map((a, i) => {
       if (a.source === 'text') return `- **NEW IMAGE ${i+1}**: Description: "${a.content}".`;
       return `- **NEW IMAGE ${i+1}**: Use local asset \`${a.content}\`. Reference as \`<img src="${a.content}" />\`.`;
@@ -105,6 +105,11 @@ Execute all commands, write all files, and finish with a successful build.
 You are an **Autonomous System Architect** iterating on an existing Vite/React website named "${spec.name}".
 The project is already initialized and configured in the current directory.
 
+### CURRENT SOURCE CODE (src/App.tsx):
+\`\`\`tsx
+${currentCode}
+\`\`\`
+
 ### YOUR TASK:
 Apply the following **specific** changes/modifications as requested by the user:
 > "${instruction}"
@@ -115,18 +120,18 @@ Note: These assets are already placed in the \`public/\` directory. Reference th
 
 ${designSkills}
 
+### DESIGN CONTINUITY:
+1. **RESPECT THE AESTHETIC**: Deeply analyze and adhere to the existing color palette, typography (font-families, sizes, weights), spacing, and visual "vibe" found in the provided source code.
+2. **STYLE MATCHING**: Any new components or sections MUST be stylistically seamless with the rest of the site. If the site is minimal, keep new additions minimal. If it's vibrant/Cyberpunk, match that energy accurately.
+3. **NO UNSOLICITED CHANGES**: Do NOT change the theme, primary colors, or fonts unless the user explicitly asked to modify the design identity.
+
 ### CRITICAL SAFETY & ISOLATION CONSTRAINTS:
 1. **TARGETED MODIFICATIONS ONLY**: Only change the components and logic directly related to the user's request. DO NOT perform unrelated refactors or change stable parts of the code.
-2. **PRESERVE ASSETS**: DO NOT delete or rename files in the \`public/\` folder. The existing logo and images must remain accessible at their current paths.
-3. **READ BEFORE WRITE**: Use the shell to read the current \`src/App.tsx\` and other relevant files before modifying them. Ensure you understand the current implementation to avoid breaking logic.
-4. **NO RE-INITIALIZATION**: Do NOT run \`npm create vite\`. The project structure is already set.
-5. **ISOLATION**: You are restricted to the current directory. DO NOT attempt to access or modify files outside of this folder.
-6. **STABILITY**: Ensure the site remains functional. After making changes, run \`npm run build\` to verify that your modifications did not break the build.
-
-### Design Identity Ref (Maintain Consistency):
-- **Tone**: ${spec.branding?.tone || 'Modern'}
-- **Palette**: Accent: #${spec.theme.primaryColor}
-${spec.persona ? `- **Persona Style**: ${spec.persona} (${spec.personaStyleGuide || this.getPersonaInstructions(spec.persona)})` : ''}
+2. **STUDY THE SOURCE**: You have been provided with the current content of \`src/App.tsx\`. Use it as a reference to ensure your changes are integrated seamlessly without breaking existing functionality.
+3. **PRESERVE UNRELATED SECTIONS**: If the user asks to change the Header, DO NOT touch the Footer or Hero sections unless strictly necessary for the change.
+4. **PRESERVE ASSETS**: DO NOT delete or rename files in the \`public/\` folder.
+5. **NO RE-INITIALIZATION**: Do NOT run \`npm create vite\`.
+6. **STABILITY**: Ensure the site remains functional. After making changes, run \`npm run build\` to verify.
 
 Execute all commands, write all required files, and finish with a successful build.
 `;

@@ -28,6 +28,7 @@ export interface SessionData {
   sceneStep: number;
   spec: Partial<SiteSpec>;
   siteId?: string;
+  sitePath?: string;
   instruction?: string;
   lastUpdate: number;
   isProcessing?: boolean;

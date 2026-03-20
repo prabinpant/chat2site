@@ -59,11 +59,9 @@ export class ConversationCoordinator {
 
       // 4. Handle Processing Lock Contextually
       if (session.isProcessing) {
-        // High priority intents that are allowed during processing
         if (intent.type === 'CHAT' || intent.type === 'HELP' || intent.type === 'LIST_SITES' || intent.type === 'CANCEL_BUILD') {
-           // Allow these to proceed
+           // Proceed
         } else {
-           // Block building/updating if already processing
            await provider.sendMessage(message.from, "⏳ I'm still working on your previous request. You can chat with me or say 'Cancel' to stop current build.");
            return;
         }
@@ -82,12 +80,14 @@ export class ConversationCoordinator {
         return;
       }
 
-      // 6. Update session spec with extracted parameters (if not in processing)
+      // 6. Update session parameters
       if (!session.isProcessing && intent.parameters) {
         if (intent.parameters.projectName) session.spec.name = intent.parameters.projectName;
         if (intent.parameters.designStyle) session.spec.persona = intent.parameters.designStyle;
         if (intent.parameters.subdomain) session.spec.preferredSubdomain = intent.parameters.subdomain;
         if (intent.parameters.description && !session.spec.description) session.spec.description = intent.parameters.description;
+        if (intent.parameters.instruction) session.instruction = intent.parameters.instruction;
+        if (intent.parameters.siteId) session.siteId = intent.parameters.siteId;
         
         // Handle explicit skips
         if (intent.parameters.skipField) {
@@ -101,9 +101,8 @@ export class ConversationCoordinator {
       if (session.currentScene === 'BUILD_SCENE' && !session.isProcessing) {
         await this.runBuildScene(message, session, provider, intent);
       } else if (session.currentScene === 'UPDATE_SCENE' && !session.isProcessing) {
-        await this.runUpdateScene(message, session, provider);
+        await this.runUpdateScene(message, session, provider, intent);
       } else {
-        // IDLE state or CHAT/HELP during processing
         switch (intent.type) {
           case 'GENERATE_SITE':
             session.currentScene = 'BUILD_SCENE';
@@ -121,16 +120,16 @@ export class ConversationCoordinator {
 
           case 'UPDATE_SITE':
             session.currentScene = 'UPDATE_SCENE';
-            session.siteId = intent.parameters.siteId;
-            session.instruction = intent.parameters.instruction;
-            if (session.siteId && session.instruction) {
-              await provider.sendMessage(message.from, `🔄 Okay, updating site ${session.siteId}...`);
-              // Fire and forget update
-              this.startUpdate(message.from, session, provider);
-            } else {
-              await provider.sendMessage(message.from, `I see you want to update a site. Which one should I modify?`);
-              session.sceneStep = 2; 
+            // Try to find the site immediately if name/id provided
+            const query = intent.parameters.siteId || intent.parameters.siteName;
+            if (query) {
+              const matches = this.workspaceManager.findSitesByQuery(query);
+              if (matches.length === 1) {
+                 session.sitePath = matches[0].path;
+                 session.siteId = matches[0].id;
+              }
             }
+            await this.runUpdateScene(message, session, provider, intent);
             break;
 
           case 'LIST_SITES':
@@ -177,27 +176,21 @@ export class ConversationCoordinator {
 
   private async runBuildScene(message: IncomingMessage, session: SessionData, provider: MessagingProvider, intent: Intent): Promise<void> {
     const text = message.text?.trim() || '';
-    
-    // Check if user is ready to start
     if (intent.parameters.isReady || text.toLowerCase() === 'done') {
-      // Fire and forget generation
       this.startGeneration(message.from, session, provider);
       return;
     }
 
-    // Identify missing info
     const missing = [];
     if (!session.spec.name && session.spec.name !== '') missing.push('name');
     if (!session.spec.persona) missing.push('style');
     if (!session.spec.preferredSubdomain && session.spec.preferredSubdomain !== '') missing.push('subdomain');
 
-    // If description is missing, we need it first
     if (!session.spec.description) {
       await provider.sendMessage(message.from, "Got it! Tell me more about the website you want to build.");
       return;
     }
 
-    // If nothing is missing, or user just sent an image/text, confirm or ask to start
     if (missing.length === 0) {
       const msg = message.mediaUrl 
         ? "Got the image! Are we ready to build, or do you have more images/details to add?"
@@ -206,10 +199,9 @@ export class ConversationCoordinator {
       return;
     }
 
-    // Ask for missing info naturally
     let prompt = "";
     if (missing.includes('name') && missing.includes('style')) {
-      prompt = "Great! What should we name this project? Also, what kind of design style do you prefer (e.g., Modern, Minimalist, Corporate)?";
+      prompt = "Great! What should we name this project? Also, what kind of design style do you prefer?";
     } else if (missing.includes('name')) {
       prompt = "Almost there! What should we name this project? (Or say 'skip' to let me choose)";
     } else if (missing.includes('style')) {
@@ -218,49 +210,72 @@ export class ConversationCoordinator {
       prompt = "One last thing: what subdomain would you prefer for the live site? (e.g. 'my-awesome-site')";
     }
 
-    if (message.mediaUrl) {
-      prompt = "Image received! " + prompt;
-    }
-
+    if (message.mediaUrl) prompt = "Image received! " + prompt;
     await provider.sendMessage(message.from, prompt);
   }
 
-  private async runUpdateScene(message: IncomingMessage, session: SessionData, provider: MessagingProvider): Promise<void> {
-    const text = message.text;
-    const parts = text?.split(' ') || [];
+  private async runUpdateScene(message: IncomingMessage, session: SessionData, provider: MessagingProvider, intent: Intent): Promise<void> {
+    const text = message.text?.trim() || '';
 
-    switch (session.sceneStep) {
-      case 0:
-        if (parts[0] === '/update' && parts.length >= 3) {
-          session.siteId = parts[1];
-          session.instruction = parts.slice(2).join(' ');
-          await provider.sendMessage(message.from, 'Got instructions! Upload images or say done.');
-          session.sceneStep = 1;
-        } else {
-          await provider.sendMessage(message.from, 'Which site to update? (ID)');
-          session.sceneStep = 2;
-        }
-        break;
-      case 1:
-        if (text?.toLowerCase().includes('done')) {
-          this.startUpdate(message.from, session, provider);
-        } else if (message.mediaUrl) {
-          await provider.sendMessage(message.from, 'Image received! More or say done.');
-        } else if (text) {
-          await provider.sendMessage(message.from, 'Description added. More or say done.');
-        }
-        break;
-      case 2:
-        session.siteId = text;
-        await provider.sendMessage(message.from, 'What changes?');
-        session.sceneStep = 3;
-        break;
-      case 3:
-        session.instruction = text;
-        await provider.sendMessage(message.from, 'Images? Upload or say done.');
-        session.sceneStep = 1;
-        break;
+    // If session is ready to start update
+    if (intent.parameters.isReady || text.toLowerCase() === 'done') {
+      if (!session.sitePath) {
+        await provider.sendMessage(message.from, "I'm not sure which site to update yet. Please tell me the name or ID.");
+        return;
+      }
+      if (!session.instruction) {
+        await provider.sendMessage(message.from, "What changes should I make to the site? (e.g. 'Add a contact form')");
+        return;
+      }
+      this.startUpdate(message.from, session, provider);
+      return;
     }
+
+    // Identify the site if not yet identified
+    if (!session.sitePath) {
+      const query = intent.parameters.siteId || intent.parameters.siteName || text;
+      if (query) {
+        const matches = this.workspaceManager.findSitesByQuery(query);
+        if (matches.length === 1) {
+          session.sitePath = matches[0].path;
+          session.siteId = matches[0].id;
+          await provider.sendMessage(message.from, `🎯 Found it! Updating "${matches[0].name}". What would you like to change?`);
+          return;
+        } else if (matches.length > 1) {
+          let msg = "I found multiple sites matching that. Which one did you mean?\n\n";
+          matches.forEach(m => msg += `- ${m.name} (${m.id})\n`);
+          await provider.sendMessage(message.from, msg);
+          return;
+        }
+      }
+      
+      const sites = this.workspaceManager.listSites();
+      if (sites.length === 0) {
+        await provider.sendMessage(message.from, "📂 You don't have any sites to update yet! Try building one first.");
+        session.currentScene = 'IDLE';
+        return;
+      }
+      
+      let msg = "Which site would you like to update? Here are your projects:\n\n";
+      sites.forEach(s => msg += `- ${s.name} (ID: ${s.id})\n`);
+      await provider.sendMessage(message.from, msg);
+      return;
+    }
+
+    // Asset collection for update
+    if (message.mediaUrl) {
+      await provider.sendMessage(message.from, "Image received for the update! Any other changes or are we ready?");
+      return;
+    }
+
+    // Ask for instructions if missing
+    if (!session.instruction) {
+      await provider.sendMessage(message.from, `I see we're updating site "${session.siteId}". What specific changes or additions should I make?`);
+      return;
+    }
+
+    // Final confirmation
+    await provider.sendMessage(message.from, "Got the instructions! Ready to apply the changes, or do you have more to add? (Include images if needed)");
   }
 
   private async listSites(message: IncomingMessage, provider: MessagingProvider) {
@@ -280,7 +295,7 @@ export class ConversationCoordinator {
   }
 
   private async startGeneration(to: string, session: SessionData, provider: MessagingProvider) {
-    if (session.isProcessing) return; // Guard
+    if (session.isProcessing) return; 
     
     session.isProcessing = true;
     await sessionManager.saveSession(session.platform, to, session);
@@ -293,7 +308,6 @@ export class ConversationCoordinator {
     
     try {
       const { url, deployedUrl, expandedSpec } = await this.generationRunner.run(spec, async (status) => {
-        // Only update status if session is still processing (not cancelled)
         const currentSession = await sessionManager.getSession(session.platform, to);
         if (currentSession.isProcessing) {
           await provider.sendMessage(to, `⏳ ${status}`).catch(() => {});
@@ -306,38 +320,31 @@ export class ConversationCoordinator {
       if (deployedUrl) msg += `\n🚀 Live URL: ${deployedUrl}`;
       await provider.sendMessage(to, msg);
     } catch (error: any) {
-      if (error.message === 'BUILD_CANCELLED') {
-        console.log('Build was cancelled by user.');
-        return;
-      }
+      if (error.message === 'BUILD_CANCELLED') return;
       console.error('Generation failed:', error);
       await provider.sendMessage(to, '❌ Something went wrong during generation. Please try again soon.').catch(() => {});
     } finally {
-      // Re-fetch session to check cancel flag
       const finalSession = await sessionManager.getSession(session.platform, to);
       finalSession.isProcessing = false;
       finalSession.currentScene = 'IDLE';
       finalSession.sceneStep = 0;
       await sessionManager.saveSession(session.platform, to, finalSession);
-      console.log(`[Generation] Task finished for ${to}`);
     }
   }
 
   private async startUpdate(to: string, session: SessionData, provider: MessagingProvider) {
     if (session.isProcessing) return;
 
-    const { siteId, instruction, spec } = session;
-    const sitePath = this.workspaceManager.findSiteById(siteId!);
-
+    const { sitePath, instruction, spec } = session;
     if (!sitePath) {
-      await provider.sendMessage(to, `❌ Site ${siteId} not found.`);
+      await provider.sendMessage(to, "❌ No site identified for update.");
       return;
     }
 
     session.isProcessing = true;
     await sessionManager.saveSession(session.platform, to, session);
 
-    await provider.sendMessage(to, `🔄 Updating ${siteId}...`);
+    await provider.sendMessage(to, `🔄 Updating your site...`);
 
     try {
       const { deployedUrl } = await this.generationRunner.iterate(sitePath, instruction!, async (status) => {

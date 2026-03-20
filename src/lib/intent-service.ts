@@ -8,6 +8,7 @@ export interface Intent {
   parameters: {
     description?: string;
     siteId?: string;
+    siteName?: string;
     instruction?: string;
     replyText?: string;
     projectName?: string;
@@ -32,10 +33,10 @@ Identify the user's intent and extract relevant parameters.
 
 ### INTENT TYPES:
 - GENERATE_SITE: User wants to build a new website.
-- UPDATE_SITE: User wants to modify an existing website.
+- UPDATE_SITE: User wants to modify an existing website. This includes specific change requests ("change the header") or identifying a site by name/ID to update ("update my bakery site").
 - LIST_SITES: User wants to see their projects.
 - HELP: User asks for help or commands.
-- CHAT: General conversation, greetings, or questions.
+- CHAT: General conversation, greetings, or questions ("How are you?", "What can you do?").
 - CANCEL_BUILD: User wants to stop/cancel the current build or generation process.
 - UNKNOWN: None of the above.
 
@@ -47,6 +48,7 @@ Identify the user's intent and extract relevant parameters.
 - isReady: Set to true if the user implies they are finished giving info and want to start the build (e.g. "go ahead", "start", "build it now", "done").
 - skipField: The name of a field the user explicitly wants to skip (e.g. "skip name"). Valid fields: projectName, designStyle, subdomain.
 - siteId: ID of the site to update (for UPDATE_SITE).
+- siteName: Name or natural reference of the site to update (e.g. "bakery", "my portfolio", "the law firm site").
 - instruction: What to change (for UPDATE_SITE).
 - replyText: A helpful conversational response (for CHAT).
 

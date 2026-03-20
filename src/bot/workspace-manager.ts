@@ -64,20 +64,26 @@ export class WorkspaceManager {
     return null;
   }
 
-  findSiteById(id: string): string | null {
-    if (!fs.existsSync(this.baseDir)) return null;
+  findSitesByQuery(query: string): { path: string; id: string; name: string }[] {
+    if (!fs.existsSync(this.baseDir)) return [];
     const projects = fs.readdirSync(this.baseDir);
-    
+    const matches: { path: string; id: string; name: string }[] = [];
+    const q = query.toLowerCase();
+
     for (const name of projects) {
       const sitePath = path.join(this.baseDir, name);
       if (fs.lstatSync(sitePath).isDirectory()) {
         const metadata = this.loadMetadata(sitePath);
-        if (metadata && (metadata.preferredSubdomain === id || name.includes(id))) {
-          return sitePath;
+        if (metadata) {
+          const id = metadata.preferredSubdomain || name;
+          const siteName = metadata.name || '';
+          if (id.toLowerCase().includes(q) || siteName.toLowerCase().includes(q)) {
+            matches.push({ path: sitePath, id, name: siteName });
+          }
         }
       }
     }
-    return null;
+    return matches;
   }
 
   listSites(): any[] {
