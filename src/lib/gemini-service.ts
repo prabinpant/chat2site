@@ -31,6 +31,10 @@ export class GeminiService implements AIService {
         // We avoid passing the prompt as a CLI argument to prevent shell escaping issues.
         const args = ['--yolo', '--sandbox', 'false', '--prompt', '""'];
         
+        if (config.geminiModel) {
+          args.push('--model', config.geminiModel);
+        }
+        
         const cp = spawn('gemini', args, {
           cwd: sitePath,
           shell: false,

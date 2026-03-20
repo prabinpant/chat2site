@@ -90,6 +90,7 @@ Guidelines:
 3. Be generous with dependencies (framer-motion, lucide-react, etc. are standard).
 4. Layout hints should be detailed, creative, and specific to the persona.
 5. **CREATIVE RISK**: For each site, choose one "Visual Anchor" (e.g., "brutalist typography", "organic liquid shapes", "ultra-minimalist monochrome") and lean into it. AVOID predictable patterns.
+6. **PRESERVE HARD DATA**: If the input prompt contains specific rules, names, or copy, ensure the \`sections\` map to these precise requirements rather than assigning generic placeholder intent.
 
 Do not include markdown. Just valid JSON.
 `;

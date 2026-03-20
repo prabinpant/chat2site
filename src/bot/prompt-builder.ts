@@ -68,6 +68,10 @@ ${spec.persona ? `- **Design Persona**: ${spec.persona}\n- **Persona Style Guide
   - Text: #${palette.text}
 - **Typography**: Heading: ${typography.heading}, Body: ${typography.body}
 
+### USER CONTEXT & EXPLICIT COPY:
+The user has provided the following raw request. If it contains specific textual copy, rules, names, or constraints, YOU MUST use them EXACTLY in the generated React code. Do not hallucinate dummy text if real text or data is provided.
+"${spec.description}"
+
 ### Site Structure:
 ${(spec.sections || []).map(s => `- ${s.title}: ${s.description} (Layout: ${s.layoutHint || 'standard'})`).join('\n')}
 
@@ -116,8 +120,8 @@ Apply the following **specific** changes/modifications as requested by the user:
 
 ${newAssets.length > 0 ? `### NEW ASSETS PROVIDED:
 ${assetInstructions}
-Note: These assets are already placed in the \`public/\` directory. Reference them in your components as shown above.\n` : ''}
-
+**CRITICAL ASSET RULE**: ONLY use these new assets if the user's instruction specifically requires imagery at a certain location. DO NOT randomly insert these assets everywhere. Maintain the existing layout and only place the asset exactly where requested.
+` : ''}
 ${designSkills}
 
 ### DESIGN CONTINUITY:
@@ -125,15 +129,16 @@ ${designSkills}
 2. **STYLE MATCHING**: Any new components or sections MUST be stylistically seamless with the rest of the site. If the site is minimal, keep new additions minimal. If it's vibrant/Cyberpunk, match that energy accurately.
 3. **NO UNSOLICITED CHANGES**: Do NOT change the theme, primary colors, or fonts unless the user explicitly asked to modify the design identity.
 
-### CRITICAL SAFETY & ISOLATION CONSTRAINTS:
-1. **TARGETED MODIFICATIONS ONLY**: Only change the components and logic directly related to the user's request. DO NOT perform unrelated refactors or change stable parts of the code.
-2. **STUDY THE SOURCE**: You have been provided with the current content of \`src/App.tsx\`. Use it as a reference to ensure your changes are integrated seamlessly without breaking existing functionality.
-3. **PRESERVE UNRELATED SECTIONS**: If the user asks to change the Header, DO NOT touch the Footer or Hero sections unless strictly necessary for the change.
-4. **PRESERVE ASSETS**: DO NOT delete or rename files in the \`public/\` folder.
-5. **NO RE-INITIALIZATION**: Do NOT run \`npm create vite\`.
-6. **STABILITY**: Ensure the site remains functional. After making changes, run \`npm run build\` to verify.
+### CRITICAL CONSTRAINTS - STRICT ENFORCEMENT:
+1. **DO NOT OVERCOMPLICATE**: Implement EXACTLY what the user requested in the simplest way possible. Do not invent new features, complex state, or animations unless explicitly asked.
+2. **TARGETED MODIFICATIONS ONLY**: ONLY modify the specific components, sections, or logic mentioned in the user's request. Leave all other parts of the code EXACTLY as they are.
+3. **NO UNNECESSARY REFACTORS**: Do not refactor existing code, rename variables, or change component structures unless it is strictly required to fulfill the user's request.
+4. **PRESERVE UNRELATED SECTIONS**: If the user asks to change a specific section, DO NOT touch any other sections.
+5. **PRESERVE ASSETS**: DO NOT delete or rename existing files in the \`public/\` folder. Do not remove existing image tags unless instructed.
+6. **NO RE-INITIALIZATION**: Do NOT run \`npm create vite\`.
+7. **STABILITY**: Ensure the site remains functional. After making changes, run \`npm run build\` to verify.
 
-Execute all commands, write all required files, and finish with a successful build.
+Execute all commands necessary, write the complete modified \`src/App.tsx\` file, and finish with a successful build. Do not explain your thought process in the code.
 `;
   }
 

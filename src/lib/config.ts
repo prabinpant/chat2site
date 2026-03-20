@@ -11,6 +11,7 @@ export const config = {
   whatsappApiVersion: process.env.WHATSAPP_API_VERSION || 'v22.0',
   codexModel: process.env.CODEX_MODEL,
   aiEngine: (process.env.AI_ENGINE || 'codex') as 'codex' | 'gemini',
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-3-flash-preview',
 };
 
 // Validate critical variables
