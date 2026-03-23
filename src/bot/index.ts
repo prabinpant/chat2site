@@ -19,7 +19,7 @@ bot.on('message', async (ctx) => {
     const message = ctx.message as any;
     const incoming: IncomingMessage = {
       from: ctx.chat.id.toString(),
-      text: message.text,
+      text: message.text || message.caption,
       platform: 'telegram',
       messageId: ctx.message.message_id.toString(),
       timestamp: ctx.message.date,

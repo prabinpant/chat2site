@@ -87,6 +87,7 @@ export class ConversationCoordinator {
         if (intent.parameters.subdomain) session.spec.preferredSubdomain = intent.parameters.subdomain;
         if (intent.parameters.description && !session.spec.description) session.spec.description = intent.parameters.description;
         if (intent.parameters.instruction) session.instruction = intent.parameters.instruction;
+        else if (text && intent.type === 'UPDATE_SITE' && !session.instruction) session.instruction = text;
         if (intent.parameters.siteId) session.siteId = intent.parameters.siteId;
         
         // Handle explicit skips
@@ -186,31 +187,22 @@ export class ConversationCoordinator {
     if (!session.spec.persona) missing.push('style');
     if (!session.spec.preferredSubdomain && session.spec.preferredSubdomain !== '') missing.push('subdomain');
 
-    if (!session.spec.description) {
-      await provider.sendMessage(message.from, "Got it! Tell me more about the website you want to build.");
+    const hasImage = message.mediaUrl || (session.spec.assets && session.spec.assets.length > 0);
+    if (!session.spec.description && !hasImage) {
+      await provider.sendMessage(message.from, "Got it! Tell me about the website you want to build, or send me an image.");
       return;
     }
 
-    if (missing.length === 0) {
-      const msg = message.mediaUrl 
-        ? "Got the image! Are we ready to build, or do you have more images/details to add?"
-        : "I have everything I need! Ready to build, or anything else to add?";
-      await provider.sendMessage(message.from, msg);
-      return;
+    let prompt = "I have the details. Ready to build? (Reply 'done' to start, or add more images/instructions)";
+    
+    if (missing.length > 0) {
+      prompt = "Got it! Ready to build? You can also specify a project name, design style, or subdomain. (Reply 'done' to start)";
     }
 
-    let prompt = "";
-    if (missing.includes('name') && missing.includes('style')) {
-      prompt = "Great! What should we name this project? Also, what kind of design style do you prefer?";
-    } else if (missing.includes('name')) {
-      prompt = "Almost there! What should we name this project? (Or say 'skip' to let me choose)";
-    } else if (missing.includes('style')) {
-      prompt = "Got the name! What kind of design style or vibe should I use for the site?";
-    } else if (missing.includes('subdomain')) {
-      prompt = "One last thing: what subdomain would you prefer for the live site? (e.g. 'my-awesome-site')";
+    if (message.mediaUrl) {
+      prompt = "Image received! " + prompt;
     }
-
-    if (message.mediaUrl) prompt = "Image received! " + prompt;
+    
     await provider.sendMessage(message.from, prompt);
   }
 
@@ -264,18 +256,30 @@ export class ConversationCoordinator {
 
     // Asset collection for update
     if (message.mediaUrl) {
-      await provider.sendMessage(message.from, "Image received for the update! Any other changes or are we ready?");
-      return;
+      if (!session.instruction && !text) {
+        await provider.sendMessage(message.from, "Image received for the update! What specific changes should I make with this?");
+        return;
+      }
     }
 
-    // Ask for instructions if missing
+    // Fallback if instruction wasn't set earlier but text is provided in the same message
+    if (!session.instruction && text) {
+      session.instruction = text;
+    }
+
+    // Ask for instructions if STILL missing
     if (!session.instruction) {
       await provider.sendMessage(message.from, `I see we're updating site "${session.siteId}". What specific changes or additions should I make?`);
       return;
     }
 
     // Final confirmation
-    await provider.sendMessage(message.from, "Got the instructions! Ready to apply the changes, or do you have more to add? (Include images if needed)");
+    let msg = "Got the instructions! Ready to apply the changes? (Reply 'done' to start, or add more images/instructions)";
+    if (message.mediaUrl) {
+      msg = "Got the image and instruction! Ready to apply the changes? (Reply 'done' to start)";
+    }
+    
+    await provider.sendMessage(message.from, msg);
   }
 
   private async listSites(message: IncomingMessage, provider: MessagingProvider) {
