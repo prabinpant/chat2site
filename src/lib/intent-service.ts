@@ -46,7 +46,7 @@ Identify the user's intent and extract relevant parameters.
 - projectName: Name for the project.
 - designStyle: Preferred style (e.g. Modern, Minimalist, Cyberpunk).
 - subdomain: Preferred Netlify subdomain.
-- isReady: Set to true if the user implies they are finished giving info and want to start the build (e.g. "go ahead", "start", "build it now", "done").
+- isReady: Set to true if the user implies they are ready to proceed with the build, decline to provide optional info, or just want to start immediately (e.g. "go ahead", "start", "build it", "done", "I don't have a name", "skip those", "yes").
 - skipField: The name of a field the user explicitly wants to skip (e.g. "skip name"). Valid fields: projectName, designStyle, subdomain.
 - siteId: ID of the site to update (for UPDATE_SITE).
 - siteName: Name or natural reference of the site to update (e.g. "bakery", "my portfolio", "the law firm site").

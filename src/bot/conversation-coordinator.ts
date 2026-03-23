@@ -192,33 +192,44 @@ export class ConversationCoordinator {
       }
     }
 
-    if (intent.parameters.isReady || text.toLowerCase() === 'done') {
+    const isReady = intent.parameters.isReady;
+
+    if (isReady) {
       this.startGeneration(message.from, session, provider);
       return;
     }
 
-    const missing = [];
-    if (!session.spec.name && session.spec.name !== '') missing.push('name');
-    if (!session.spec.persona) missing.push('style');
-    if (!session.spec.preferredSubdomain && session.spec.preferredSubdomain !== '') missing.push('subdomain');
-
+    const missingName = !session.spec.name && session.spec.name !== '';
+    const missingSubdomain = !session.spec.preferredSubdomain && session.spec.preferredSubdomain !== '';
     const hasImage = message.mediaUrl || (session.spec.assets && session.spec.assets.length > 0);
+
     if (!session.spec.description && !hasImage) {
-      await provider.sendMessage(message.from, "Got it! Tell me about the website you want to build, or send me an image.");
+      await provider.sendMessage(message.from, "Got it! Can you tell me a bit more about the website you'd like to build? You can describe it in detail or just send over a reference image.");
       return;
     }
 
-    let prompt = "I have the details. Ready to build? (Reply 'done' to start, or add more images/instructions)";
-    
-    if (missing.length > 0) {
-      prompt = "Got it! Ready to build? You can also specify a project name, design style, or subdomain. (Reply 'done' to start)";
+    if (missingName || missingSubdomain) {
+      const missingPieces: string[] = [];
+      if (missingName) missingPieces.push('a project name');
+      if (missingSubdomain) missingPieces.push('a preferred subdomain (e.g. my-awesome-site)');
+      if (!hasImage) missingPieces.push('any logos or images');
+
+      const askStr = missingPieces.length === 1 
+        ? missingPieces[0] 
+        : missingPieces.slice(0, -1).join(', ') + ' or ' + missingPieces[missingPieces.length - 1];
+      
+      let prompt = `Awesome! To help set things up, do you have ${askStr}? If you just want me to handle everything, simply reply 'done' and I'll start building.`;
+      
+      if (message.mediaUrl) {
+        prompt = "Image received! " + prompt;
+      }
+      
+      await provider.sendMessage(message.from, prompt);
+      return;
     }
 
-    if (message.mediaUrl) {
-      prompt = "Image received! " + prompt;
-    }
-    
-    await provider.sendMessage(message.from, prompt);
+    // Auto-start if they have given a name and subdomain and didn't mention they want to provide more.
+    this.startGeneration(message.from, session, provider);
   }
 
   private async runUpdateScene(message: IncomingMessage, session: SessionData, provider: MessagingProvider, intent: Intent): Promise<void> {
