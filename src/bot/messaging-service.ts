@@ -32,4 +32,5 @@ export interface SessionData {
   instruction?: string;
   lastUpdate: number;
   isProcessing?: boolean;
+  processingId?: number;
 }

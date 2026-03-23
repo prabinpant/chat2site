@@ -42,7 +42,7 @@ Identify the user's intent and extract relevant parameters.
 - UNKNOWN: None of the above.
 
 ### PARAMETERS TO EXTRACT (if applicable):
-- description: Brief description of the site (for GENERATE_SITE).
+- description: Brief description of the actual site (for GENERATE_SITE or BUILD_SCENE). Do NOT extract generic intent phrases like "I want to build a site" - leave it empty unless there are actual topical details.
 - projectName: Name for the project.
 - designStyle: Preferred style (e.g. Modern, Minimalist, Cyberpunk).
 - subdomain: Preferred Netlify subdomain.

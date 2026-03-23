@@ -74,6 +74,7 @@ export class ConversationCoordinator {
           return;
         }
         session.isProcessing = false;
+        session.processingId = undefined;
         session.currentScene = 'IDLE';
         await provider.sendMessage(message.from, "🛑 Generation stopped. Session reset.");
         await sessionManager.saveSession(message.platform, message.from, session);
@@ -110,7 +111,7 @@ export class ConversationCoordinator {
           case 'GENERATE_SITE':
             session.currentScene = 'BUILD_SCENE';
             session.spec = {
-              description: intent.parameters.description || text || session.spec.description || '',
+              description: intent.parameters.description || session.spec.description || '',
               name: intent.parameters.projectName || session.spec.name,
               persona: intent.parameters.designStyle || session.spec.persona,
               preferredSubdomain: intent.parameters.subdomain || session.spec.preferredSubdomain,
@@ -179,6 +180,18 @@ export class ConversationCoordinator {
 
   private async runBuildScene(message: IncomingMessage, session: SessionData, provider: MessagingProvider, intent: Intent): Promise<void> {
     const text = message.text?.trim() || '';
+    
+    // Capture text or instruction as description if missing and it's not a generic format command
+    if (!session.spec.description) {
+      if (intent.parameters.description) {
+        session.spec.description = intent.parameters.description;
+      } else if (intent.parameters.instruction) {
+        session.spec.description = intent.parameters.instruction;
+      } else if (text && text.toLowerCase() !== 'done' && intent.type !== 'GENERATE_SITE' && intent.type !== 'CANCEL_BUILD' && intent.type !== 'HELP' && intent.type !== 'LIST_SITES' && !message.mediaUrl) {
+        session.spec.description = text;
+      }
+    }
+
     if (intent.parameters.isReady || text.toLowerCase() === 'done') {
       this.startGeneration(message.from, session, provider);
       return;
@@ -308,6 +321,8 @@ export class ConversationCoordinator {
     if (session.isProcessing) return; 
     
     session.isProcessing = true;
+    session.processingId = Date.now();
+    const myProcessingId = session.processingId;
     await sessionManager.saveSession(session.platform, to, session);
 
     const spec = session.spec as SiteSpec;
@@ -319,7 +334,7 @@ export class ConversationCoordinator {
     try {
       const { url, deployedUrl, expandedSpec } = await this.generationRunner.run(spec, async (status) => {
         const currentSession = await sessionManager.getSession(session.platform, to);
-        if (currentSession.isProcessing) {
+        if (currentSession.isProcessing && currentSession.processingId === myProcessingId) {
           await provider.sendMessage(to, `⏳ ${status}`).catch(() => {});
         } else {
           throw new Error('BUILD_CANCELLED');
@@ -335,10 +350,13 @@ export class ConversationCoordinator {
       await provider.sendMessage(to, '❌ Something went wrong during generation. Please try again soon.').catch(() => {});
     } finally {
       const finalSession = await sessionManager.getSession(session.platform, to);
-      finalSession.isProcessing = false;
-      finalSession.currentScene = 'IDLE';
-      finalSession.sceneStep = 0;
-      await sessionManager.saveSession(session.platform, to, finalSession);
+      if (finalSession.processingId === myProcessingId) {
+        finalSession.isProcessing = false;
+        finalSession.processingId = undefined;
+        finalSession.currentScene = 'IDLE';
+        finalSession.sceneStep = 0;
+        await sessionManager.saveSession(session.platform, to, finalSession);
+      }
     }
   }
 
@@ -352,6 +370,8 @@ export class ConversationCoordinator {
     }
 
     session.isProcessing = true;
+    session.processingId = Date.now();
+    const myProcessingId = session.processingId;
     await sessionManager.saveSession(session.platform, to, session);
 
     await provider.sendMessage(to, `🔄 Updating your site...`);
@@ -359,7 +379,7 @@ export class ConversationCoordinator {
     try {
       const { deployedUrl } = await this.generationRunner.iterate(sitePath, instruction!, async (status) => {
         const currentSession = await sessionManager.getSession(session.platform, to);
-        if (currentSession.isProcessing) {
+        if (currentSession.isProcessing && currentSession.processingId === myProcessingId) {
           await provider.sendMessage(to, `⏳ ${status}`).catch(() => {});
         } else {
           throw new Error('BUILD_CANCELLED');
@@ -372,11 +392,14 @@ export class ConversationCoordinator {
       await provider.sendMessage(to, '❌ Update failed.').catch(() => {});
     } finally {
       const finalSession = await sessionManager.getSession(session.platform, to);
-      finalSession.isProcessing = false;
-      finalSession.currentScene = 'IDLE';
-      finalSession.sceneStep = 0;
-      finalSession.instruction = undefined; // Clear the instruction after successful/failed update
-      await sessionManager.saveSession(session.platform, to, finalSession);
+      if (finalSession.processingId === myProcessingId) {
+        finalSession.isProcessing = false;
+        finalSession.processingId = undefined;
+        finalSession.currentScene = 'IDLE';
+        finalSession.sceneStep = 0;
+        finalSession.instruction = undefined; // Clear the instruction after successful/failed update
+        await sessionManager.saveSession(session.platform, to, finalSession);
+      }
     }
   }
 
