@@ -157,17 +157,8 @@ export class GenerationRunner {
       }
     }
 
-    await onProgress('🧠 Studying existing project code...');
-    const appTsxPath = path.join(sitePath, 'src', 'App.tsx');
-    let currentCode = '// src/App.tsx not found';
-    try {
-      currentCode = await fs.readFile(appTsxPath, 'utf-8');
-    } catch (e) {
-      console.warn('Could not read App.tsx for iteration context');
-    }
-
     await onProgress('🧠 Building update strategy...');
-    const prompt = PromptBuilder.buildIterationPrompt(spec, instruction, currentCode, newAssets);
+    const prompt = PromptBuilder.buildIterationPrompt(spec, instruction, newAssets);
 
     await onProgress('🛠️  AI is applying specific changes...');
     await this.executeWithRepair(prompt, sitePath, onProgress);

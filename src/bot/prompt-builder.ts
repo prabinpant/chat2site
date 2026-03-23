@@ -88,16 +88,21 @@ ${logoAsset || galleryAssets.length > 0 ? `
 - **ALIGNMENT**: If the logo is minimalist, keep the UI minimalist. If the images are vibrant/organic, use similar gradients and shapes.
 ` : '- **GENERIC ALIGNMENT**: Since no custom assets were provided, follow the Persona Style Guide strictly to create a cohesive brand from scratch.'}
 
-### Visual Principles:
+### Frontend Design Principles:
+- **One Composition**: The first viewport must read as a single composition, not a dashboard. On landing pages, the hero image should be a dominant edge-to-edge visual plane or background unless the design system clearly requires something else. Do not use generic hero overlays (floating badges, stickers) on top of media.
+- **Brand First**: The brand or product name must be a hero-level signal. Focus the first viewport on the brand, one headline, a short supporting sentence, and one CTA group.
+- **Cards Rule**: Default to no cards. Never use cards in the hero. Cards are allowed only when they are the container for a user interaction.
+- **One Job Per Section**: Each section should have one purpose, one headline, and usually one short supporting sentence. Do not clutter specific sections with pill clusters, stat strips, or overlapping blocks.
+- **Design System Adherence**: Establish a clear design system with variables for background, surface, primary text, muted text, and accent. Define typography roles (display, headline, body).
+- **Structure as Narrative**: Structure the page as a narrative: Hero -> Supporting imagery -> Context/Detail -> Social proof -> Final CTA.
+- **Ground Content**: Ground the design in real content. Avoid generic placeholder patterns.
 - **DESIGN COMMITMENT**: Follow the "${spec.persona || 'Modern Minimalist'}" identity with extreme conviction.
-- **SURPRISE ME**: Do not fall back to generic layouts. Use unexpected grid placements, overlapping elements, or custom-designed UI components that specifically fit this persona.
-- **MOTION & DEPTH**: Use Framer Motion and creative CSS (glassmorphism, gradients, noise) ONLY as dictated by the Persona Style Guide.
 - **ANTI-PATTERN**: AVOID the "generic AI startup" look (purple gradients on white, standard Inter font, 3-column feature grid) unless specifically required.
 
 Execute all commands, write all files, and finish with a successful build.
 `;
   }
-  static buildIterationPrompt(spec: SiteSpec, instruction: string, currentCode: string, newAssets: Asset[] = []): string {
+  static buildIterationPrompt(spec: SiteSpec, instruction: string, newAssets: Asset[] = []): string {
     const assetInstructions = newAssets.map((a, i) => {
       if (a.source === 'text') return `- **NEW IMAGE ${i+1}**: Description: "${a.content}".`;
       return `- **NEW IMAGE ${i+1}**: Use local asset \`${a.content}\`. Reference as \`<img src="${a.content}" />\`.`;
@@ -109,18 +114,19 @@ Execute all commands, write all files, and finish with a successful build.
 You are an **Autonomous System Architect** iterating on an existing Vite/React website named "${spec.name}".
 The project is already initialized and configured in the current directory.
 
-### CURRENT SOURCE CODE (src/App.tsx):
-\`\`\`tsx
-${currentCode}
-\`\`\`
-
 ### YOUR TASK:
-Apply the following **specific** changes/modifications as requested by the user:
+1. **STUDY THE PROJECT**: Before making any changes, explore and study the existing project completely on your own to understand its structure, design system, and context.
+2. **IMPLEMENTATION**: Apply the following **specific** changes/modifications as requested by the user:
 > "${instruction}"
 
 ${newAssets.length > 0 ? `### NEW ASSETS PROVIDED:
 ${assetInstructions}
-**CRITICAL ASSET RULE**: ONLY use these new assets if the user's instruction specifically requires imagery at a certain location. DO NOT randomly insert these assets everywhere. Maintain the existing layout and only place the asset exactly where requested.
+**CRITICAL ASSET STRATEGY**: 
+1. The user provided new assets, but you MUST NOT insert them blindly across the whole webpage.
+2. ONLY replace or insert an image if the user's instruction specifically asks to update a certain section or location.
+3. Replace ONLY the specific image requested. Leave all other existing images UNTOUCHED.
+4. DO NOT use the new image as a global background unless explicitly asked.
+5. If the request is ambiguous, find the most logical single place to put the new image. DO NOT place it everywhere.
 ` : ''}
 ${designSkills}
 

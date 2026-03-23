@@ -86,8 +86,10 @@ export class ConversationCoordinator {
         if (intent.parameters.designStyle) session.spec.persona = intent.parameters.designStyle;
         if (intent.parameters.subdomain) session.spec.preferredSubdomain = intent.parameters.subdomain;
         if (intent.parameters.description && !session.spec.description) session.spec.description = intent.parameters.description;
-        if (intent.parameters.instruction) session.instruction = intent.parameters.instruction;
-        else if (text && intent.type === 'UPDATE_SITE' && !session.instruction) session.instruction = text;
+        if (intent.parameters.instruction) {
+          if (!session.instruction) session.instruction = intent.parameters.instruction;
+          else if (!session.instruction.includes(intent.parameters.instruction)) session.instruction += '\n' + intent.parameters.instruction;
+        }
         if (intent.parameters.siteId) session.siteId = intent.parameters.siteId;
         
         // Handle explicit skips
@@ -210,7 +212,7 @@ export class ConversationCoordinator {
     const text = message.text?.trim() || '';
 
     // If session is ready to start update
-    if (intent.parameters.isReady || text.toLowerCase() === 'done') {
+    if (intent.parameters.isReady || text.toLowerCase() === 'done' || text.toLowerCase() === 'continue') {
       if (!session.sitePath) {
         await provider.sendMessage(message.from, "I'm not sure which site to update yet. Please tell me the name or ID.");
         return;
@@ -262,9 +264,13 @@ export class ConversationCoordinator {
       }
     }
 
-    // Fallback if instruction wasn't set earlier but text is provided in the same message
-    if (!session.instruction && text) {
-      session.instruction = text;
+    // Fallback and accumulation if instruction was provided as multiple messages
+    if (text && !intent.parameters.instruction) {
+      if (!session.instruction) {
+        session.instruction = text;
+      } else if (!session.instruction.includes(text)) {
+        session.instruction += '\n' + text;
+      }
     }
 
     // Ask for instructions if STILL missing
@@ -369,6 +375,7 @@ export class ConversationCoordinator {
       finalSession.isProcessing = false;
       finalSession.currentScene = 'IDLE';
       finalSession.sceneStep = 0;
+      finalSession.instruction = undefined; // Clear the instruction after successful/failed update
       await sessionManager.saveSession(session.platform, to, finalSession);
     }
   }
