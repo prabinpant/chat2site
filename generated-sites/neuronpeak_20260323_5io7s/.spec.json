@@ -1,0 +1,90 @@
+{
+  "name": "NeuronPeak",
+  "description": "A new website using the same content as https://ai.wwktm.com/2026/ but visually revamped with AI-inspired aesthetics.",
+  "persona": "The Signal Monolith",
+  "personaStyleGuide": "Design the site as if a research lab, cultural summit, and future-facing operating system converged in Kathmandu. The visual anchor is a luminous neural-grid horizon: dark, mineral backgrounds with electric signal lines, restrained glass surfaces, and precise editorial typography. Use a cinematic dark canvas with subtle depth gradients, faint topographic or circuit-like linework, and one dominant accent color that feels computational rather than playful. Typography should feel authoritative and engineered: large uppercase or tightly tracked display headlines paired with highly legible body text. Spacing should be generous in hero and agenda moments, then tighter in information-dense cards. Favor asymmetrical editorial-split layouts, floating info rails, and layered panels that suggest data streams moving through space. Corners should be slightly rounded, not bubbly. Shadows should be soft and diffused, with glow used sparingly only around CTAs, active states, and key numeric details. Motion should feel like signal propagation: slow pulses, scan sweeps, staggered reveals, and subtle parallax on grid lines. Avoid generic neon cyberpunk clutter; the tone is disciplined, premium, and regionally grounded. Include hints of altitude and Kathmandu through atmospheric gradients, contour textures, and warm-metal accents inside an otherwise cool AI system.",
+  "features": [
+    "Immersive event hero with date, location, and conference positioning above a dynamic neural-grid backdrop",
+    "High-clarity agenda and speaker modules designed for fast scanning across a two-day conference format",
+    "Conversion-focused registration flow with persistent CTA treatment and trust-building conference details",
+    "Editorial storytelling sections that frame engineers, designers, and builders as the core audience",
+    "Responsive motion system with premium transitions, signal-line interactions, and glass data cards"
+  ],
+  "theme": {
+    "primaryColor": "#6EE7FF",
+    "darkMode": true,
+    "palette": {
+      "background": "#080B12",
+      "surface": "#111827",
+      "accent": "#6EE7FF",
+      "text": "#E8F0FF"
+    },
+    "spacing": "airy",
+    "layoutStrategy": "editorial-split"
+  },
+  "sections": [
+    {
+      "title": "Hero Signal",
+      "description": "Lead with AI Conf 2026, the exact dates Jan 10-11, and Kathmandu, Nepal. Position it as a two-day regional conference for engineers, designers, and builders creating the future with AI. Copy should feel ambitious, credible, and immediate, with registration as the primary action.",
+      "layoutHint": "Full-bleed hero with a dark atmospheric gradient, animated neural-grid horizon, split layout between oversized headline stack and a floating glass event card showing date, city, and CTA."
+    },
+    {
+      "title": "Conference Premise",
+      "description": "Expand on why this event matters now: regional AI momentum, practical building culture, and cross-disciplinary collaboration. This section should translate the conference description into a sharper value proposition without changing the underlying meaning.",
+      "layoutHint": "Offset editorial columns with a dense text block on one side and stacked translucent metric or principle cards on the other, connected by thin glowing linework."
+    },
+    {
+      "title": "Audience Matrix",
+      "description": "Explicitly spotlight engineers, designers, and builders as the primary attendees. Clarify what each group gains from participating while preserving the conference's broad future-building message.",
+      "layoutHint": "Three-panel horizontal system with differentiated card treatments, subtle hover glows, and icon-led headers. Cards should feel like modules in a shared AI operating surface."
+    },
+    {
+      "title": "Two-Day Program",
+      "description": "Present the Jan 10-11 schedule as a structured conference agenda, emphasizing clarity, momentum, and event flow. Even if final agenda details are limited, the section should be ready to host keynotes, sessions, workshops, and networking blocks.",
+      "layoutHint": "Timeline-meets-dashboard layout with a vertical date spine, layered session cards, and day toggles. Use restrained motion for expanding items and signal-trace dividers between program blocks."
+    },
+    {
+      "title": "Venue Context",
+      "description": "Ground the experience in Kathmandu, Nepal. Convey destination, regional relevance, and the atmosphere of gathering for a future-facing AI event in a culturally rich city.",
+      "layoutHint": "Wide panoramic section with abstract contour overlays inspired by mountain maps, paired with venue and city details in elevated glass tiles."
+    },
+    {
+      "title": "Registration",
+      "description": "Drive sign-ups with concise, high-confidence copy about attending AI Conf 2026. Reinforce the date, location, and target audience while keeping the path to register frictionless.",
+      "layoutHint": "Centered conversion block with a luminous CTA, compact supporting details, trust markers, and a subtle animated scan line passing beneath the button group."
+    },
+    {
+      "title": "FAQ / Practical Info",
+      "description": "Answer likely attendee questions around timing, location, conference format, and who should attend. Keep the tone direct and useful.",
+      "layoutHint": "Accordion system inside a low-gloss dark panel with thin dividers and minimal iconography, avoiding oversized generic FAQ styling."
+    }
+  ],
+  "branding": {
+    "tone": "Intelligent, Atmospheric & Precise",
+    "aesthetic": "A premium AI conference identity blending computational futurism, editorial restraint, and Himalayan atmosphere through dark surfaces, electric cyan signal accents, and subtle contour textures.",
+    "typography": {
+      "heading": "Space Grotesk",
+      "body": "Manrope"
+    }
+  },
+  "imagery": {
+    "style": "Abstract AI-system visuals with neural grids, topographic light fields, atmospheric city-night gradients, and premium conference environment placeholders rather than stock corporate tech scenes.",
+    "keywords": [
+      "neural horizon",
+      "data lattice",
+      "Kathmandu night glow",
+      "topographic contours",
+      "glass interface",
+      "signal pulse",
+      "future summit"
+    ]
+  },
+  "extraDependencies": {
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.460.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4"
+  },
+  "preferredSubdomain": "neuronpeak-5io7s",
+  "assets": []
+}
