@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Sora:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --paper: 246 248 251;
+    --surface: 255 255 255;
+    --accent: 255 135 87;
+    --ink: 16 32 51;
+    --skyline: 72 189 240;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-paper font-body text-ink antialiased;
+    margin: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  a {
+    @apply transition-colors;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .hero-chevron {
+    clip-path: polygon(12% 0, 88% 0, 100% 18%, 70% 100%, 30% 100%, 0 18%);
+    border-radius: 3rem;
+  }
+
+  .diagonal-panel {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .diagonal-panel::after {
+    content: '';
+    position: absolute;
+    inset: auto -15% -35% 35%;
+    height: 7rem;
+    background: linear-gradient(90deg, rgba(255, 135, 87, 0.16), rgba(72, 189, 240, 0));
+    transform: skewX(-32deg);
+  }
+
+  .track-card {
+    clip-path: polygon(0 0, calc(100% - 1.75rem) 0, 100% 1.75rem, 100% 100%, 0 100%);
+  }
+
+  .network-tile {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .network-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(125deg, rgba(72, 189, 240, 0.08) 10%, transparent 10%, transparent 45%, rgba(255, 135, 87, 0.08) 45%, rgba(255, 135, 87, 0.08) 55%, transparent 55%);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .grain {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='%23102033' fill-opacity='0.08'%3E%3Ccircle cx='22' cy='20' r='1'/%3E%3Ccircle cx='65' cy='52' r='1'/%3E%3Ccircle cx='142' cy='41' r='1'/%3E%3Ccircle cx='35' cy='112' r='1'/%3E%3Ccircle cx='118' cy='132' r='1'/%3E%3Ccircle cx='160' cy='101' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .marquee {
+    width: max-content;
+    animation: marquee 22s linear infinite;
+  }
+
+  .shadow-soft {
+    box-shadow: 0 14px 34px rgba(16, 32, 51, 0.08);
+  }
+
+  .shadow-hero {
+    box-shadow: 0 22px 68px rgba(16, 32, 51, 0.16);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
