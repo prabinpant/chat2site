@@ -10,6 +10,7 @@ import { AIServiceFactory } from '../lib/ai-service-factory.js';
 import { NetlifyDeploymentService } from '../lib/deployment-service.js';
 import { SpecExpansionService } from '../lib/spec-expansion-service.js';
 import { ReferenceService, ReferenceData } from '../lib/reference-service.js';
+import { versionService } from '../lib/version-service.js';
 
 export class GenerationRunner {
   private workspaceManager: WorkspaceManager;
@@ -119,6 +120,9 @@ export class GenerationRunner {
       const finalSpec = { ...spec, preferredSubdomain: netlifySiteName };
       this.workspaceManager.saveMetadata(sitePath, finalSpec);
 
+      await onProgress('📦 Initializing version control (v1)...');
+      await versionService.initVersionControl(sitePath, spec.name);
+
       return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec };
     } catch (error) {
        // Cleanup failed generation attempt to avoid cluttering disk with broken sites
@@ -167,11 +171,34 @@ export class GenerationRunner {
     const siteName = spec.preferredSubdomain || path.basename(sitePath);
     const deployment = await this.deploymentService.deploy(sitePath, siteName);
 
+    await onProgress('📦 Saving new version...');
+    await versionService.commitNewVersion(sitePath, spec.name);
+
     await onProgress('✅ Update complete!');
     return {
       url: deployment.url,
       deployedUrl: deployment.url
     };
+  }
+
+  async revertAndDeploy(sitePath: string, version: string, onProgress: (status: string) => Promise<void> | void): Promise<{ deployedUrl?: string }> {
+    await onProgress(`🔄 Reverting site to ${version}...`);
+    const spec = this.workspaceManager.loadMetadata(sitePath) as SiteSpec;
+    if (!spec) throw new Error('Site metadata not found');
+    
+    const siteName = spec.name || path.basename(sitePath);
+    const newVersion = await versionService.revertToVersion(sitePath, siteName, version);
+    
+    await onProgress(`📦 Reverted to ${version} and saved as ${newVersion}. Installing dependencies...`);
+    const execAsync = promisify(exec);
+    await execAsync('npm install', { cwd: sitePath });
+    
+    await onProgress('🚀 Redeploying reverted version...');
+    const netlifySiteName = spec.preferredSubdomain || path.basename(sitePath);
+    const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
+    
+    await onProgress('✅ Revert and deployment complete!');
+    return { deployedUrl: deployment.url };
   }
 
   /**

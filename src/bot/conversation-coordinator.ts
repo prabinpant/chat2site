@@ -8,6 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { intentService, Intent } from '../lib/intent-service.js';
 import { transcriptionService } from '../lib/transcription-service.js';
+import { versionService } from '../lib/version-service.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.join(process.cwd(), 'temp-uploads');
@@ -160,6 +161,10 @@ export class ConversationCoordinator {
                 await this.runBuildScene(message, session, provider, intent);
             } else if (text.toLowerCase().startsWith('/list')) {
                 await this.listSites(message, provider);
+            } else if (text.toLowerCase().startsWith('/versions')) {
+                await this.listSiteVersions(message, session, provider);
+            } else if (text.toLowerCase().startsWith('/revert')) {
+                await this.revertSiteVersion(message, session, provider);
             } else if (!session.isProcessing) {
                 await provider.sendMessage(message.from, "🤖 I can help you build or update websites! Just tell me what you need.");
             }
@@ -310,6 +315,114 @@ export class ConversationCoordinator {
     }
     
     await provider.sendMessage(message.from, msg);
+  }
+
+  private async listSiteVersions(message: IncomingMessage, session: SessionData, provider: MessagingProvider) {
+    const text = message.text?.trim() || '';
+    let sitePath = session.sitePath;
+    let siteName = session.siteId || '';
+
+    const parts = text.split(' ');
+    if (parts.length > 1) {
+      const query = parts.slice(1).join(' ');
+      const matches = this.workspaceManager.findSitesByQuery(query);
+      if (matches.length === 1) {
+        sitePath = matches[0].path;
+        siteName = matches[0].name || matches[0].id;
+      } else if (matches.length > 1) {
+        let msg = "I found multiple sites. Which one did you mean?\n\n";
+        matches.forEach(m => msg += `- ${m.name} (${m.id})\n`);
+        await provider.sendMessage(message.from, msg);
+        return;
+      } else {
+        await provider.sendMessage(message.from, "❌ Could not find a site matching that name.");
+        return;
+      }
+    }
+
+    if (!sitePath) {
+      await provider.sendMessage(message.from, "❌ Please specify a site (e.g. `/versions my-site`) or start updating an existing site first.");
+      return;
+    }
+
+    const versions = await versionService.listVersions(sitePath, siteName);
+    if (versions.length === 0) {
+      await provider.sendMessage(message.from, `No versions found for ${siteName}. It might not have been tracked yet.`);
+      return;
+    }
+
+    let response = `📑 Versions for ${siteName}:\n\n`;
+    response += versions.map(v => `- ${v}`).join('\n');
+    await provider.sendMessage(message.from, response);
+  }
+
+  private async revertSiteVersion(message: IncomingMessage, session: SessionData, provider: MessagingProvider) {
+    const text = message.text?.trim() || '';
+    const parts = text.split(' ');
+    const version = parts[1];
+    let sitePath = session.sitePath;
+    let siteName = session.spec?.name || session.siteId || 'Site';
+
+    const match = version?.match(/^v\d+$/i);
+    if (!match) {
+       await provider.sendMessage(message.from, "❌ Please specify a valid version. e.g. `/revert v1`");
+       return;
+    }
+
+    const targetVersion = version.toLowerCase();
+
+    if (parts.length > 2) {
+      const query = parts.slice(2).join(' ');
+      const siteMatches = this.workspaceManager.findSitesByQuery(query);
+      if (siteMatches.length === 1) {
+        sitePath = siteMatches[0].path;
+        siteName = siteMatches[0].name || siteMatches[0].id;
+      } else {
+        await provider.sendMessage(message.from, "❌ Could not unambiguously find the site to revert.");
+        return;
+      }
+    }
+
+    if (!sitePath) {
+      await provider.sendMessage(message.from, "❌ Please specify a site to revert (e.g. `/revert v1 my-site`), or update an existing site first.");
+      return;
+    }
+
+    if (session.isProcessing) {
+      await provider.sendMessage(message.from, "⏳ I'm currently busy with another task. Please cancel it or wait until it finishes.");
+      return;
+    }
+
+    session.isProcessing = true;
+    session.processingId = Date.now();
+    const myProcessingId = session.processingId;
+    await sessionManager.saveSession(session.platform, message.from, session);
+
+    try {
+      const { deployedUrl } = await this.generationRunner.revertAndDeploy(sitePath, targetVersion, async (status) => {
+        const currentSession = await sessionManager.getSession(session.platform, message.from);
+        if (currentSession.isProcessing && currentSession.processingId === myProcessingId) {
+          await provider.sendMessage(message.from, `⏳ ${status}`).catch(() => {});
+        } else {
+          throw new Error('BUILD_CANCELLED');
+        }
+      });
+      
+      await provider.sendMessage(message.from, `✅ Successfully reverted ${siteName} to ${targetVersion}!\n\n🚀 Live URL: ${deployedUrl}`);
+    } catch (e: any) {
+      if (e.message === 'BUILD_CANCELLED') return;
+      console.error('Revert failed:', e);
+      await provider.sendMessage(message.from, '❌ Revert failed. Please check the version or try again.').catch(() => {});
+    } finally {
+      const finalSession = await sessionManager.getSession(session.platform, message.from);
+      if (finalSession.processingId === myProcessingId) {
+        finalSession.isProcessing = false;
+        finalSession.processingId = undefined;
+        finalSession.currentScene = 'IDLE';
+        finalSession.sceneStep = 0;
+        await sessionManager.saveSession(session.platform, message.from, finalSession);
+      }
+    }
   }
 
   private async listSites(message: IncomingMessage, provider: MessagingProvider) {

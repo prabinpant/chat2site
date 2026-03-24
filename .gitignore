@@ -23,5 +23,4 @@ build/
 !.env.example
 
 # Project specific
-generated-sites/
 temp-uploads/
