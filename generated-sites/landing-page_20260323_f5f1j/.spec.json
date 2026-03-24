@@ -1,0 +1,14 @@
+{
+  "name": "landing page",
+  "description": "landing page that teaches how to do auth in next js",
+  "features": [
+    "Modern UI",
+    "Responsive Design"
+  ],
+  "theme": {
+    "primaryColor": "3b82f6",
+    "darkMode": false
+  },
+  "preferredSubdomain": "landing-page-f5f1j",
+  "assets": []
+}
