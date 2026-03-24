@@ -27,7 +27,7 @@ export class GenerationRunner {
     this.referenceService = new ReferenceService();
   }
 
-  async run(initialSpec: SiteSpec, onProgress: (status: string) => Promise<void> | void): Promise<{ sitePath: string; url?: string; deployedUrl?: string; expandedSpec: SiteSpec }> {
+  async run(initialSpec: SiteSpec, onProgress: (status: string) => Promise<void> | void): Promise<{ sitePath: string; url?: string; deployedUrl?: string; expandedSpec: SiteSpec; version?: string }> {
     this.workspaceManager.cleanupOldSites(5); // Keep only last 5 sites to save disk space
     
     // Check for Reference URLs in the description
@@ -123,7 +123,7 @@ export class GenerationRunner {
       await onProgress('📦 Initializing version control (v1)...');
       await versionService.initVersionControl(sitePath, spec.name);
 
-      return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec };
+      return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec, version: 'v1' };
     } catch (error) {
        // Cleanup failed generation attempt to avoid cluttering disk with broken sites
        console.error(`[GenerationRunner] Cleaning up failed site directory: ${sitePath}`);
@@ -172,12 +172,13 @@ export class GenerationRunner {
     const deployment = await this.deploymentService.deploy(sitePath, siteName);
 
     await onProgress('📦 Saving new version...');
-    await versionService.commitNewVersion(sitePath, spec.name);
+    const newVersion = await versionService.commitNewVersion(sitePath, spec.name);
 
     await onProgress('✅ Update complete!');
     return {
       url: deployment.url,
-      deployedUrl: deployment.url
+      deployedUrl: deployment.url,
+      version: newVersion
     };
   }
 

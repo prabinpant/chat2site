@@ -60,7 +60,7 @@ export class ConversationCoordinator {
 
       // 4. Handle Processing Lock Contextually
       if (session.isProcessing) {
-        if (intent.type === 'CHAT' || intent.type === 'HELP' || intent.type === 'LIST_SITES' || intent.type === 'CANCEL_BUILD') {
+        if (intent.type === 'CHAT' || intent.type === 'HELP' || intent.type === 'LIST_SITES' || intent.type === 'LIST_VERSIONS' || intent.type === 'CANCEL_BUILD') {
            // Proceed
         } else {
            await provider.sendMessage(message.from, "⏳ I'm still working on your previous request. You can chat with me or say 'Cancel' to stop current build.");
@@ -141,6 +141,14 @@ export class ConversationCoordinator {
             await this.listSites(message, provider);
             break;
 
+          case 'LIST_VERSIONS':
+            await this.listSiteVersions(message, session, provider, intent);
+            break;
+
+          case 'REVERT_VERSION':
+            await this.revertSiteVersion(message, session, provider, intent);
+            break;
+
           case 'HELP':
             await this.sendHelp(message, provider);
             break;
@@ -162,9 +170,9 @@ export class ConversationCoordinator {
             } else if (text.toLowerCase().startsWith('/list')) {
                 await this.listSites(message, provider);
             } else if (text.toLowerCase().startsWith('/versions')) {
-                await this.listSiteVersions(message, session, provider);
+                await this.listSiteVersions(message, session, provider, intent);
             } else if (text.toLowerCase().startsWith('/revert')) {
-                await this.revertSiteVersion(message, session, provider);
+                await this.revertSiteVersion(message, session, provider, intent);
             } else if (!session.isProcessing) {
                 await provider.sendMessage(message.from, "🤖 I can help you build or update websites! Just tell me what you need.");
             }
@@ -317,14 +325,14 @@ export class ConversationCoordinator {
     await provider.sendMessage(message.from, msg);
   }
 
-  private async listSiteVersions(message: IncomingMessage, session: SessionData, provider: MessagingProvider) {
+  private async listSiteVersions(message: IncomingMessage, session: SessionData, provider: MessagingProvider, intent: Intent) {
     const text = message.text?.trim() || '';
     let sitePath = session.sitePath;
     let siteName = session.siteId || '';
 
-    const parts = text.split(' ');
-    if (parts.length > 1) {
-      const query = parts.slice(1).join(' ');
+    // Try intent parameters first, then fallback to slash command parsing
+    const query = intent.parameters.siteName || intent.parameters.siteId;
+    if (query) {
       const matches = this.workspaceManager.findSitesByQuery(query);
       if (matches.length === 1) {
         sitePath = matches[0].path;
@@ -338,10 +346,21 @@ export class ConversationCoordinator {
         await provider.sendMessage(message.from, "❌ Could not find a site matching that name.");
         return;
       }
+    } else if (!sitePath) {
+      // Fallback: try slash command parsing
+      const parts = text.split(' ');
+      if (parts.length > 1) {
+        const cmdQuery = parts.slice(1).join(' ');
+        const matches = this.workspaceManager.findSitesByQuery(cmdQuery);
+        if (matches.length === 1) {
+          sitePath = matches[0].path;
+          siteName = matches[0].name || matches[0].id;
+        }
+      }
     }
 
     if (!sitePath) {
-      await provider.sendMessage(message.from, "❌ Please specify a site (e.g. `/versions my-site`) or start updating an existing site first.");
+      await provider.sendMessage(message.from, "❌ Please specify a site. e.g. 'show versions of NeuronPeak' or `/versions my-site`");
       return;
     }
 
@@ -356,24 +375,28 @@ export class ConversationCoordinator {
     await provider.sendMessage(message.from, response);
   }
 
-  private async revertSiteVersion(message: IncomingMessage, session: SessionData, provider: MessagingProvider) {
+  private async revertSiteVersion(message: IncomingMessage, session: SessionData, provider: MessagingProvider, intent: Intent) {
     const text = message.text?.trim() || '';
-    const parts = text.split(' ');
-    const version = parts[1];
     let sitePath = session.sitePath;
     let siteName = session.spec?.name || session.siteId || 'Site';
 
-    const match = version?.match(/^v\d+$/i);
-    if (!match) {
-       await provider.sendMessage(message.from, "❌ Please specify a valid version. e.g. `/revert v1`");
-       return;
+    // Get version from intent params or slash command
+    let targetVersion = intent.parameters.version?.toLowerCase();
+    if (!targetVersion) {
+      const parts = text.split(' ');
+      const vPart = parts.find(p => /^v\d+$/i.test(p));
+      targetVersion = vPart?.toLowerCase();
     }
 
-    const targetVersion = version.toLowerCase();
+    if (!targetVersion || !/^v\d+$/.test(targetVersion)) {
+      await provider.sendMessage(message.from, "❌ Please specify a valid version. e.g. 'revert NeuronPeak to v1'");
+      return;
+    }
 
-    if (parts.length > 2) {
-      const query = parts.slice(2).join(' ');
-      const siteMatches = this.workspaceManager.findSitesByQuery(query);
+    // Identify the site from intent params or slash command
+    const siteQuery = intent.parameters.siteName || intent.parameters.siteId;
+    if (siteQuery) {
+      const siteMatches = this.workspaceManager.findSitesByQuery(siteQuery);
       if (siteMatches.length === 1) {
         sitePath = siteMatches[0].path;
         siteName = siteMatches[0].name || siteMatches[0].id;
@@ -381,10 +404,22 @@ export class ConversationCoordinator {
         await provider.sendMessage(message.from, "❌ Could not unambiguously find the site to revert.");
         return;
       }
+    } else if (!sitePath) {
+      // Fallback: try parsing slash command
+      const parts = text.split(' ');
+      const nonVersionParts = parts.filter(p => p !== '/revert' && !/^v\d+$/i.test(p));
+      if (nonVersionParts.length > 0) {
+        const cmdQuery = nonVersionParts.join(' ');
+        const siteMatches = this.workspaceManager.findSitesByQuery(cmdQuery);
+        if (siteMatches.length === 1) {
+          sitePath = siteMatches[0].path;
+          siteName = siteMatches[0].name || siteMatches[0].id;
+        }
+      }
     }
 
     if (!sitePath) {
-      await provider.sendMessage(message.from, "❌ Please specify a site to revert (e.g. `/revert v1 my-site`), or update an existing site first.");
+      await provider.sendMessage(message.from, "❌ Please specify a site to revert. e.g. 'revert NeuronPeak to v1'");
       return;
     }
 
@@ -399,7 +434,7 @@ export class ConversationCoordinator {
     await sessionManager.saveSession(session.platform, message.from, session);
 
     try {
-      const { deployedUrl } = await this.generationRunner.revertAndDeploy(sitePath, targetVersion, async (status) => {
+      const { deployedUrl } = await this.generationRunner.revertAndDeploy(sitePath, targetVersion!, async (status) => {
         const currentSession = await sessionManager.getSession(session.platform, message.from);
         if (currentSession.isProcessing && currentSession.processingId === myProcessingId) {
           await provider.sendMessage(message.from, `⏳ ${status}`).catch(() => {});
@@ -456,7 +491,7 @@ export class ConversationCoordinator {
     await provider.sendMessage(to, '🚀 Starting generation... This will take a minute.');
     
     try {
-      const { url, deployedUrl, expandedSpec } = await this.generationRunner.run(spec, async (status) => {
+      const { url, deployedUrl, expandedSpec, version } = await this.generationRunner.run(spec, async (status) => {
         const currentSession = await sessionManager.getSession(session.platform, to);
         if (currentSession.isProcessing && currentSession.processingId === myProcessingId) {
           await provider.sendMessage(to, `⏳ ${status}`).catch(() => {});
@@ -465,7 +500,9 @@ export class ConversationCoordinator {
         }
       });
       
-      let msg = `✅ Success! "${expandedSpec.name}" is live!\n\n🔗 Preview: ${url}`;
+      let msg = `✅ Success! "${expandedSpec.name}" is live!`;
+      if (version) msg += `\n📦 Version: ${version}`;
+      msg += `\n\n🔗 Preview: ${url}`;
       if (deployedUrl) msg += `\n🚀 Live URL: ${deployedUrl}`;
       await provider.sendMessage(to, msg);
     } catch (error: any) {
@@ -501,7 +538,7 @@ export class ConversationCoordinator {
     await provider.sendMessage(to, `🔄 Updating your site...`);
 
     try {
-      const { deployedUrl } = await this.generationRunner.iterate(sitePath, instruction!, async (status) => {
+      const { deployedUrl, version } = await this.generationRunner.iterate(sitePath, instruction!, async (status) => {
         const currentSession = await sessionManager.getSession(session.platform, to);
         if (currentSession.isProcessing && currentSession.processingId === myProcessingId) {
           await provider.sendMessage(to, `⏳ ${status}`).catch(() => {});
@@ -509,7 +546,10 @@ export class ConversationCoordinator {
           throw new Error('BUILD_CANCELLED');
         }
       }, spec.assets as Asset[]);
-      await provider.sendMessage(to, `✅ Updated! 🚀 ${deployedUrl}`);
+      let msg = `✅ Updated!`;
+      if (version) msg += ` 📦 Version: ${version}`;
+      msg += ` 🚀 ${deployedUrl}`;
+      await provider.sendMessage(to, msg);
     } catch (error: any) {
       if (error.message === 'BUILD_CANCELLED') return;
       console.error('Update failed:', error);

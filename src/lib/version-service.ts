@@ -58,8 +58,9 @@ export class VersionService {
       await execAsync(`git add "${relPath}"`, { cwd: REPO_ROOT });
       await execAsync(`git commit -m "${siteName} - v1"`, { cwd: REPO_ROOT });
       await execAsync(`git tag "${tagPrefix}/v1"`, { cwd: REPO_ROOT });
+      await execAsync('git push origin main --tags', { cwd: REPO_ROOT });
 
-      console.log(`[VersionService] Initialized ${tagPrefix}/v1 for "${siteName}"`);
+      console.log(`[VersionService] Initialized ${tagPrefix}/v1 for "${siteName}" and pushed`);
     } catch (e) {
       console.error(`[VersionService] Failed to init version control for "${siteName}":`, e);
     }
@@ -90,7 +91,8 @@ export class VersionService {
       }
 
       await execAsync(`git tag "${tagPrefix}/v${nextV}"`, { cwd: REPO_ROOT });
-      console.log(`[VersionService] Created ${tagPrefix}/v${nextV} for "${siteName}"`);
+      await execAsync('git push origin main --tags', { cwd: REPO_ROOT });
+      console.log(`[VersionService] Created ${tagPrefix}/v${nextV} for "${siteName}" and pushed`);
       return `v${nextV}`;
     } catch (e) {
       console.error(`[VersionService] Failed to commit new version for "${siteName}":`, e);
@@ -141,7 +143,8 @@ export class VersionService {
       }
 
       await execAsync(`git tag "${tagPrefix}/v${nextV}"`, { cwd: REPO_ROOT });
-      console.log(`[VersionService] Reverted "${siteName}" to ${version}, saved as v${nextV}`);
+      await execAsync('git push origin main --tags', { cwd: REPO_ROOT });
+      console.log(`[VersionService] Reverted "${siteName}" to ${version}, saved as v${nextV} and pushed`);
       return `v${nextV}`;
     } catch (e) {
       console.error(`[VersionService] Failed to revert "${siteName}" to ${version}:`, e);

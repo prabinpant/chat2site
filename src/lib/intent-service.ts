@@ -1,7 +1,7 @@
 import { AIService } from './ai-service.js';
 import { AIServiceFactory } from './ai-service-factory.js';
 
-export type IntentType = 'GENERATE_SITE' | 'UPDATE_SITE' | 'LIST_SITES' | 'HELP' | 'CHAT' | 'CANCEL_BUILD' | 'UNKNOWN';
+export type IntentType = 'GENERATE_SITE' | 'UPDATE_SITE' | 'LIST_SITES' | 'LIST_VERSIONS' | 'REVERT_VERSION' | 'HELP' | 'CHAT' | 'CANCEL_BUILD' | 'UNKNOWN';
 
 export interface Intent {
   type: IntentType;
@@ -17,6 +17,7 @@ export interface Intent {
     subdomain?: string;
     isReady?: boolean;
     skipField?: string;
+    version?: string;
   };
 }
 
@@ -36,6 +37,8 @@ Identify the user's intent and extract relevant parameters.
 - GENERATE_SITE: User wants to build a new website.
 - UPDATE_SITE: User wants to modify an existing website. This includes specific change requests ("change the header") or identifying a site by name/ID to update ("update my bakery site").
 - LIST_SITES: User wants to see their projects.
+- LIST_VERSIONS: User wants to see the versions/history of a specific site (e.g. "show versions of NeuronPeak", "what versions does my blog have").
+- REVERT_VERSION: User wants to revert/rollback a site to a specific version (e.g. "revert NeuronPeak to v1", "go back to version 2 of my blog").
 - HELP: User asks for help or commands.
 - CHAT: General conversation, greetings, or questions ("How are you?", "What can you do?").
 - CANCEL_BUILD: User wants to stop/cancel the current build or generation process.
@@ -52,6 +55,7 @@ Identify the user's intent and extract relevant parameters.
 - siteName: Name or natural reference of the site to update (e.g. "bakery", "my portfolio", "the law firm site").
 - instruction: What to change (for UPDATE_SITE).
 - replyText: A helpful conversational response (for CHAT).
+- version: The target version string (for REVERT_VERSION, e.g. "v1", "v2").
 
 ### CONTEXT:
 ${context || 'No context provided.'}
@@ -69,7 +73,8 @@ Return JSON ONLY:
     "instruction": "extracted update instruction for UPDATE_SITE",
     "replyText": "suggested friendly response if CHAT/HELP",
     "isReady": boolean,
-    "skipField": "string"
+    "skipField": "string",
+    "version": "target version string for REVERT_VERSION (e.g. 'v1')"
   }
 }
 
