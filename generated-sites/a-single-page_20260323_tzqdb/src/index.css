@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background-color: #f4f1ea;
+  color: #1a1a1a;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Wobbly border utility */
+.wobbly-border {
+  border: 4px solid #1a1a1a;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+.wobbly-border-thin {
+  border: 2px solid #1a1a1a;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+}
+
+.shield-shape {
+  clip-path: polygon(0% 0%, 100% 0%, 100% 80%, 50% 100%, 0% 80%);
+}
+
+/* Film Grain Overlay */
+.grain-overlay {
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background-image: url('https://grainy-gradients.vercel.app/noise.svg');
+  opacity: 0.15;
+  mix-blend-mode: multiply;
+}
+
+/* Sepia Filter */
+.sepia-filter {
+  filter: sepia(0.2) contrast(1.1) grayscale(0.8);
+}
+
+/* Rubber-hose animation helpers */
+.rubber-hose-item {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.rubber-hose-item:hover {
+  transform: scaleY(1.1) scaleX(0.95);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4f1ea;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border: 3px solid #f4f1ea;
+  border-radius: 10px;
+}

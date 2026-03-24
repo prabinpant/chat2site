@@ -1,0 +1,14 @@
+{
+  "name": "arpil 100",
+  "description": "A single-page web application for the ARPIL 100KM CHALLENGE for the Arbyte Running Club. Features a 'Rubber-Hose 1930s Cartoon' visual theme with high-contrast black and white/sepia tones, wobbly hand-drawn borders, squash and stretch animations, and a film grain overlay. Includes a hero section, a rules guide, and a 25-runner leaderboard gallery with specific names and bios. Built with Tailwind CSS and a responsive grid layout.",
+  "features": [
+    "Modern UI",
+    "Responsive Design"
+  ],
+  "theme": {
+    "primaryColor": "3b82f6",
+    "darkMode": false
+  },
+  "preferredSubdomain": "arpil-100",
+  "assets": []
+}
