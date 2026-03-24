@@ -1,0 +1,14 @@
+{
+  "name": "tic tac",
+  "description": "tic tac toe game",
+  "features": [
+    "Modern UI",
+    "Responsive Design"
+  ],
+  "theme": {
+    "primaryColor": "3b82f6",
+    "darkMode": false
+  },
+  "preferredSubdomain": "tic-tac-yzek3",
+  "assets": []
+}
