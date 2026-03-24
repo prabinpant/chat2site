@@ -72,7 +72,6 @@ const AWARDS = [
   { title: "The Wanderer", description: "Awarded to the explorer who completes the challenge across the most diverse locations.", icon: MapPin },
   { title: "100 Miler", description: "Crosses 160km", icon: Medal },
   { title: "You vs You", description: "The last one to finish the challenge", icon: Users },
-  { title: "Route Artist", description: "The one with the most creative strava route map.", icon: Map },
   { title: "The Redeemer", description: "The one who did not complete the previous challenges that completes April 100km", icon: RotateCcw },
   { title: "First Foot Forward", description: "Awarded to the one who makes the opening move of the entire challenge.", icon: Play },
 ];
