@@ -198,9 +198,19 @@ export class GenerationRunner {
     const siteName = spec.name || path.basename(sitePath);
     const newVersion = await versionService.revertToVersion(sitePath, siteName, version);
     
-    await onProgress(`📦 Reverted to ${version} and saved as ${newVersion}. Installing dependencies...`);
+    await onProgress(`📦 Reverted to ${version} (saved as ${newVersion}). Cleaning and reinstalling dependencies...`);
     const execAsync = promisify(exec);
-    await execAsync('npm install', { cwd: sitePath });
+
+    // Clean stale dist/ and node_modules (dependencies may differ between versions)
+    const distPath = path.join(sitePath, 'dist');
+    const nodeModulesPath = path.join(sitePath, 'node_modules');
+    await fs.rm(distPath, { recursive: true, force: true }).catch(() => {});
+    await fs.rm(nodeModulesPath, { recursive: true, force: true }).catch(() => {});
+
+    await execAsync('npm install', { cwd: sitePath, timeout: 120000 });
+
+    await onProgress('🔨 Rebuilding from reverted source...');
+    await execAsync('npm run build', { cwd: sitePath, timeout: 120000 });
     
     await onProgress('🚀 Redeploying reverted version...');
     const netlifySiteName = spec.preferredSubdomain || path.basename(sitePath);
