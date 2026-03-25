@@ -18,8 +18,10 @@ import {
   Target,
   Infinity as InfinityIcon,
   RotateCcw,
-  Play
+  Play,
+  MessageSquare
 } from 'lucide-react';
+
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -30,7 +32,7 @@ function cn(...inputs: ClassValue[]) {
 const RUNNERS = [
   { id: "AS", name: "Aaryash S.", bio: "Self-proclaimed CTO, runs like a maniac, bets like a fool!" },
   { id: "AK", name: "Alok K.", bio: "He is an Ironman. He eats 100 for breakfast." },
-  { id: "AK", name: "Avinash Kundaliya", bio: "Has the most expensive shoes and watch, we have high hopes" },
+  { id: "AK", name: "Avinash K.", bio: "Has the most expensive shoes and watch, we have high hopes" },
   { id: "AN", name: "Anita N.", bio: "Don't let the new one beat you." },
   { id: "ID", name: "Ishu D.", bio: "She will complete the challenge with few lectures." },
   { id: "KB", name: "Karuna B.", bio: "Strolling light, fueled by bakery delights." },
@@ -75,6 +77,7 @@ const AWARDS = [
   { title: "You vs You", description: "The last one to finish the challenge", icon: Users },
   { title: "The Redeemer", description: "The one who did not complete the previous challenges that completes April 100km", icon: RotateCcw },
   { title: "First Foot Forward", description: "Awarded to the one who makes the opening move of the entire challenge.", icon: Play },
+  { title: "Pro Banter", description: "Awarded to the best banter throughout the challenge.", icon: MessageSquare },
 ];
 
 const RULES = [
