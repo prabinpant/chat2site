@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { Compass, Cpu, Users, Globe, ChevronRight, Menu, X, ArrowUpRight } from 'lucide-react';
+import { Users, Menu, X, ArrowUpRight, Zap, Radio, Activity, Terminal } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -19,65 +19,59 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Manifesto', href: '#manifesto' },
-    { name: 'Hikes', href: '#hikes' },
-    { name: 'Community', href: '#community' },
+    { name: '// Manifesto', href: '#manifesto' },
+    { name: '// Hikes', href: '#hikes' },
+    { name: '// Community', href: '#community' },
   ];
 
   return (
     <nav
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4 md:px-12',
-        isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-200' : 'bg-transparent'
+        'fixed top-0 left-0 right-0 z-[60] transition-all duration-500 px-6 py-4 md:px-12',
+        isScrolled ? 'bg-pitch/80 backdrop-blur-xl border-b-2 border-accent' : 'bg-transparent'
       )}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-accent rounded-sm flex items-center justify-center">
-            <span className="text-white font-bold text-lg">W</span>
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <motion.div 
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            className="w-10 h-10 bg-accent flex items-center justify-center brutalist-border box-glow-pink"
+          >
+            <span className="text-white font-black text-xl">W</span>
+          </motion.div>
+          <div className="flex flex-col">
+            <span className="text-2xl font-black tracking-tighter text-white leading-none">
+              WWKTM
+            </span>
+            <span className="text-[10px] font-mono text-accent uppercase tracking-widest leading-none mt-1">
+              [ AI_ENABLED_CRAFT ]
+            </span>
           </div>
-          <span className={cn(
-            'text-xl font-bold tracking-tight',
-            isScrolled ? 'text-slate-900' : 'text-white'
-          )}>
-            WWKTM
-          </span>
         </div>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <a
               key={link.name}
               href={link.href}
-              className={cn(
-                'text-sm font-medium transition-colors hover:text-accent',
-                isScrolled ? 'text-slate-600' : 'text-white/80'
-              )}
+              className="text-sm font-mono font-bold text-white/70 hover:text-accent transition-colors relative group"
             >
               {link.name}
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all group-hover:w-full" />
             </a>
           ))}
-          <button className={cn(
-            'px-5 py-2 rounded-full text-sm font-bold transition-all',
-            isScrolled 
-              ? 'bg-slate-900 text-white hover:bg-slate-800' 
-              : 'bg-white text-slate-900 hover:bg-slate-100'
-          )}>
-            Join Now
+          <button className="px-6 py-2 bg-accent text-white font-black uppercase text-sm brutalist-border hover:translate-x-1 hover:-translate-y-1 transition-transform">
+            JOIN_SYSTEM
           </button>
         </div>
 
         {/* Mobile Toggle */}
         <button
-          className="md:hidden"
+          className="md:hidden p-2 bg-accent brutalist-border"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {isMobileMenuOpen ? (
-            <X className={isScrolled ? 'text-slate-900' : 'text-white'} />
-          ) : (
-            <Menu className={isScrolled ? 'text-slate-900' : 'text-white'} />
-          )}
+          {isMobileMenuOpen ? <X className="text-white" /> : <Menu className="text-white" />}
         </button>
       </div>
 
@@ -85,23 +79,32 @@ const Navbar = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 right-0 bg-white border-b border-slate-200 p-6 md:hidden flex flex-col gap-4 shadow-xl"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-0 bg-pitch z-[70] flex flex-col p-8 md:hidden"
           >
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-lg font-medium text-slate-900 py-2 border-b border-slate-100"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {link.name}
-              </a>
-            ))}
-            <button className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold mt-2">
-              Join Now
+            <div className="flex justify-between items-center mb-12">
+              <span className="text-2xl font-black text-white">MENU</span>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-accent brutalist-border">
+                <X className="text-white" />
+              </button>
+            </div>
+            <div className="flex flex-col gap-8">
+              {navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className="text-4xl font-black text-white hover:text-accent transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
+            <button className="mt-auto w-full py-6 bg-accent text-white font-black text-2xl brutalist-border">
+              JOIN_SYSTEM
             </button>
           </motion.div>
         )}
@@ -110,138 +113,246 @@ const Navbar = () => {
   );
 };
 
+const GlitchText = ({ text, className }: { text: string, className?: string }) => {
+  return (
+    <div className={cn("relative inline-block group", className)}>
+      <span className="relative z-10">{text}</span>
+      <span className="absolute top-0 left-0 -z-10 text-accent-blue translate-x-1 translate-y-1 opacity-0 group-hover:opacity-70 group-hover:animate-glitch select-none">
+        {text}
+      </span>
+      <span className="absolute top-0 left-0 -z-10 text-accent translate-x-[-1px] translate-y-[-1px] opacity-0 group-hover:opacity-70 group-hover:animate-glitch select-none" style={{ animationDelay: '0.1s' }}>
+        {text}
+      </span>
+    </div>
+  );
+};
+
 const Hero = () => {
-  const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 500], [0, 200]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], [0, 400]);
+  const rotate = useTransform(scrollYProgress, [0, 1], [0, -10]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
 
   return (
-    <section className="relative h-screen min-h-[700px] w-full flex items-center justify-center overflow-hidden bg-slate-950">
+    <section ref={containerRef} className="relative h-[120vh] w-full flex items-center justify-center overflow-hidden bg-pitch">
+      <div className="scanline" />
+      
+      {/* Background AI Grid/Mesh */}
+      <div className="absolute inset-0 z-0 opacity-20">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,0,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,0,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,255,255,0.1)_0%,transparent_70%)]" />
+      </div>
+
       <motion.div 
-        style={{ y: y1 }}
-        className="absolute inset-0 z-0"
+        style={{ y, rotate, scale, opacity }}
+        className="relative z-10 w-full max-w-[1600px] px-6"
+      >
+        <div className="flex flex-col items-center text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-6 font-mono text-accent-green font-bold tracking-[0.5em] uppercase text-sm flex items-center gap-2"
+          >
+            <Activity className="w-4 h-4 animate-pulse" />
+            [ PROTOCOL_V3.0_ONLINE ]
+          </motion.div>
+
+          <h1 className="text-[12vw] md:text-[10vw] font-black leading-[0.8] tracking-tighter text-white mb-8">
+            <span className="block cursor-default">
+              <GlitchText text="WEB" />
+            </span>
+            <span className="block text-accent glow-pink">
+               <GlitchText text="WEEKEND" />
+            </span>
+            <span className="block hover:skew-x-12 transition-transform duration-300">
+               <GlitchText text="KATHMANDU" />
+            </span>
+          </h1>
+
+          <div className="relative w-full max-w-4xl">
+            <div className="absolute -left-12 top-0 text-accent-blue font-mono text-xs hidden md:block vertical-rl">
+              CORE_SYSTEM_ACTIVE // 27.7172° N, 85.3240° E
+            </div>
+            <p className="text-xl md:text-3xl text-white/60 font-medium leading-tight max-w-3xl mx-auto mb-12">
+              The <span className="text-white italic">Un-conference</span> for those who craft with code, design with intent, and build with <span className="text-accent-blue font-mono font-bold">Generative Intelligence.</span>
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-10 py-5 bg-accent text-white font-black text-xl brutalist-border flex items-center gap-3 box-glow-pink"
+            >
+              INITIALIZE_JOIN
+              <Zap className="w-6 h-6 fill-white" />
+            </motion.button>
+            <motion.button 
+              whileHover={{ x: 10 }}
+              className="px-10 py-5 border-4 border-white text-white font-black text-xl hover:bg-white hover:text-pitch transition-colors flex items-center gap-3"
+            >
+              READ_MANIFESTO
+              <Terminal className="w-6 h-6" />
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Background Image - Distorted */}
+      <motion.div 
+        style={{ opacity: useTransform(scrollYProgress, [0, 0.4], [0.3, 0]) }}
+        className="absolute bottom-0 right-0 w-1/2 h-full z-0 pointer-events-none"
       >
         <img
           src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2071&auto=format&fit=crop"
           alt="Kathmandu Himalayas"
-          className="w-full h-full object-cover opacity-60 scale-105"
+          className="w-full h-full object-cover grayscale mix-blend-overlay opacity-50"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-transparent to-slate-950/80" />
-      </motion.div>
-
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          style={{ opacity }}
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-xs font-bold tracking-widest uppercase mb-8">
-            <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-            Kathmandu, Nepal
-          </div>
-          <h1 className="text-5xl md:text-8xl font-black text-white mb-6 tracking-tighter leading-[0.9]">
-            WEB <br /> WEEKEND <br /> <span className="text-accent">KATHMANDU</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
-            Connecting Nepal's builders, designers, and AI practitioners with the global tech scene.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button className="group px-8 py-4 bg-white text-slate-950 rounded-full font-bold text-lg hover:bg-accent hover:text-white transition-all flex items-center gap-2">
-              Join the Un-conference
-              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white border border-white/20 rounded-full font-bold text-lg hover:bg-white/20 transition-all">
-              Our Manifesto
-            </button>
-          </div>
-        </motion.div>
-      </div>
-
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
-      >
-        <div className="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center p-1">
-          <div className="w-1 h-2 bg-white rounded-full" />
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-l from-pitch via-pitch/50 to-transparent" />
       </motion.div>
     </section>
   );
 };
 
-const SectionHeading = ({ children, subtitle, light = false }: { children: React.ReactNode, subtitle?: string, light?: boolean }) => (
-  <div className="mb-16">
-    <motion.h2
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className={cn(
-        "text-4xl md:text-6xl font-black tracking-tighter mb-4",
-        light ? "text-white" : "text-slate-900"
-      )}
-    >
-      {children}
-    </motion.h2>
-    {subtitle && (
-      <motion.p
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ delay: 0.1 }}
-        className={cn(
-          "text-xl max-w-2xl leading-relaxed",
-          light ? "text-white/70" : "text-slate-600"
-        )}
-      >
-        {subtitle}
-      </motion.p>
-    )}
-  </div>
-);
+const Manifesto = () => {
+  const scrollRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: scrollRef,
+    offset: ["start end", "end start"]
+  });
 
-const AppliedKnowledge = () => {
+  const x1 = useTransform(scrollYProgress, [0, 1], [0, -200]);
+  const x2 = useTransform(scrollYProgress, [0, 1], [0, 200]);
+
   return (
-    <section id="manifesto" className="py-24 md:py-32 bg-white px-6">
-      <div className="max-w-7xl mx-auto">
-        <SectionHeading subtitle="We believe in the power of building. WWKTM is a community-run tech un-conference movement focused on applied knowledge and craft.">
-          FOR THE <br /> BUILDERS
-        </SectionHeading>
+    <section id="manifesto" ref={scrollRef} className="py-32 bg-pitch overflow-hidden">
+      <motion.div style={{ x: x1 }} className="whitespace-nowrap flex gap-8 mb-12">
+        {[...Array(5)].map((_, i) => (
+          <span key={i} className="text-[10vw] font-black text-white/5 uppercase leading-none">
+            Applied Knowledge Craft Applied Knowledge Craft
+          </span>
+        ))}
+      </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-12">
+      <div className="max-w-[1400px] mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+        <div className="relative">
+          <div className="absolute -left-8 top-0 w-2 h-full bg-accent" />
+          <h2 className="text-6xl md:text-8xl font-black text-white leading-none tracking-tighter mb-12">
+            THE <br /> <span className="text-accent-blue">BUILDER'S</span> <br /> CODE
+          </h2>
+          <div className="font-mono text-accent-green mb-8 flex items-center gap-2">
+            <Radio className="w-5 h-5" />
+            STRENGTHENING_THE_LOCAL_ECOSYSTEM
+          </div>
+        </div>
+
+        <div className="grid gap-6">
           {[
-            {
-              icon: <Cpu className="w-8 h-8 text-accent" />,
-              title: "Applied AI",
-              desc: "Moving beyond theory to implement AI systems that solve real local and global problems."
+            { 
+              title: "HYPER-APPLIED AI", 
+              desc: "We don't talk about GPT-5. We build systems that solve the chaotic, beautiful problems of Kathmandu and beyond.",
+              color: "accent"
             },
-            {
-              icon: <Globe className="w-8 h-8 text-accent" />,
-              title: "Global-Local Bridge",
-              desc: "Connecting Kathmandu's brightest minds with the international engineering community."
+            { 
+              title: "RADICAL OPENNESS", 
+              desc: "Knowledge is a fluid. We bridge the gap between global standards and local ingenuity in Nepali and English.",
+              color: "accent-blue"
             },
-            {
-              icon: <Compass className="w-8 h-8 text-accent" />,
-              title: "Radical Inclusivity",
-              desc: "A bilingual space (Nepali & English) welcoming all who craft, from juniors to veterans."
+            { 
+              title: "CRAFT OVER CLOUT", 
+              desc: "No corporate fluff. No polished pitches. Just raw code, deep design, and the smell of fresh mountain air.",
+              color: "accent-green"
             }
           ].map((item, i) => (
-            <motion.div
+            <motion.div 
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="group"
+              className={cn(
+                "p-8 brutalist-border",
+                item.color === 'accent' ? 'brutalist-border' : 
+                item.color === 'accent-blue' ? 'brutalist-border-blue' : 'brutalist-border-green'
+              )}
             >
-              <div className="mb-6 p-4 rounded-2xl bg-surface group-hover:bg-accent/5 transition-colors inline-block">
-                {item.icon}
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">{item.title}</h3>
-              <p className="text-slate-600 leading-relaxed font-medium">
+              <h3 className="text-2xl font-black text-white mb-4">{item.title}</h3>
+              <p className="text-white/60 font-medium leading-relaxed">
                 {item.desc}
               </p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <motion.div style={{ x: x2 }} className="whitespace-nowrap flex gap-8 mt-24">
+        {[...Array(5)].map((_, i) => (
+          <span key={i} className="text-[10vw] font-black text-white/5 uppercase leading-none">
+            Radical Inclusivity Global Radical Inclusivity Global
+          </span>
+        ))}
+      </motion.div>
+    </section>
+  );
+};
+
+const Hikes = () => {
+  return (
+    <section id="hikes" className="py-32 bg-pitch relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-1/3 h-full pointer-events-none opacity-20">
+        <svg viewBox="0 0 100 100" className="w-full h-full stroke-accent-blue fill-none stroke-[0.5]">
+          <path d="M0,50 Q25,25 50,50 T100,50 M0,60 Q25,35 50,60 T100,60 M0,40 Q25,15 50,40 T100,40" />
+          <path d="M10,0 Q35,25 10,50 T10,100 M20,0 Q45,25 20,50 T20,100" />
+        </svg>
+      </div>
+
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className="flex flex-col md:flex-row gap-12 mb-24">
+          <div className="flex-1">
+            <h2 className="text-6xl md:text-[10rem] font-black text-white leading-[0.8] tracking-tighter uppercase mb-12">
+              BEYOND <br /> THE <br /> <span className="text-accent glow-pink">SCREEN</span>
+            </h2>
+          </div>
+          <div className="flex-1 flex flex-col justify-end">
+            <p className="text-2xl md:text-4xl text-white/80 font-bold leading-tight mb-8">
+              We break the walls of traditional networking. Our hikes are where the <span className="text-accent-blue">real algorithms</span> are written—on the trails of Kathmandu Valley.
+            </p>
+            <div className="flex gap-4">
+              <div className="px-6 py-3 bg-white text-pitch font-black uppercase text-sm brutalist-border">
+                12+ SUMMITS
+              </div>
+              <div className="px-6 py-3 border-2 border-white text-white font-black uppercase text-sm">
+                500+ TRAIL HOURS
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            { img: "https://images.unsplash.com/photo-1551632432-c735e8299298?q=80&w=2070&auto=format&fit=crop", title: "Shivapuri Peak", tag: "HARD_CORE" },
+            { img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop", title: "Champadevi", tag: "FLOW_STATE" },
+            { img: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?q=80&w=2071&auto=format&fit=crop", title: "Nagarkot Rim", tag: "SYSTEM_SCAN" }
+          ].map((item, i) => (
+            <motion.div 
+              key={i}
+              whileHover={{ y: -20 }}
+              className="relative aspect-[3/4] overflow-hidden group brutalist-border"
+            >
+              <img src={item.img} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700" alt={item.title} />
+              <div className="absolute inset-0 bg-gradient-to-t from-pitch via-transparent to-transparent opacity-80" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <span className="inline-block px-3 py-1 bg-accent-green text-pitch font-mono font-bold text-xs mb-2">
+                  {item.tag}
+                </span>
+                <h4 className="text-3xl font-black text-white uppercase">{item.title}</h4>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -250,108 +361,71 @@ const AppliedKnowledge = () => {
   );
 };
 
-const RadicalNetworking = () => {
-  return (
-    <section id="hikes" className="relative py-24 md:py-32 overflow-hidden bg-slate-900">
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <img 
-          src="https://images.unsplash.com/photo-1551632432-c735e8299298?q=80&w=2070&auto=format&fit=crop" 
-          alt="Hiking" 
-          className="w-full h-full object-cover"
-        />
-      </div>
-      
-      <div className="relative z-10 max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
-          <SectionHeading light subtitle="We break the walls of traditional networking. Our community hikes are where the real conversations happen, amidst the hills of the Kathmandu Valley.">
-            RADICAL <br /> NETWORKING
-          </SectionHeading>
-          
-          <div className="space-y-8">
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="p-8 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10"
-            >
-              <h4 className="text-xl font-bold text-white mb-2">Un-structured Conversations</h4>
-              <p className="text-white/60">No stages, no forced agendas. Just engineers and designers talking craft while walking trails.</p>
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="p-8 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10"
-            >
-              <h4 className="text-xl font-bold text-white mb-2">Builder-to-Builder</h4>
-              <p className="text-white/60">Peer-level mentorship and networking that lasts far beyond the weekend.</p>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
 const Community = () => {
   return (
-    <section id="community" className="py-24 md:py-32 bg-surface px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-          <SectionHeading subtitle="WWKTM is not just an event; it's a movement owned and run by the community.">
-            NEPAL'S <br /> TECH SCENE
-          </SectionHeading>
-          <div className="flex gap-4 mb-4">
-            <div className="text-right">
-              <div className="text-3xl font-black text-slate-900">500+</div>
-              <div className="text-slate-500 font-bold text-sm uppercase tracking-wider">Builders</div>
+    <section id="community" className="py-32 bg-white px-6 overflow-hidden">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="grid md:grid-cols-2 gap-24 items-center">
+          <div>
+            <h2 className="text-7xl md:text-9xl font-black text-pitch leading-[0.8] tracking-tighter uppercase mb-12">
+              SYSTEM <br /> <span className="text-accent underline decoration-[20px] decoration-accent/30 underline-offset-[-10px]">OWNERS</span>
+            </h2>
+            <p className="text-2xl text-pitch/60 font-bold mb-12">
+              WWKTM is not a corporate event. It is a self-evolving community node powered by volunteers and local builders.
+            </p>
+            
+            <div className="grid grid-cols-2 gap-8 mb-12">
+              <div>
+                <div className="text-6xl font-black text-pitch">500+</div>
+                <div className="font-mono text-accent font-bold uppercase tracking-widest text-sm">Active_Builders</div>
+              </div>
+              <div>
+                <div className="text-6xl font-black text-pitch">100%</div>
+                <div className="font-mono text-accent-blue font-bold uppercase tracking-widest text-sm">Community_Run</div>
+              </div>
             </div>
-            <div className="w-px h-12 bg-slate-300" />
-            <div className="text-right">
-              <div className="text-3xl font-black text-slate-900">12+</div>
-              <div className="text-slate-500 font-bold text-sm uppercase tracking-wider">Hikes</div>
+
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              className="px-8 py-4 bg-pitch text-white font-black text-xl brutalist-border-blue flex items-center gap-3"
+            >
+              JOIN_THE_MOVEMENT
+              <ArrowUpRight className="w-6 h-6" />
+            </motion.button>
+          </div>
+
+          <div className="relative">
+            <motion.div 
+              animate={{ rotate: [0, 5, 0] }}
+              transition={{ repeat: Infinity, duration: 10, ease: "linear" }}
+              className="absolute -top-12 -left-12 w-64 h-64 bg-accent-green rounded-full blur-[100px] opacity-20 pointer-events-none" 
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="aspect-square bg-pitch brutalist-border overflow-hidden">
+                  <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover grayscale opacity-80" alt="community" />
+                </div>
+                <div className="aspect-[3/4] bg-accent brutalist-border-blue flex items-center justify-center p-8">
+                  <Users className="w-20 h-20 text-white" />
+                </div>
+              </div>
+              <div className="space-y-4 pt-12">
+                <div className="aspect-[3/4] bg-accent-blue brutalist-border overflow-hidden">
+                   <div className="p-6 font-mono text-white text-xs">
+                    {`>> LOADING_COMMUNITY_DATA...`}
+                    <br />{`>> SUCCESS.`}
+                    <br /><br />{`LOCATION: KATHMANDU`}
+                    <br />{`STATUS: EVOLVING`}
+                    <br />{`DIVERSITY: 100%`}
+                    <br />{`VIBE: VIBRANT`}
+                   </div>
+                </div>
+                <div className="aspect-square bg-pitch brutalist-border-green overflow-hidden">
+                  <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover grayscale opacity-80" alt="community" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="group relative aspect-video overflow-hidden rounded-3xl bg-slate-200"
-          >
-            <img 
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" 
-              alt="Community" 
-              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent flex flex-col justify-end p-8">
-              <h4 className="text-2xl font-bold text-white mb-2 underline decoration-accent decoration-4 underline-offset-4">Community Led</h4>
-              <p className="text-white/70 max-w-md">Driven by volunteers and local practitioners who care about the future of tech in Nepal.</p>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="bg-accent rounded-3xl p-12 flex flex-col justify-between text-white"
-          >
-            <div>
-              <Users className="w-12 h-12 mb-8" />
-              <h4 className="text-4xl font-black tracking-tight mb-4">Bilingual & Inclusive</h4>
-              <p className="text-xl font-medium text-white/90 leading-relaxed">
-                Whether you prefer Nepali or English, WWKTM is your home. We bridge the language gap to ensure knowledge flows freely.
-              </p>
-            </div>
-            <a href="#" className="flex items-center gap-2 font-bold text-lg mt-8 group">
-              Learn more about our inclusivity
-              <ArrowUpRight className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
-            </a>
-          </motion.div>
         </div>
       </div>
     </section>
@@ -360,27 +434,42 @@ const Community = () => {
 
 const CTA = () => {
   return (
-    <section className="py-24 md:py-32 px-6">
-      <div className="max-w-7xl mx-auto rounded-[3rem] bg-slate-950 p-12 md:p-24 relative overflow-hidden text-center">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-accent/40 via-transparent to-transparent" />
-        </div>
-        
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter mb-8">
-            READY TO JOIN THE <span className="text-accent">MOVEMENT?</span>
-          </h2>
-          <p className="text-xl text-white/60 mb-12 font-medium">
-            Be part of the next un-conference. Connect with the best builders in Kathmandu and beyond.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <button className="w-full sm:w-auto px-10 py-5 bg-white text-slate-950 rounded-full font-bold text-xl hover:bg-accent hover:text-white transition-all shadow-2xl shadow-white/5">
-              Secure Your Spot
-            </button>
-            <button className="w-full sm:w-auto px-10 py-5 bg-white/5 text-white border border-white/10 rounded-full font-bold text-xl hover:bg-white/10 transition-all">
-              Become a Sponsor
-            </button>
-          </div>
+    <section className="py-32 px-6 bg-pitch overflow-hidden relative">
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent rounded-full blur-[150px] opacity-10 animate-pulse" />
+      </div>
+
+      <div className="max-w-[1200px] mx-auto relative z-10">
+        <div className="bg-pitch brutalist-border p-12 md:p-24 text-center relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent" />
+          <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent-blue to-transparent" />
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            className="mb-8"
+          >
+            <h2 className="text-5xl md:text-9xl font-black text-white leading-none tracking-tighter mb-8 uppercase italic">
+              ARE YOU <br /> <span className="text-accent glow-pink">CONNECTED?</span>
+            </h2>
+            <p className="text-xl md:text-3xl text-white/50 font-mono mb-12 uppercase tracking-widest">
+              [ WAITING_FOR_U_TO_JOIN_THE_ARRAY ]
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <motion.button 
+                whileHover={{ scale: 1.1, rotate: -2 }}
+                className="w-full sm:w-auto px-12 py-6 bg-accent text-white font-black text-2xl brutalist-border box-glow-pink uppercase"
+              >
+                STAKE_YOUR_CLAIM
+              </motion.button>
+              <motion.button 
+                whileHover={{ scale: 1.1, rotate: 2 }}
+                className="w-full sm:w-auto px-12 py-6 bg-accent-blue text-white font-black text-2xl brutalist-border-blue uppercase"
+              >
+                SPONSOR_NODE
+              </motion.button>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -389,25 +478,51 @@ const CTA = () => {
 
 const Footer = () => {
   return (
-    <footer className="py-12 px-6 border-t border-slate-100">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-accent rounded-sm flex items-center justify-center">
-            <span className="text-white font-bold text-xs">W</span>
+    <footer className="py-24 px-6 bg-pitch border-t-4 border-white overflow-hidden">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-24">
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-accent flex items-center justify-center brutalist-border">
+                <span className="text-white font-black text-2xl">W</span>
+              </div>
+              <span className="text-4xl font-black tracking-tighter text-white uppercase italic">
+                WWKTM
+              </span>
+            </div>
+            <p className="text-white/40 font-mono text-sm max-w-sm leading-relaxed">
+              KATHMANDU VALLEY / NEPAL / EARTH / SECTOR-ZZ9-PLURAL-Z-ALPHA / BUILT BY THE COMMUNITY FOR THE COMMUNITY.
+            </p>
           </div>
-          <span className="text-lg font-bold tracking-tight text-slate-900 uppercase">
-            WWKTM
-          </span>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-12">
+            <div>
+              <h5 className="font-mono text-accent-green font-bold text-xs mb-6 uppercase tracking-widest">{`// NAVIGATION`}</h5>
+              <div className="flex flex-col gap-4 font-black uppercase text-xl">
+                <a href="#" className="hover:text-accent transition-colors">MANIFESTO</a>
+                <a href="#" className="hover:text-accent transition-colors">HIKES</a>
+                <a href="#" className="hover:text-accent transition-colors">NODES</a>
+              </div>
+            </div>
+            <div>
+              <h5 className="font-mono text-accent-blue font-bold text-xs mb-6 uppercase tracking-widest">{`// CONNECT`}</h5>
+              <div className="flex flex-col gap-4 font-black uppercase text-xl">
+                <a href="#" className="hover:text-accent transition-colors">TWITTER</a>
+                <a href="#" className="hover:text-accent transition-colors">GITHUB</a>
+                <a href="#" className="hover:text-accent transition-colors">INSTAGRAM</a>
+              </div>
+            </div>
+          </div>
         </div>
         
-        <p className="text-slate-500 text-sm font-medium">
-          © {new Date().getFullYear()} Web Weekend Kathmandu. Community-run tech movement.
-        </p>
-        
-        <div className="flex gap-8 text-sm font-bold text-slate-900">
-          <a href="#" className="hover:text-accent transition-colors">Twitter</a>
-          <a href="#" className="hover:text-accent transition-colors">GitHub</a>
-          <a href="#" className="hover:text-accent transition-colors">Instagram</a>
+        <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-white/10 gap-6">
+          <div className="font-mono text-[10px] text-white/30 uppercase tracking-[0.3em]">
+            © {new Date().getFullYear()} WEB WEEKEND KATHMANDU / ALL_RIGHTS_RESERVED
+          </div>
+          <div className="flex items-center gap-4">
+             <div className="h-px w-24 bg-white/20" />
+             <div className="font-mono text-[10px] text-accent font-bold">SYSTEM_STABLE_100%</div>
+          </div>
         </div>
       </div>
     </footer>
@@ -416,11 +531,12 @@ const Footer = () => {
 
 const App = () => {
   return (
-    <div className="bg-white font-sans selection:bg-accent selection:text-white">
+    <div className="bg-pitch font-display selection:bg-accent selection:text-white">
+      <div className="noise-overlay" />
       <Navbar />
       <Hero />
-      <AppliedKnowledge />
-      <RadicalNetworking />
+      <Manifesto />
+      <Hikes />
       <Community />
       <CTA />
       <Footer />
