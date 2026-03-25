@@ -431,31 +431,39 @@ export class ConversationCoordinator {
     session.isProcessing = true;
     session.processingId = Date.now();
     const myProcessingId = session.processingId;
-    await sessionManager.saveSession(session.platform, message.from, session);
+    const platform = session.platform;
+    const from = message.from;
+    await sessionManager.saveSession(platform, from, session);
 
+    // Fire-and-forget: don't await, attach .catch() to prevent unhandled rejections
+    this.executeRevert(from, platform, myProcessingId, sitePath, targetVersion!, siteName, provider)
+      .catch((err) => console.error('[GenerationRunner] Unhandled error in background revert task:', err));
+  }
+
+  private async executeRevert(to: string, platform: string, myProcessingId: number, sitePath: string, targetVersion: string, siteName: string, provider: MessagingProvider): Promise<void> {
     try {
-      const { deployedUrl } = await this.generationRunner.revertAndDeploy(sitePath, targetVersion!, async (status) => {
-        const currentSession = await sessionManager.getSession(session.platform, message.from);
+      const { deployedUrl } = await this.generationRunner.revertAndDeploy(sitePath, targetVersion, async (status) => {
+        const currentSession = await sessionManager.getSession(platform, to);
         if (currentSession.isProcessing && currentSession.processingId === myProcessingId) {
-          await provider.sendMessage(message.from, `⏳ ${status}`).catch(() => {});
+          await provider.sendMessage(to, `⏳ ${status}`).catch(() => {});
         } else {
           throw new Error('BUILD_CANCELLED');
         }
       });
       
-      await provider.sendMessage(message.from, `✅ Successfully reverted ${siteName} to ${targetVersion}!\n\n🚀 Live URL: ${deployedUrl}`);
+      await provider.sendMessage(to, `✅ Successfully reverted ${siteName} to ${targetVersion}!\n\n🚀 Live URL: ${deployedUrl}`);
     } catch (e: any) {
       if (e.message === 'BUILD_CANCELLED') return;
       console.error('Revert failed:', e);
-      await provider.sendMessage(message.from, '❌ Revert failed. Please check the version or try again.').catch(() => {});
+      await provider.sendMessage(to, '❌ Revert failed. Please check the version or try again.').catch(() => {});
     } finally {
-      const finalSession = await sessionManager.getSession(session.platform, message.from);
+      const finalSession = await sessionManager.getSession(platform, to);
       if (finalSession.processingId === myProcessingId) {
         finalSession.isProcessing = false;
         finalSession.processingId = undefined;
         finalSession.currentScene = 'IDLE';
         finalSession.sceneStep = 0;
-        await sessionManager.saveSession(session.platform, message.from, finalSession);
+        await sessionManager.saveSession(platform, to, finalSession);
       }
     }
   }
@@ -482,7 +490,8 @@ export class ConversationCoordinator {
     session.isProcessing = true;
     session.processingId = Date.now();
     const myProcessingId = session.processingId;
-    await sessionManager.saveSession(session.platform, to, session);
+    const platform = session.platform;
+    await sessionManager.saveSession(platform, to, session);
 
     const spec = session.spec as SiteSpec;
     spec.name = spec.name || ''; 
@@ -490,9 +499,15 @@ export class ConversationCoordinator {
     
     await provider.sendMessage(to, '🚀 Starting generation... This will take a minute.');
     
+    // Fire-and-forget: don't await, attach .catch() to prevent unhandled rejections
+    this.executeGeneration(to, platform, myProcessingId, spec, provider)
+      .catch((err) => console.error('[GenerationRunner] Unhandled error in background generation task:', err));
+  }
+
+  private async executeGeneration(to: string, platform: string, myProcessingId: number, spec: SiteSpec, provider: MessagingProvider): Promise<void> {
     try {
       const { url, deployedUrl, expandedSpec, version } = await this.generationRunner.run(spec, async (status) => {
-        const currentSession = await sessionManager.getSession(session.platform, to);
+        const currentSession = await sessionManager.getSession(platform, to);
         if (currentSession.isProcessing && currentSession.processingId === myProcessingId) {
           await provider.sendMessage(to, `⏳ ${status}`).catch(() => {});
         } else {
@@ -510,13 +525,13 @@ export class ConversationCoordinator {
       console.error('Generation failed:', error);
       await provider.sendMessage(to, '❌ Something went wrong during generation. Please try again soon.').catch(() => {});
     } finally {
-      const finalSession = await sessionManager.getSession(session.platform, to);
+      const finalSession = await sessionManager.getSession(platform, to);
       if (finalSession.processingId === myProcessingId) {
         finalSession.isProcessing = false;
         finalSession.processingId = undefined;
         finalSession.currentScene = 'IDLE';
         finalSession.sceneStep = 0;
-        await sessionManager.saveSession(session.platform, to, finalSession);
+        await sessionManager.saveSession(platform, to, finalSession);
       }
     }
   }
@@ -533,19 +548,26 @@ export class ConversationCoordinator {
     session.isProcessing = true;
     session.processingId = Date.now();
     const myProcessingId = session.processingId;
-    await sessionManager.saveSession(session.platform, to, session);
+    const platform = session.platform;
+    await sessionManager.saveSession(platform, to, session);
 
     await provider.sendMessage(to, `🔄 Updating your site...`);
 
+    // Fire-and-forget: don't await, attach .catch() to prevent unhandled rejections
+    this.executeUpdate(to, platform, myProcessingId, sitePath, instruction!, spec.assets as Asset[], provider)
+      .catch((err) => console.error('[GenerationRunner] Unhandled error in background update task:', err));
+  }
+
+  private async executeUpdate(to: string, platform: string, myProcessingId: number, sitePath: string, instruction: string, assets: Asset[], provider: MessagingProvider): Promise<void> {
     try {
-      const { deployedUrl, version } = await this.generationRunner.iterate(sitePath, instruction!, async (status) => {
-        const currentSession = await sessionManager.getSession(session.platform, to);
+      const { deployedUrl, version } = await this.generationRunner.iterate(sitePath, instruction, async (status) => {
+        const currentSession = await sessionManager.getSession(platform, to);
         if (currentSession.isProcessing && currentSession.processingId === myProcessingId) {
           await provider.sendMessage(to, `⏳ ${status}`).catch(() => {});
         } else {
           throw new Error('BUILD_CANCELLED');
         }
-      }, spec.assets as Asset[]);
+      }, assets);
       let msg = `✅ Updated!`;
       if (version) msg += ` 📦 Version: ${version}`;
       msg += ` 🚀 ${deployedUrl}`;
@@ -555,14 +577,14 @@ export class ConversationCoordinator {
       console.error('Update failed:', error);
       await provider.sendMessage(to, '❌ Update failed.').catch(() => {});
     } finally {
-      const finalSession = await sessionManager.getSession(session.platform, to);
+      const finalSession = await sessionManager.getSession(platform, to);
       if (finalSession.processingId === myProcessingId) {
         finalSession.isProcessing = false;
         finalSession.processingId = undefined;
         finalSession.currentScene = 'IDLE';
         finalSession.sceneStep = 0;
-        finalSession.instruction = undefined; // Clear the instruction after successful/failed update
-        await sessionManager.saveSession(session.platform, to, finalSession);
+        finalSession.instruction = undefined;
+        await sessionManager.saveSession(platform, to, finalSession);
       }
     }
   }

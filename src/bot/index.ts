@@ -50,11 +50,13 @@ bot.launch().then(() => console.log('Telegram bot is running...'));
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
-// Global error handlers to prevent process exit on background failures
+// Global error handlers to prevent process exit on background failures.
+// These are the last line of defense — errors should be caught closer to the source.
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  console.error(`[${new Date().toISOString()}] [WARN] Unhandled Rejection — server staying alive.`, reason);
 });
 
 process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
+  console.error(`[${new Date().toISOString()}] [ERROR] Uncaught Exception — server staying alive.`, error);
+  // Intentionally NOT calling process.exit() — the bot must stay alive.
 });

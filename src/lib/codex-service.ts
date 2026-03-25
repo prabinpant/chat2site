@@ -52,11 +52,14 @@ export class CodexService implements AIService {
   }
 
   async executeAutonomousBuild(prompt: string, sitePath: string): Promise<string> {
+    const BUILD_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+
     try {
       console.log(`[AutonomousCodex] Handing over keys to AI in ${sitePath}...`);
       
       return new Promise((resolve, reject) => {
         let output = '';
+        let settled = false;
         const args = ['exec', '--dangerously-bypass-approvals-and-sandbox', '--skip-git-repo-check'];
         if (config.codexModel) {
           args.push('--model', config.codexModel);
@@ -70,6 +73,19 @@ export class CodexService implements AIService {
             NETLIFY_AUTH_TOKEN: config.netlifyAuthToken 
           }
         });
+
+        // Safeguard timeout: kill the process if it hangs too long
+        const timeout = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            console.error(`[AutonomousCodex] Build timed out after ${BUILD_TIMEOUT_MS / 1000}s. Killing process.`);
+            cp.kill('SIGTERM');
+            setTimeout(() => { if (!cp.killed) cp.kill('SIGKILL'); }, 5000);
+            const error = new Error(`Codex Build timed out after ${BUILD_TIMEOUT_MS / 1000} seconds`);
+            (error as any).output = output;
+            reject(error);
+          }
+        }, BUILD_TIMEOUT_MS);
 
         // Feed prompt directly via stdin
         if (cp.stdin) {
@@ -90,6 +106,9 @@ export class CodexService implements AIService {
         });
 
         cp.on('close', (code: number) => {
+          clearTimeout(timeout);
+          if (settled) return;
+          settled = true;
           if (code === 0) {
             resolve(output);
           } else {
@@ -101,6 +120,9 @@ export class CodexService implements AIService {
         });
 
         cp.on('error', (err: Error) => {
+          clearTimeout(timeout);
+          if (settled) return;
+          settled = true;
           console.error('[AutonomousCodex] Spawn error:', err);
           reject(err);
         });

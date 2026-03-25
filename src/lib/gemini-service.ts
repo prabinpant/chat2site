@@ -18,17 +18,15 @@ export class GeminiService implements AIService {
   }
 
   async executeAutonomousBuild(prompt: string, sitePath: string): Promise<string> {
+    const BUILD_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+
     try {
       console.log(`[GeminiEngine] Starting autonomous build in ${sitePath}...`);
       
       return new Promise((resolve, reject) => {
         let output = '';
+        let settled = false;
         
-        // Use gemini CLI with --prompt (non-interactive) and --yolo (auto-approve)
-        // We also disable sandbox if it matches codex's behavior or keep it if safer.
-        // User requested "gemini like codex", so we'll go with yolo and non-interactive.
-        // We use --yolo for auto-approval and --sandbox false for workspace access.
-        // We avoid passing the prompt as a CLI argument to prevent shell escaping issues.
         const args = ['--yolo', '--sandbox', 'false', '--prompt', '""'];
         
         if (config.geminiModel) {
@@ -43,6 +41,19 @@ export class GeminiService implements AIService {
             NETLIFY_AUTH_TOKEN: config.netlifyAuthToken
           }
         });
+
+        // Safeguard timeout: kill the process if it hangs too long
+        const timeout = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            console.error(`[GeminiEngine] Build timed out after ${BUILD_TIMEOUT_MS / 1000}s. Killing process.`);
+            cp.kill('SIGTERM');
+            setTimeout(() => { if (!cp.killed) cp.kill('SIGKILL'); }, 5000);
+            const error = new Error(`Gemini Build timed out after ${BUILD_TIMEOUT_MS / 1000} seconds`);
+            (error as any).output = output;
+            reject(error);
+          }
+        }, BUILD_TIMEOUT_MS);
 
         // Feed prompt directly via stdin
         if (cp.stdin) {
@@ -63,6 +74,9 @@ export class GeminiService implements AIService {
         });
 
         cp.on('close', (code: number) => {
+          clearTimeout(timeout);
+          if (settled) return;
+          settled = true;
           if (code === 0) {
             resolve(output);
           } else {
@@ -74,6 +88,9 @@ export class GeminiService implements AIService {
         });
 
         cp.on('error', (err: Error) => {
+          clearTimeout(timeout);
+          if (settled) return;
+          settled = true;
           console.error('[GeminiEngine] Spawn error:', err);
           reject(err);
         });
