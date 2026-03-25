@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -19,8 +19,9 @@ html {
 body {
   @apply m-0 bg-background font-body text-text;
   background-image:
-    radial-gradient(circle at top left, rgba(45, 164, 78, 0.08), transparent 30%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+    radial-gradient(circle at top left, rgba(255, 77, 109, 0.16), transparent 24%),
+    radial-gradient(circle at top right, rgba(0, 245, 212, 0.16), transparent 26%),
+    linear-gradient(180deg, rgba(7, 11, 20, 0.96), rgba(7, 11, 20, 1));
 }
 
 #root {
@@ -28,12 +29,21 @@ body {
 }
 
 ::selection {
-  background: rgba(45, 164, 78, 0.28);
+  background: rgba(0, 245, 212, 0.3);
+  color: #070b14;
 }
 
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+
   a {
     @apply text-inherit no-underline;
+  }
+
+  img {
+    display: block;
   }
 }
 
@@ -42,11 +52,33 @@ body {
     @apply mx-auto w-full max-w-7xl px-6 md:px-10;
   }
 
-  .micro-label {
-    @apply font-mono text-[0.72rem] uppercase tracking-[0.32em] text-muted;
+  .eyebrow {
+    @apply font-heading text-[0.72rem] uppercase tracking-[0.34em] text-accent;
   }
 
-  .divider-line {
-    @apply h-px w-full bg-line;
+  .action-button {
+    @apply inline-flex items-center gap-2 border border-line bg-panel px-5 py-3 font-heading text-sm uppercase tracking-[0.2em] text-text transition-all duration-300 hover:-translate-y-0.5 hover:border-accent;
+  }
+
+  .action-button--primary {
+    @apply border-accent bg-accent text-background;
+  }
+
+  .action-link {
+    @apply items-center gap-2 font-heading text-sm uppercase tracking-[0.2em] text-accent transition-transform duration-300 hover:-translate-y-0.5;
+  }
+
+  .progress-bar {
+    @apply fixed left-0 right-0 top-0 z-[60] h-1 origin-left bg-accent;
+  }
+}
+
+@layer utilities {
+  .bg-circuit-grid {
+    background-size: 64px 64px;
+  }
+
+  .bg-scanlines {
+    background-size: 100% 6px;
   }
 }

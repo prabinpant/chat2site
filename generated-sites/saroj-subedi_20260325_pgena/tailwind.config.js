@@ -4,24 +4,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0D1117',
-        surface: '#161B22',
-        accent: '#2DA44E',
-        text: '#E6EDF3',
-        muted: '#8B949E',
-        line: 'rgba(230, 237, 243, 0.12)',
+        background: '#070B14',
+        panel: '#0F1729',
+        accent: '#00F5D4',
+        highlight: '#FF4D6D',
+        text: '#F4F7FB',
+        soft: '#B7C2D7',
+        muted: '#7D8AA5',
+        line: 'rgba(183, 194, 215, 0.18)',
       },
       fontFamily: {
-        heading: ['"Space Grotesk"', 'sans-serif'],
+        heading: ['"Chakra Petch"', 'sans-serif'],
         body: ['"IBM Plex Sans"', 'sans-serif'],
-        mono: ['"IBM Plex Mono"', 'monospace'],
+        mono: ['"IBM Plex Sans"', 'sans-serif'],
       },
       boxShadow: {
-        lift: '0 18px 40px rgba(0, 0, 0, 0.18)',
+        lift: '0 30px 80px rgba(0, 0, 0, 0.35)',
       },
       backgroundImage: {
-        grain:
-          'radial-gradient(circle at top, rgba(45, 164, 78, 0.18), transparent 30%), linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0))',
+        'circuit-grid':
+          'linear-gradient(rgba(0,245,212,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,212,0.12) 1px, transparent 1px)',
+        scanlines:
+          'linear-gradient(180deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 6px)',
       },
     },
   },
