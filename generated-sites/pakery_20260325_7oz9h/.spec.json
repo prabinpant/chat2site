@@ -1,0 +1,14 @@
+{
+  "name": "pakery",
+  "description": "a bakery landing page with a menu and contact form",
+  "features": [
+    "Modern UI",
+    "Responsive Design"
+  ],
+  "theme": {
+    "primaryColor": "3b82f6",
+    "darkMode": false
+  },
+  "preferredSubdomain": "lakery-pakery",
+  "assets": []
+}
