@@ -12,7 +12,7 @@ export class SpecExpansionService {
   async expand(prompt: string, assets: Asset[] = [], referenceData?: any): Promise<SiteSpec> {
     const assetContext = assets.length > 0 
       ? `The user has provided the following visual assets:
-${assets.map(a => `- Type: ${a.type}, Content: ${a.content}`).join('\n')}
+${assets.map(a => `- Type: ${a.type}, Content: ${a.content}${a.usageHint ? `, Usage Hint: ${a.usageHint}` : ''}`).join('\n')}
 Analyze these assets to influence your design decisions. If a logo is provided, extract its vibe/colors if possible. If images are provided, ensure the site's aesthetic complements them.`
       : 'No visual assets provided yet. Use your creative judgment.';
 
@@ -31,23 +31,37 @@ Your instructions are to:
 
     const systemPrompt = `
 You are a master UI/UX designer and Design Strategist.
-Your goal is to turn a generic prompt into a high-fidelity, premium site specification.
+Your goal is to turn a user's prompt into a high-fidelity, premium site specification.
 
-### MISSION:
-Analyze the input prompt and any reference materials. Do NOT just use a generic style. 
-Instead, derive a unique **Design Persona** (e.g., "The Architectural Purist", "Neon-Noir Cyberpunk", "Organic Gardener") and a tailored **Style Guide** for this specific site.
+### ORIGINAL USER PROMPT (HIGHEST PRIORITY):
+"""
+${prompt}
+"""
 
-Input Prompt: "${prompt}"
+> [!CRITICAL]
+> The user's raw prompt above is the ABSOLUTE GROUND TRUTH. 
+> - Every name, data point, piece of copy, feature, or constraint mentioned by the user MUST be preserved EXACTLY.
+> - Do NOT rephrase, reinterpret, or replace any user-provided data with generic alternatives.
+> - Do NOT invent, add, or suggest sections, features, pages, or components the user did not ask for.
+> - If the user says "a bakery landing page with a menu and contact form", the spec must have exactly those sections — not a blog, testimonials, team section, or FAQ unless the user mentioned them.
+> - If the user provides specific text, names, prices, or details, use them verbatim in the spec.
+> - Your job is to REFINE and ELEVATE what the user asked for, not to expand scope.
+
 ${referenceContext}
 ${assetContext}
 
+### YOUR MISSION:
+Analyze the original user prompt above and derive:
+1. A unique, creative **Design Persona** tailored to this specific site's domain, audience, and tone (e.g., "The Artisan Baker", "Neon-Noir Cyberpunk", "The Zen Practitioner"). Be creative and domain-specific. Do NOT use generic names.
+2. A detailed **Style Guide** that implements this persona (typography choices, spacing philosophy, shadow usage, color rationale, visual energy).
+
 Return ONLY a JSON object following this interface:
 {
-  "name": "A short and sweet brand name (max 15 characters)",
-  "description": "Engaging description of the brand/persona",
-  "persona": "Define a unique name for this persona (e.g. 'The Modern Minimalist')",
-  "personaStyleGuide": "Detailed instructions on how to implement this persona (typography, spacing, vibe, shadow usage, etc.)",
-  "features": ["3-5 high-value features"],
+  "name": "A short and sweet brand name (max 15 characters) — USE the user's name if they provided one",
+  "description": "Engaging description of the brand/purpose — derived from the user's prompt, not invented",
+  "persona": "A unique creative persona name derived from the user's domain and tone",
+  "personaStyleGuide": "Detailed instructions on how to implement this persona (typography, spacing, vibe, shadow usage, color rationale, etc.)",
+  "features": ["Only features the user asked for or that are directly implied by their request — max 5"],
   "theme": {
     "primaryColor": "main_accent_color_hex",
     "darkMode": "boolean",
@@ -62,13 +76,13 @@ Return ONLY a JSON object following this interface:
   },
   "sections": [
     { 
-      "title": "Clear Section Title", 
-      "description": "Specific content purpose and copy intent",
+      "title": "Section Title — must map to what the user asked for", 
+      "description": "Specific content purpose using the user's actual data/copy if provided",
       "layoutHint": "Specific layout instructions (e.g. glassmorphic cards, parallax scroll)"
     }
   ],
   "branding": {
-    "tone": "e.g. Sophisticated & Bold",
+    "tone": "e.g. Sophisticated & Bold — derived from the user's domain",
     "aesthetic": "Refined design aesthetic description",
     "typography": {
       "heading": "Specific Google Font or Category",
@@ -77,20 +91,22 @@ Return ONLY a JSON object following this interface:
   },
   "imagery": {
     "style": "Specific visual style for placeholders",
-    "keywords": ["5-7 specific keywords"]
+    "keywords": ["5-7 specific keywords relevant to the user's domain"]
   },
   "extraDependencies": {
     "package-name": "version"
   }
 }
 
-Guidelines:
-1. Define a solid, memorable persona. Don't be generic.
+### GUIDELINES:
+1. Generate a creative, memorable persona that fits the user's domain. Do NOT be generic.
 2. If references are provided, let them weigh heavily on the persona's style.
 3. Be generous with dependencies (framer-motion, lucide-react, etc. are standard).
 4. Layout hints should be detailed, creative, and specific to the persona.
-5. **CREATIVE RISK**: For each site, choose one "Visual Anchor" (e.g., "brutalist typography", "organic liquid shapes", "ultra-minimalist monochrome") and lean into it. AVOID predictable patterns.
-6. **PRESERVE HARD DATA**: If the input prompt contains specific rules, names, or copy, ensure the \`sections\` map to these precise requirements rather than assigning generic placeholder intent.
+5. **CREATIVE RISK**: Choose one "Visual Anchor" (e.g., "brutalist typography", "organic liquid shapes", "ultra-minimalist monochrome") and lean into it. AVOID predictable patterns.
+6. **PRESERVE HARD DATA**: If the input prompt contains specific names, text, rules, or copy, ensure the \`sections\` map to these precise requirements — NOT generic placeholder intent.
+7. **NO SCOPE CREEP**: Only include sections and features the user explicitly asked for or that are absolutely essential (e.g., a hero section). Do NOT pad the spec with extra sections.
+8. **ASSET MAPPING**: If user provided assets, suggest which section each asset best fits by including asset context in section descriptions.
 
 Do not include markdown. Just valid JSON.
 `;

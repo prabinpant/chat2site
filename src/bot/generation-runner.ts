@@ -84,8 +84,16 @@ export class GenerationRunner {
         for (let i = 0; i < spec.assets.length; i++) {
           const asset = spec.assets[i];
           if (asset.source === 'file') {
-            const extension = asset.type === 'logo' ? 'png' : 'jpg'; 
-            const fileName = asset.type === 'logo' ? `logo.${extension}` : `asset_${i}.${extension}`;
+            const extension = asset.type === 'logo' ? 'png' : 'jpg';
+            let fileName: string;
+            if (asset.type === 'logo') {
+              fileName = `logo.${extension}`;
+            } else if (asset.usageHint) {
+              const safeHint = asset.usageHint.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
+              fileName = `image_${safeHint}.${extension}`;
+            } else {
+              fileName = `image_section_${i}.${extension}`;
+            }
             const filePath = path.join(publicPath, fileName);
             
             try {

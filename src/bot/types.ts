@@ -4,6 +4,7 @@ export interface Asset {
   content: string; // File path if source is file, description if source is text
   originalName?: string;
   mimeType?: string;
+  usageHint?: string; // Hint for where this asset should be used (e.g., 'hero', 'about', 'gallery')
 }
 
 export interface SiteSpec {
