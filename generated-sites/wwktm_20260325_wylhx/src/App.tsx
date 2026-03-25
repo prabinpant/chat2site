@@ -20,6 +20,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: '// Manifesto', href: '#manifesto' },
+    { name: '// Events', href: '#events' },
     { name: '// Hikes', href: '#hikes' },
     { name: '// Community', href: '#community' },
   ];
@@ -176,9 +177,6 @@ const Hero = () => {
           </h1>
 
           <div className="relative w-full max-w-4xl">
-            <div className="absolute -left-12 top-0 text-accent-blue font-mono text-xs hidden md:block vertical-rl">
-              CORE_SYSTEM_ACTIVE // 27.7172° N, 85.3240° E
-            </div>
             <p className="text-xl md:text-3xl text-white/60 font-medium leading-tight max-w-3xl mx-auto mb-12">
               The <span className="text-white italic">Un-conference</span> for those who craft with code, design with intent, and build with <span className="text-accent-blue font-mono font-bold">Generative Intelligence.</span>
             </p>
@@ -298,6 +296,94 @@ const Manifesto = () => {
           </span>
         ))}
       </motion.div>
+    </section>
+  );
+};
+
+const Events = () => {
+  const events = [
+    {
+      name: "Web Weekend Kathmandu",
+      shortName: "WWKTM",
+      description: "A biennial conference on web tech and UI/UX. It brings together local and international builders to share knowledge and craft.",
+      link: "https://wwktm.com/",
+      logo: "https://raw.githubusercontent.com/wwktm/brand-assets/master/logo/logo.png",
+      color: "accent"
+    },
+    {
+      name: "AI Conf (AI in Action)",
+      shortName: "AI_CONF",
+      description: "Focusing on practical AI deployment and governance. Exploring how generative intelligence is reshaping our workflows.",
+      link: "https://ai.wwktm.com/",
+      logo: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2070&auto=format&fit=crop",
+      color: "accent-blue"
+    },
+    {
+      name: "BarCamp Kathmandu",
+      shortName: "BARCAMP",
+      description: "An attendee-led unconference where everyone is a speaker. Radical openness and spontaneous knowledge sharing.",
+      link: "https://barcamp.wwktm.com/",
+      logo: "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=2070&auto=format&fit=crop",
+      color: "accent-green"
+    },
+    {
+      name: "Tech Kura Kani",
+      shortName: "TKK",
+      description: "A monthly tech meetup series for casual conversations and networking within the local ecosystem.",
+      link: "https://lu.ma/wwktm",
+      logo: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=2070&auto=format&fit=crop",
+      color: "white"
+    }
+  ];
+
+  return (
+    <section id="events" className="py-32 bg-pitch relative overflow-hidden">
+      <div className="max-w-[1400px] mx-auto px-6">
+        <h2 className="text-6xl md:text-9xl font-black text-white leading-[0.8] tracking-tighter uppercase mb-24">
+          THINGS <br /> WE <br /> <span className="text-accent-blue">DO</span>
+        </h2>
+        
+        <div className="grid md:grid-cols-2 gap-12">
+          {events.map((event, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className={cn(
+                "group p-8 brutalist-border relative overflow-hidden flex flex-col justify-between min-h-[400px]",
+                event.color === 'accent' ? 'brutalist-border' : 
+                event.color === 'accent-blue' ? 'brutalist-border-blue' : 
+                event.color === 'accent-green' ? 'brutalist-border-green' : 'border-white'
+              )}
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                 <span className="text-8xl font-black text-white">{event.shortName}</span>
+              </div>
+
+              <div className="relative z-10">
+                <div className="w-20 h-20 mb-8 bg-white p-2 brutalist-border overflow-hidden">
+                  <img src={event.logo} alt={event.name} className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all" />
+                </div>
+                <h3 className="text-4xl font-black text-white mb-4 uppercase leading-none">{event.name}</h3>
+                <p className="text-white/60 text-lg mb-8 max-w-md leading-relaxed">
+                  {event.description}
+                </p>
+              </div>
+
+              <a 
+                href={event.link} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-white font-mono font-bold hover:text-accent transition-colors mt-auto"
+              >
+                {`>> VIEW_SITE`} <ArrowUpRight className="w-5 h-5" />
+              </a>
+            </motion.div>
+          ))}
+        </div>
+      </div>
     </section>
   );
 };
@@ -499,9 +585,10 @@ const Footer = () => {
             <div>
               <h5 className="font-mono text-accent-green font-bold text-xs mb-6 uppercase tracking-widest">{`// NAVIGATION`}</h5>
               <div className="flex flex-col gap-4 font-black uppercase text-xl">
-                <a href="#" className="hover:text-accent transition-colors">MANIFESTO</a>
-                <a href="#" className="hover:text-accent transition-colors">HIKES</a>
-                <a href="#" className="hover:text-accent transition-colors">NODES</a>
+                <a href="#manifesto" className="hover:text-accent transition-colors">MANIFESTO</a>
+                <a href="#events" className="hover:text-accent transition-colors">EVENTS</a>
+                <a href="#hikes" className="hover:text-accent transition-colors">HIKES</a>
+                <a href="#community" className="hover:text-accent transition-colors">COMMUNITY</a>
               </div>
             </div>
             <div>
@@ -536,6 +623,7 @@ const App = () => {
       <Navbar />
       <Hero />
       <Manifesto />
+      <Events />
       <Hikes />
       <Community />
       <CTA />
