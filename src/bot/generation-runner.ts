@@ -28,7 +28,7 @@ export class GenerationRunner {
   }
 
   async run(initialSpec: SiteSpec, onProgress: (status: string) => Promise<void> | void): Promise<{ sitePath: string; url?: string; deployedUrl?: string; expandedSpec: SiteSpec; version?: string }> {
-    this.workspaceManager.cleanupOldSites(5); // Keep only last 5 sites to save disk space
+    // this.workspaceManager.cleanupOldSites(5); // Keep only last 5 sites to save disk space
     
     // Check for Reference URLs in the description
     const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -134,8 +134,8 @@ export class GenerationRunner {
       return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec, version: 'v1' };
     } catch (error) {
        // Cleanup failed generation attempt to avoid cluttering disk with broken sites
-       console.error(`[GenerationRunner] Cleaning up failed site directory: ${sitePath}`);
-       this.workspaceManager.deleteSiteDirectory(sitePath);
+       // console.error(`[GenerationRunner] Cleaning up failed site directory: ${sitePath}`);
+       // this.workspaceManager.deleteSiteDirectory(sitePath);
        throw error;
     }
   }

@@ -17,33 +17,14 @@ export class WorkspaceManager {
   }
 
   cleanupOldSites(keepCount: number = 5) {
-    try {
-      if (!fs.existsSync(this.baseDir)) return;
-      const projects = fs.readdirSync(this.baseDir)
-        .map(name => ({
-          name,
-          path: path.join(this.baseDir, name),
-          time: fs.statSync(path.join(this.baseDir, name)).mtime.getTime()
-        }))
-        .filter(p => fs.lstatSync(p.path).isDirectory())
-        .sort((a, b) => b.time - a.time);
-
-      if (projects.length > keepCount) {
-        const toDelete = projects.slice(keepCount);
-        console.log(`🧹 Cleaning up ${toDelete.length} old projects...`);
-        for (const p of toDelete) {
-          fs.rmSync(p.path, { recursive: true, force: true });
-        }
-      }
-    } catch (e) {
-      console.error('Failed to cleanup old sites:', e);
-    }
+    // Deletion disabled as per user request
+    console.log(`🧹 Site cleanup is currently disabled.`);
   }
 
   prepareSiteDirectory(siteName: string, isUpdate: boolean = false): string {
     const sitePath = path.join(this.baseDir, siteName);
     if (!isUpdate && fs.existsSync(sitePath)) {
-      fs.rmSync(sitePath, { recursive: true, force: true });
+      // fs.rmSync(sitePath, { recursive: true, force: true });
     }
     if (!fs.existsSync(sitePath)) {
       fs.mkdirSync(sitePath, { recursive: true });
@@ -115,8 +96,7 @@ export class WorkspaceManager {
   }
 
   deleteSiteDirectory(sitePath: string) {
-    if (fs.existsSync(sitePath)) {
-      fs.rmSync(sitePath, { recursive: true, force: true });
-    }
+    // Deletion disabled as per user request
+    console.log(`⚠️ Prevented deletion of: ${sitePath}`);
   }
 }
