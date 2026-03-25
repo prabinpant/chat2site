@@ -39,6 +39,8 @@ const metrics = [
   { value: '40+', label: 'projects shipped', detail: 'delivery across Nepal, Australia, and Germany' },
 ]
 
+const signalBadges = ['Currently online', 'Munich, Germany', 'Shopify systems', 'Native macOS utilities']
+
 const capabilities = [
   {
     title: 'Shopify systems',
@@ -181,7 +183,7 @@ function App() {
         <nav className="mx-auto flex max-w-7xl items-center justify-between border border-line bg-background/82 px-4 py-3 backdrop-blur-md md:px-5">
           <div>
             <p className="font-heading text-lg uppercase tracking-[0.2em] text-text">Saroj Subedi</p>
-            <p className="text-[0.68rem] uppercase tracking-[0.28em] text-muted">retro systems dossier</p>
+            <p className="text-[0.68rem] uppercase tracking-[0.28em] text-muted">personal homepage 2.0</p>
           </div>
           <div className="hidden items-center gap-6 md:flex">
             {navItems.map((item) => (
@@ -209,16 +211,18 @@ function App() {
               transition={{ duration: 0.7, ease: 'easeOut' }}
               className="max-w-4xl"
             >
-              <p className="eyebrow">Visual thesis / retro cyborg control deck</p>
+              <p className="eyebrow">Old internet signal / new web polish</p>
               <h1 className="mt-5 max-w-5xl font-heading text-[3.3rem] uppercase leading-[0.84] tracking-[0.04em] text-text sm:text-[4.8rem] lg:text-[7rem]">
                 Saroj
                 <br />
-                builds
+                ships
                 <br />
-                growth systems.
+                modern systems
+                <br />
+                with old-web energy.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-soft md:text-2xl">
-                Technical architect and product engineer focused on Shopify scale, resilient integrations, and native macOS side projects.
+                Technical architect and product engineer focused on Shopify scale, resilient integrations, and native macOS side projects with a homepage that reads like a rebooted internet artifact.
               </p>
               <p className="mt-6 max-w-2xl text-base leading-7 text-muted md:text-lg">
                 Based on his official profile and public work, Saroj Subedi combines commerce engineering, performance tuning, and practical product thinking with a steady interest in utility-driven software.
@@ -234,6 +238,21 @@ function App() {
                 </a>
               </div>
 
+              <div className="mt-8 flex flex-wrap gap-3">
+                {signalBadges.map((badge, index) => (
+                  <motion.span
+                    key={badge}
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, delay: 0.2 + index * 0.06, ease: 'easeOut' }}
+                    className="inline-flex items-center gap-2 border border-line bg-background/60 px-3 py-2 font-heading text-[0.65rem] uppercase tracking-[0.24em] text-soft backdrop-blur-sm"
+                  >
+                    <span className="h-2 w-2 bg-accent" />
+                    {badge}
+                  </motion.span>
+                ))}
+              </div>
+
               <div className="mt-14 grid gap-3 md:grid-cols-3">
                 {metrics.map((metric, index) => (
                   <motion.div
@@ -241,8 +260,16 @@ function App() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.55, delay: 0.12 + index * 0.08, ease: 'easeOut' }}
-                    className="border border-line bg-panel px-4 py-5"
+                    className="retro-panel px-4 py-5"
                   >
+                    <div className="mb-5 flex items-center justify-between border-b border-line pb-3">
+                      <div className="flex gap-2">
+                        <span className="h-2.5 w-2.5 rounded-full bg-highlight" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-accent" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-soft/60" />
+                      </div>
+                      <span className="font-heading text-[0.62rem] uppercase tracking-[0.28em] text-muted">status panel</span>
+                    </div>
                     <p className="font-heading text-4xl uppercase tracking-[0.08em] text-accent">{metric.value}</p>
                     <p className="mt-2 text-sm uppercase tracking-[0.22em] text-text">{metric.label}</p>
                     <p className="mt-2 text-sm leading-6 text-muted">{metric.detail}</p>
@@ -253,6 +280,14 @@ function App() {
           </div>
 
           <motion.div style={{ scale: heroScale, y: heroY }} className="relative overflow-hidden border-l border-line">
+            <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-line bg-background/75 px-4 py-3 font-heading text-[0.62rem] uppercase tracking-[0.28em] text-soft backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-highlight" />
+                <span className="h-2.5 w-2.5 rounded-full bg-accent" />
+                <span className="h-2.5 w-2.5 rounded-full bg-soft/60" />
+              </div>
+              <span>ersaroj.com.np / profile feed</span>
+            </div>
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,77,109,0.16),transparent_38%),linear-gradient(135deg,rgba(0,245,212,0.18),transparent_58%),linear-gradient(180deg,rgba(7,11,20,0.1),rgba(7,11,20,0.9))]" />
             <img
               src={portraitUrl}
@@ -263,7 +298,7 @@ function App() {
             <div className="absolute left-0 top-0 h-28 w-28 bg-accent" />
             <div className="absolute bottom-0 right-0 h-32 w-32 bg-highlight" />
             <div className="absolute bottom-8 left-8 max-w-sm border border-line bg-background/78 p-5 backdrop-blur-sm">
-              <p className="eyebrow">Primary focus</p>
+              <p className="eyebrow">Now browsing</p>
               <p className="mt-3 text-lg leading-7 text-text">
                 Shopify apps, ERP integrations, checkout systems, and performance engineering for fast-moving commerce teams.
               </p>
@@ -272,12 +307,33 @@ function App() {
         </div>
       </section>
 
+      <section className="border-y border-line bg-panel/70 py-4">
+        <div className="marquee-track">
+          <div className="marquee-content font-heading text-xs uppercase tracking-[0.32em] text-soft">
+            <span>portfolio reboot</span>
+            <span>shopify architecture</span>
+            <span>native macOS tools</span>
+            <span>performance tuning</span>
+            <span>munich / kathmandu / sydney</span>
+            <span>personal homepage energy</span>
+          </div>
+          <div aria-hidden="true" className="marquee-content font-heading text-xs uppercase tracking-[0.32em] text-soft">
+            <span>portfolio reboot</span>
+            <span>shopify architecture</span>
+            <span>native macOS tools</span>
+            <span>performance tuning</span>
+            <span>munich / kathmandu / sydney</span>
+            <span>personal homepage energy</span>
+          </div>
+        </div>
+      </section>
+
       <section id="profile" className="section-shell py-24 md:py-32">
         <div className="grid gap-14 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-start">
           <SectionLead
             kicker="Profile"
-            title="One engineer. Two lanes. Client scale and personal utilities."
-            body="The public record shows a developer comfortable with high-traffic commerce systems by day and focused, human-scale side projects by habit. That mix defines the site’s direction."
+            title="One engineer. Two lanes. Commerce scale and personal utilities."
+            body="The public record shows a developer comfortable with high-traffic commerce systems by day and focused, human-scale side projects by habit. This version frames that mix like an upgraded personal site instead of a corporate portfolio shell."
           />
 
           <motion.div
@@ -286,8 +342,12 @@ function App() {
             viewport={{ once: true, amount: 0.3 }}
             variants={fadeUp}
             transition={{ duration: 0.65, ease: 'easeOut' }}
-            className="border border-line bg-panel p-6"
+            className="retro-panel p-6"
           >
+            <div className="mb-5 flex items-center justify-between border-b border-line pb-3">
+              <p className="font-heading text-[0.62rem] uppercase tracking-[0.28em] text-muted">profile metadata</p>
+              <p className="font-heading text-[0.62rem] uppercase tracking-[0.28em] text-accent">v2.6</p>
+            </div>
             <div className="space-y-5">
               <div className="flex items-center gap-3">
                 <MapPin className="h-4 w-4 text-accent" />
@@ -322,7 +382,7 @@ function App() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.28 }}
               transition={{ duration: 0.5, delay: index * 0.06, ease: 'easeOut' }}
-              className="bg-panel px-6 py-8"
+              className="retro-panel px-6 py-8"
             >
               <Icon className="h-7 w-7 text-accent" />
               <h3 className="mt-6 font-heading text-2xl uppercase tracking-[0.08em] text-text">{title}</h3>
@@ -366,9 +426,9 @@ function App() {
             <div className="absolute left-6 top-6 w-16 border-t-4 border-accent" />
             <div className="absolute bottom-6 right-6 w-16 border-b-4 border-highlight" />
             <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
-              <p className="eyebrow">Interaction thesis</p>
+              <p className="eyebrow">Screen saver logic</p>
               <p className="mt-3 max-w-sm text-lg leading-7 text-text">
-                Large image planes, rigid color blocks, and scroll-based reveals keep the page feeling mechanical instead of ornamental.
+                Large image planes, rigid color blocks, and scroll-based reveals keep the page feeling like a restored web artifact instead of nostalgia cosplay.
               </p>
             </div>
           </motion.div>
@@ -396,12 +456,16 @@ function App() {
                 className="grid gap-px border border-line bg-line xl:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.85fr)]"
               >
                 <div className="relative min-h-[26rem] overflow-hidden bg-[#111827]">
+                  <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between border-b border-line bg-background/75 px-4 py-3 font-heading text-[0.62rem] uppercase tracking-[0.28em] text-soft backdrop-blur-sm">
+                    <span>{project.type}</span>
+                    <span>{project.name.toLowerCase().replace(/\s+/g, '-')}.html</span>
+                  </div>
                   <img src={project.image} alt={project.alt} className="h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,11,20,0.16),rgba(7,11,20,0.74))]" />
                   <div className={cn('absolute top-0 h-20 w-20', index % 2 === 0 ? 'left-0 bg-accent' : 'right-0 bg-highlight')} />
                 </div>
 
-                <div className="bg-panel px-6 py-8 md:px-8 md:py-10">
+                <div className="retro-panel px-6 py-8 md:px-8 md:py-10">
                   <p className="eyebrow">{project.type}</p>
                   <h3 className="mt-4 font-heading text-4xl uppercase leading-none tracking-[0.08em] text-text md:text-5xl">
                     {project.name}
@@ -431,7 +495,7 @@ function App() {
         <SectionLead
           kicker="Experience"
           title="A path from Nepal web builds to multinational commerce infrastructure."
-          body="The timeline below compresses the official experience into the throughline that matters most: increasing technical scope, broader systems responsibility, and stronger product judgment."
+          body="The timeline below keeps the official experience intact, then presents it like a clean archive page: direct dates, direct roles, no extra chrome."
         />
 
         <div className="mt-14 space-y-px border border-line bg-line">
@@ -442,7 +506,7 @@ function App() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: index * 0.06, ease: 'easeOut' }}
-              className="grid gap-8 bg-panel px-6 py-8 md:grid-cols-[220px_minmax(0,1fr)] md:px-8"
+              className="grid gap-8 bg-panel px-6 py-8 transition-colors duration-300 hover:bg-panel/90 md:grid-cols-[220px_minmax(0,1fr)] md:px-8"
             >
               <div>
                 <p className="font-heading text-xl uppercase tracking-[0.08em] text-accent">{item.period}</p>
@@ -466,17 +530,21 @@ function App() {
               <div className="relative">
                 <SectionLead
                   kicker="Connect"
-                  title="Ready for selective builds and serious technical problem solving."
-                  body="The official site positions Saroj as available for select projects. This page keeps that focus, then routes directly to the channels already attached to his public identity."
+                  title="Guestbook energy. Direct links. No dead ends."
+                  body="The official site positions Saroj as available for select projects. This version keeps that focus and routes directly to the channels already attached to his public identity."
                 />
                 <div className="mt-10 flex items-center gap-3 text-sm uppercase tracking-[0.24em] text-soft">
                   <Sparkles className="h-4 w-4 text-accent" />
-                  Research basis: official site, public GitHub profile, and public project repositories.
+                  Verified from the official site, public GitHub profile, and public project repositories.
                 </div>
               </div>
             </div>
 
             <div className="bg-background px-6 py-8 md:px-8 md:py-10">
+              <div className="mb-6 flex items-center justify-between border-b border-line pb-3">
+                <p className="font-heading text-[0.62rem] uppercase tracking-[0.28em] text-muted">webring / outbound</p>
+                <p className="font-heading text-[0.62rem] uppercase tracking-[0.28em] text-accent">open in new tab</p>
+              </div>
               <div className="space-y-4">
                 {links.map(({ label, href, detail, icon: Icon }) => (
                   <a
