@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu as MenuIcon, 
@@ -35,67 +35,26 @@ const menuItems = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${
-      scrolled 
-        ? "bg-pakery-bg/70 backdrop-blur-lg shadow-sm" 
-        : "bg-transparent py-4"
-    }`}>
+    <nav className="fixed w-full z-50 bg-pakery-bg/70 backdrop-blur-lg">
       <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
         <div className="flex justify-between items-center h-24">
           <div className="flex items-center gap-3">
-            <span className={`text-3xl font-serif font-black tracking-tight lowercase transition-colors ${
-              scrolled ? "text-pakery-text" : "text-white"
-            }`}>
-              pakery.
-            </span>
+            <span className="text-3xl font-serif font-black text-pakery-text tracking-tight lowercase">pakery.</span>
           </div>
           
           <div className="hidden md:flex items-center gap-12">
-            <a 
-              href="#about" 
-              className={`text-sm font-semibold transition-all uppercase tracking-widest ${
-                scrolled ? "text-pakery-text/70 hover:text-pakery-accent" : "text-white/80 hover:text-white"
-              }`}
-            >
-              The Story
-            </a>
-            <a 
-              href="#menu" 
-              className={`text-sm font-semibold transition-all uppercase tracking-widest ${
-                scrolled ? "text-pakery-text/70 hover:text-pakery-accent" : "text-white/80 hover:text-white"
-              }`}
-            >
-              Our Bakes
-            </a>
-            <a 
-              href="#contact" 
-              className={`text-sm font-semibold transition-all uppercase tracking-widest ${
-                scrolled ? "text-pakery-text/70 hover:text-pakery-accent" : "text-white/80 hover:text-white"
-              }`}
-            >
-              Visit Us
-            </a>
+            <a href="#about" className="text-sm font-semibold text-pakery-text/70 hover:text-pakery-accent transition-all uppercase tracking-widest">The Story</a>
+            <a href="#menu" className="text-sm font-semibold text-pakery-text/70 hover:text-pakery-accent transition-all uppercase tracking-widest">Our Bakes</a>
+            <a href="#contact" className="text-sm font-semibold text-pakery-text/70 hover:text-pakery-accent transition-all uppercase tracking-widest">Visit Us</a>
             <button className="bg-pakery-accent text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-pakery-text transition-all shadow-lg shadow-pakery-accent/10">
               Order Online
             </button>
           </div>
 
           <div className="md:hidden">
-            <button 
-              onClick={() => setIsOpen(!isOpen)} 
-              className={scrolled ? "text-pakery-text" : "text-white"}
-            >
+            <button onClick={() => setIsOpen(!isOpen)} className="text-pakery-text">
               {isOpen ? <X size={28} /> : <MenuIcon size={28} />}
             </button>
           </div>
