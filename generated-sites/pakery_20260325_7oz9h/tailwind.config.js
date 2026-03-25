@@ -8,11 +8,16 @@ export default {
     extend: {
       colors: {
         'pakery': {
-          'bg': '#ffffff',
-          'surface': '#f8fafc',
-          'accent': '#3b82f6',
-          'text': '#0f172a',
+          'bg': '#FAF9F6',
+          'surface': '#F3EFE0',
+          'accent': '#BC6C25',
+          'text': '#2C1810',
+          'soft': '#DDA15E',
         }
+      },
+      fontFamily: {
+        'serif': ['"Playfair Display"', 'serif'],
+        'sans': ['"Instrument Sans"', 'sans-serif'],
       },
     },
   },

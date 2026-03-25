@@ -1,20 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu as MenuIcon, 
   X, 
-  ShoppingBag, 
   Instagram, 
   Facebook, 
   Twitter,
   MapPin,
-  Phone,
-  Mail,
-  Clock,
-  ArrowRight,
-  Cake,
-  Croissant,
-  Coffee
+  Clock
 } from 'lucide-react';
 
 // --- Data ---
@@ -42,30 +35,68 @@ const menuItems = [
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-pakery-accent rounded-full flex items-center justify-center text-white">
-              <Cake size={20} />
-            </div>
-            <span className="text-2xl font-bold text-pakery-text tracking-tight uppercase">pakery</span>
+    <nav className={`fixed w-full z-50 transition-all duration-300 ${
+      scrolled 
+        ? "bg-pakery-bg/70 backdrop-blur-lg shadow-sm" 
+        : "bg-transparent py-4"
+    }`}>
+      <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+        <div className="flex justify-between items-center h-24">
+          <div className="flex items-center gap-3">
+            <span className={`text-3xl font-serif font-black tracking-tight lowercase transition-colors ${
+              scrolled ? "text-pakery-text" : "text-white"
+            }`}>
+              pakery.
+            </span>
           </div>
           
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#about" className="text-sm font-medium text-slate-600 hover:text-pakery-accent transition-colors">Story</a>
-            <a href="#menu" className="text-sm font-medium text-slate-600 hover:text-pakery-accent transition-colors">Menu</a>
-            <a href="#contact" className="text-sm font-medium text-slate-600 hover:text-pakery-accent transition-colors">Order</a>
-            <button className="bg-pakery-text text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-slate-800 transition-all flex items-center gap-2">
-              Visit Us <ArrowRight size={16} />
+          <div className="hidden md:flex items-center gap-12">
+            <a 
+              href="#about" 
+              className={`text-sm font-semibold transition-all uppercase tracking-widest ${
+                scrolled ? "text-pakery-text/70 hover:text-pakery-accent" : "text-white/80 hover:text-white"
+              }`}
+            >
+              The Story
+            </a>
+            <a 
+              href="#menu" 
+              className={`text-sm font-semibold transition-all uppercase tracking-widest ${
+                scrolled ? "text-pakery-text/70 hover:text-pakery-accent" : "text-white/80 hover:text-white"
+              }`}
+            >
+              Our Bakes
+            </a>
+            <a 
+              href="#contact" 
+              className={`text-sm font-semibold transition-all uppercase tracking-widest ${
+                scrolled ? "text-pakery-text/70 hover:text-pakery-accent" : "text-white/80 hover:text-white"
+              }`}
+            >
+              Visit Us
+            </a>
+            <button className="bg-pakery-accent text-white px-8 py-3 rounded-full text-sm font-bold hover:bg-pakery-text transition-all shadow-lg shadow-pakery-accent/10">
+              Order Online
             </button>
           </div>
 
           <div className="md:hidden">
-            <button onClick={() => setIsOpen(!isOpen)} className="text-pakery-text">
-              {isOpen ? <X size={24} /> : <MenuIcon size={24} />}
+            <button 
+              onClick={() => setIsOpen(!isOpen)} 
+              className={scrolled ? "text-pakery-text" : "text-white"}
+            >
+              {isOpen ? <X size={28} /> : <MenuIcon size={28} />}
             </button>
           </div>
         </div>
@@ -74,16 +105,16 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-white border-t border-slate-100 overflow-hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="md:hidden bg-pakery-bg border-t border-pakery-text/5 overflow-hidden shadow-2xl"
           >
-            <div className="px-4 py-6 space-y-4">
-              <a href="#about" onClick={() => setIsOpen(false)} className="block text-lg font-medium text-slate-900">Story</a>
-              <a href="#menu" onClick={() => setIsOpen(false)} className="block text-lg font-medium text-slate-900">Menu</a>
-              <a href="#contact" onClick={() => setIsOpen(false)} className="block text-lg font-medium text-slate-900">Order</a>
-              <button className="w-full bg-pakery-text text-white py-4 rounded-xl font-bold">Visit Us</button>
+            <div className="px-6 py-8 space-y-6">
+              <a href="#about" onClick={() => setIsOpen(false)} className="block text-2xl font-serif font-bold text-pakery-text">The Story</a>
+              <a href="#menu" onClick={() => setIsOpen(false)} className="block text-2xl font-serif font-bold text-pakery-text">Our Bakes</a>
+              <a href="#contact" onClick={() => setIsOpen(false)} className="block text-2xl font-serif font-bold text-pakery-text">Visit Us</a>
+              <button className="w-full bg-pakery-accent text-white py-5 rounded-2xl font-bold text-lg">Order Online</button>
             </div>
           </motion.div>
         )}
@@ -92,13 +123,13 @@ const Navbar = () => {
   );
 };
 
-const SectionHeading = ({ children, subtitle }: { children: React.ReactNode, subtitle?: string }) => (
-  <div className="mb-16">
+const SectionHeading = ({ children, subtitle, light = false }: { children: React.ReactNode, subtitle?: string, light?: boolean }) => (
+  <div className="mb-20">
     <motion.h2 
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      className="text-4xl md:text-5xl font-bold text-pakery-text mb-4"
+      className={`text-5xl md:text-7xl font-serif font-black leading-tight mb-6 ${light ? 'text-white' : 'text-pakery-text'}`}
     >
       {children}
     </motion.h2>
@@ -108,7 +139,7 @@ const SectionHeading = ({ children, subtitle }: { children: React.ReactNode, sub
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.1 }}
-        className="text-lg text-slate-500 max-w-2xl"
+        className={`text-xl md:text-2xl font-medium max-w-3xl leading-relaxed ${light ? 'text-white/70' : 'text-pakery-text/60'}`}
       >
         {subtitle}
       </motion.p>
@@ -118,166 +149,166 @@ const SectionHeading = ({ children, subtitle }: { children: React.ReactNode, sub
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-pakery-bg text-pakery-text font-sans selection:bg-pakery-accent selection:text-white">
+    <div className="min-h-screen bg-pakery-bg text-pakery-text font-sans selection:bg-pakery-accent selection:text-white overflow-x-hidden">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="relative h-[100svh] flex items-center overflow-hidden">
+      {/* Hero Section - Full Bleed Poster Style */}
+      <section className="relative h-[100svh] flex items-center justify-center text-center px-6">
         <div className="absolute inset-0 z-0">
-          <img 
-            src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2072&auto=format&fit=crop" 
+          <motion.img 
+            initial={{ scale: 1.1, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=2072&auto=format&fit=crop" 
             alt="Bakery background" 
-            className="w-full h-full object-cover brightness-[0.85]"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
         </div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-20">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-2xl"
+        <div className="relative z-10 max-w-5xl">
+          <motion.span
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="inline-block text-white/90 text-sm font-bold tracking-[0.3em] uppercase mb-8"
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-white text-sm font-semibold mb-6 border border-white/20 uppercase tracking-widest">
-              Established 2024
-            </span>
-            <h1 className="text-6xl md:text-8xl font-bold text-white mb-8 tracking-tight leading-tight">
-              Honest Flour. <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60">Slow Rising.</span>
-            </h1>
-            <p className="text-xl text-white/80 mb-10 leading-relaxed max-w-lg">
-              Crafting premium artisan breads and delicate pastries daily. Every loaf is a labor of love, time, and the finest organic ingredients.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a href="#menu" className="bg-pakery-accent hover:bg-blue-600 text-white px-8 py-4 rounded-full font-bold text-center transition-all transform hover:scale-105 shadow-xl shadow-blue-500/20">
-                Explore Menu
-              </a>
-              <a href="#contact" className="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 px-8 py-4 rounded-full font-bold text-center transition-all">
-                Order Online
-              </a>
-            </div>
+            Artisan Bakery & Coffee
+          </motion.span>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.8 }}
+            className="text-7xl md:text-9xl font-serif font-black text-white mb-10 leading-[0.9] tracking-tighter"
+          >
+            Freshly Baked, <br />
+            <span className="italic font-normal">Daily.</span>
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+          >
+            <a href="#menu" className="group relative bg-white text-pakery-text px-12 py-5 rounded-full font-black text-lg transition-all hover:scale-105 active:scale-95 shadow-2xl">
+              Discover Our Menu
+            </a>
+            <a href="#about" className="text-white font-bold text-lg border-b-2 border-white/30 hover:border-white transition-all py-1">
+              Read Our Story
+            </a>
           </motion.div>
         </div>
         
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 1 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 flex flex-col items-center gap-2"
+          transition={{ delay: 2, duration: 1 }}
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 text-white/70 flex flex-col items-center gap-3"
         >
-          <span className="text-xs uppercase tracking-widest font-medium">Scroll to explore</span>
-          <div className="w-px h-12 bg-gradient-to-b from-white/50 to-transparent" />
+          <span className="text-[10px] uppercase tracking-[0.4em] font-black">Scroll</span>
+          <div className="w-px h-16 bg-gradient-to-b from-white to-transparent" />
         </motion.div>
       </section>
 
-      {/* About Section */}
-      <section id="about" className="py-24 md:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div className="relative">
+      {/* About Section - Large Image & Big Typography */}
+      <section id="about" className="py-32 md:py-48 bg-pakery-bg">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-center">
+            <div className="lg:col-span-7">
+              <SectionHeading subtitle="We believe the best things in life are simple, honest, and shared over a warm loaf of bread. Our journey began with a single sourdough starter and a dream to bring authentic, slow-fermented bakes to our community.">
+                Honest Flour. <br />Patient Hands.
+              </SectionHeading>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                <div className="space-y-4">
+                  <h3 className="text-3xl font-serif font-bold italic">Slow Fermentation</h3>
+                  <p className="text-lg text-pakery-text/60 leading-relaxed">
+                    Every loaf rests for at least 48 hours, allowing flavors to deepen and textures to perfect naturally.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-3xl font-serif font-bold italic">Organic Grains</h3>
+                  <p className="text-lg text-pakery-text/60 leading-relaxed">
+                    We source only the finest heritage grains from local farmers who care as much about the soil as we do about the bread.
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="lg:col-span-5 relative">
               <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                className="aspect-[4/5] rounded-[2.5rem] overflow-hidden"
+                transition={{ duration: 1 }}
+                className="aspect-[3/4] rounded-[4rem] overflow-hidden shadow-2xl"
               >
                 <img 
-                  src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=1926&auto=format&fit=crop" 
-                  alt="Baker working" 
+                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=2072&auto=format&fit=crop" 
+                  alt="Baker at work" 
                   className="w-full h-full object-cover"
                 />
               </motion.div>
-              <motion.div 
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-                className="absolute -bottom-10 -right-10 bg-pakery-accent p-8 rounded-[2rem] text-white hidden md:block"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                    <Clock size={24} />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold tracking-tight">48 Hours</div>
-                    <div className="text-sm opacity-80">Natural Fermentation</div>
-                  </div>
-                </div>
-                <p className="max-w-[200px] text-sm leading-relaxed opacity-90">
-                  Our sourdough process takes time, resulting in deeper flavor and better digestion.
-                </p>
-              </motion.div>
-            </div>
-            
-            <div>
-              <SectionHeading subtitle="Rooted in tradition, perfected for the modern palate. At Pakery, we believe that the best ingredients and patient hands create the most memorable experiences.">
-                The Art of Baking.
-              </SectionHeading>
-              
-              <div className="space-y-8">
-                {[
-                  { icon: <Croissant />, title: "Artisan Quality", desc: "Small-batch production ensuring every piece meets our exacting standards." },
-                  { icon: <ShoppingBag />, title: "Organic Ingredients", desc: "We source only the finest organic flour and local dairy for pure taste." },
-                  { icon: <Coffee />, title: "Daily Freshness", desc: "Baked through the night to ensure your morning starts with the perfect crunch." }
-                ].map((feature, i) => (
-                  <motion.div 
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    className="flex gap-6"
-                  >
-                    <div className="flex-shrink-0 w-14 h-14 bg-pakery-surface rounded-2xl flex items-center justify-center text-pakery-accent">
-                      {feature.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-                      <p className="text-slate-500 leading-relaxed">{feature.desc}</p>
-                    </div>
-                  </motion.div>
-                ))}
+              <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-pakery-accent rounded-full flex items-center justify-center text-white text-center p-6 transform -rotate-12 shadow-xl hidden xl:flex">
+                <span className="text-xl font-serif font-bold">Baked fresh every single morning</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Menu Section */}
-      <section id="menu" className="py-24 md:py-32 bg-pakery-surface">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <SectionHeading subtitle="A curated selection of our daily creations. Selection may vary by season.">
-              Our Daily Menu.
-            </SectionHeading>
+      {/* Feature Image - Parallax Style */}
+      <section className="h-[60svh] relative overflow-hidden">
+        <img 
+          src="https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?q=80&w=2072&auto=format&fit=crop" 
+          alt="Fresh croissants" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-pakery-text/20" />
+      </section>
+
+      {/* Menu Section - Visual & Clean */}
+      <section id="menu" className="py-32 md:py-48 bg-pakery-surface">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-24">
+            <div className="max-w-3xl">
+              <SectionHeading subtitle="From our signature sourdough to delicate French pastries, every item is crafted with intention and the finest seasonal ingredients.">
+                Our Daily <br />Curations.
+              </SectionHeading>
+            </div>
+            <div className="pb-24">
+              <button className="text-xl font-bold border-b-2 border-pakery-accent pb-1 text-pakery-accent hover:text-pakery-text hover:border-pakery-text transition-all">
+                Download Full Menu (PDF)
+              </button>
+            </div>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
             {menuItems.map((category, idx) => (
               <motion.div 
                 key={idx}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: idx * 0.2 }}
-                className="bg-white p-8 md:p-12 rounded-[3rem] shadow-sm border border-slate-100"
+                className="space-y-12"
               >
-                <h3 className="text-2xl font-bold mb-10 text-pakery-accent flex items-center gap-3">
-                  <div className="w-8 h-px bg-pakery-accent/30" />
+                <h3 className="text-4xl md:text-5xl font-serif font-black flex items-center gap-6">
+                  <span className="text-pakery-accent">0{idx + 1}</span>
                   {category.category}
                 </h3>
                 <div className="space-y-10">
                   {category.items.map((item, itemIdx) => (
-                    <div key={itemIdx} className="group cursor-default">
-                      <div className="flex justify-between items-baseline mb-2">
-                        <h4 className="text-xl font-bold group-hover:text-pakery-accent transition-colors">
+                    <div key={itemIdx} className="group">
+                      <div className="flex justify-between items-baseline mb-3">
+                        <h4 className="text-2xl md:text-3xl font-serif font-bold group-hover:text-pakery-accent transition-colors cursor-default">
                           {item.name}
                         </h4>
-                        <span className="text-lg font-bold text-slate-900">{item.price}</span>
+                        <div className="flex-grow mx-4 border-b border-dotted border-pakery-text/20" />
+                        <span className="text-xl font-bold">{item.price}</span>
                       </div>
-                      <p className="text-slate-500 leading-relaxed">{item.description}</p>
-                      <div className="mt-4 h-px w-full bg-slate-50" />
+                      <p className="text-lg text-pakery-text/50 max-w-xl leading-relaxed">
+                        {item.description}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -287,117 +318,121 @@ export default function App() {
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section id="contact" className="py-24 md:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
-            <div>
-              <SectionHeading subtitle="Have a custom order or want to say hello? Drop us a message below or visit our cozy bakery downtown.">
-                Get in Touch.
-              </SectionHeading>
-              
-              <div className="space-y-8">
-                <div className="flex items-start gap-6">
-                  <div className="w-12 h-12 bg-pakery-surface rounded-xl flex items-center justify-center text-pakery-accent">
-                    <MapPin size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold mb-1">Location</h4>
-                    <p className="text-slate-500">123 Artisan Way, Bread District<br />Dough Town, DT 5678</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-6">
-                  <div className="w-12 h-12 bg-pakery-surface rounded-xl flex items-center justify-center text-pakery-accent">
-                    <Phone size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold mb-1">Phone</h4>
-                    <p className="text-slate-500">+1 (555) 123-4567</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-6">
-                  <div className="w-12 h-12 bg-pakery-surface rounded-xl flex items-center justify-center text-pakery-accent">
-                    <Mail size={24} />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold mb-1">Email</h4>
-                    <p className="text-slate-500">hello@pakery.com</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-12 flex gap-4">
-                {[Instagram, Facebook, Twitter].map((Icon, i) => (
-                  <a key={i} href="#" className="w-12 h-12 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:border-pakery-accent hover:text-pakery-accent transition-all">
-                    <Icon size={20} />
-                  </a>
-                ))}
+      {/* Atmosphere Section - Large Imagery */}
+      <section className="py-32 md:py-48 bg-pakery-text text-white">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
+            <div className="order-2 lg:order-1">
+              <div className="grid grid-cols-2 gap-6">
+                <motion.img 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  src="https://images.unsplash.com/photo-1486427944299-d1955d23e34d?q=80&w=2072&auto=format&fit=crop" 
+                  className="rounded-3xl aspect-square object-cover shadow-2xl"
+                  alt="Pastry close up"
+                />
+                <motion.img 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 }}
+                  src="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?q=80&w=2070&auto=format&fit=crop" 
+                  className="rounded-3xl aspect-square object-cover mt-12 shadow-2xl"
+                  alt="Bread selection"
+                />
               </div>
             </div>
-            
-            <motion.div 
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="bg-pakery-surface p-8 md:p-12 rounded-[3rem] border border-slate-100"
-            >
-              <form className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold uppercase tracking-wider text-slate-400">Full Name</label>
-                    <input type="text" className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:border-pakery-accent transition-colors" placeholder="John Doe" />
+            <div className="order-1 lg:order-2">
+              <SectionHeading 
+                light 
+                subtitle="Step into our cozy corner of the city. We've designed Pakery to be a sanctuary for bread lovers—a place where the smell of fresh yeast and roasting coffee greets you at the door."
+              >
+                A Sanctuary <br /><span className="italic font-normal">for Bread.</span>
+              </SectionHeading>
+              
+              <div className="space-y-8 mt-12">
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center text-pakery-accent">
+                    <Clock size={28} />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold uppercase tracking-wider text-slate-400">Email Address</label>
-                    <input type="email" className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:border-pakery-accent transition-colors" placeholder="john@example.com" />
+                  <div>
+                    <h4 className="text-2xl font-bold">Daily 7am — 4pm</h4>
+                    <p className="text-white/50">Or until we sell out of the day's bakes.</p>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-slate-400">Subject</label>
-                  <select className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:border-pakery-accent transition-colors appearance-none">
-                    <option>General Inquiry</option>
-                    <option>Custom Cake Order</option>
-                    <option>Wholesale</option>
-                    <option>Feedback</option>
-                  </select>
+                <div className="flex items-center gap-6">
+                  <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center text-pakery-accent">
+                    <MapPin size={28} />
+                  </div>
+                  <div>
+                    <h4 className="text-2xl font-bold">Bread District</h4>
+                    <p className="text-white/50">123 Artisan Way, Dough Town</p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-slate-400">Message</label>
-                  <textarea rows={5} className="w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 outline-none focus:border-pakery-accent transition-colors resize-none" placeholder="Tell us what's on your mind..."></textarea>
-                </div>
-                <button type="submit" className="w-full bg-pakery-text text-white py-5 rounded-2xl font-bold text-lg hover:bg-slate-800 transition-all flex items-center justify-center gap-3 group">
-                  Send Message
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </button>
-              </form>
-            </motion.div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section - Clean & Cozy */}
+      <section id="contact" className="py-32 md:py-48 bg-pakery-bg">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <SectionHeading subtitle="Want to pre-order for an event or just have a question? We'd love to hear from you.">
+            Say Hello.
+          </SectionHeading>
+          
+          <motion.form 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-16 space-y-8"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <input 
+                type="text" 
+                placeholder="Your Name" 
+                className="w-full bg-pakery-surface border-none rounded-3xl px-8 py-6 text-lg focus:ring-2 focus:ring-pakery-accent transition-all outline-none"
+              />
+              <input 
+                type="email" 
+                placeholder="Your Email" 
+                className="w-full bg-pakery-surface border-none rounded-3xl px-8 py-6 text-lg focus:ring-2 focus:ring-pakery-accent transition-all outline-none"
+              />
+            </div>
+            <textarea 
+              placeholder="Your Message" 
+              rows={6}
+              className="w-full bg-pakery-surface border-none rounded-3xl px-8 py-6 text-lg focus:ring-2 focus:ring-pakery-accent transition-all outline-none resize-none"
+            ></textarea>
+            <button className="w-full bg-pakery-accent text-white py-6 rounded-full text-xl font-black shadow-xl shadow-pakery-accent/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+              Send Message
+            </button>
+          </motion.form>
+          
+          <div className="mt-24 flex justify-center gap-12">
+            {[Instagram, Facebook, Twitter].map((Icon, i) => (
+              <a key={i} href="#" className="text-pakery-text/40 hover:text-pakery-accent transition-colors">
+                <Icon size={32} />
+              </a>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-pakery-text text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-10 pb-20 border-b border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-pakery-accent rounded-full flex items-center justify-center">
-                <Cake size={24} />
-              </div>
-              <span className="text-3xl font-bold tracking-tight uppercase">pakery</span>
-            </div>
-            <div className="flex gap-10">
-              <a href="#about" className="hover:text-pakery-accent transition-colors">Story</a>
-              <a href="#menu" className="hover:text-pakery-accent transition-colors">Menu</a>
-              <a href="#contact" className="hover:text-pakery-accent transition-colors">Contact</a>
-            </div>
+      <footer className="py-20 bg-pakery-surface border-t border-pakery-text/5">
+        <div className="max-w-screen-2xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-12">
+          <span className="text-4xl font-serif font-black text-pakery-text lowercase">pakery.</span>
+          <div className="flex gap-12 text-sm font-black uppercase tracking-widest text-pakery-text/40">
+            <a href="#about" className="hover:text-pakery-accent transition-colors">Story</a>
+            <a href="#menu" className="hover:text-pakery-accent transition-colors">Menu</a>
+            <a href="#contact" className="hover:text-pakery-accent transition-colors">Contact</a>
           </div>
-          <div className="pt-10 flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-white/40">
-            <p>© 2024 Pakery Artisan Bakery. All rights reserved.</p>
-            <div className="flex gap-6">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            </div>
-          </div>
+          <p className="text-pakery-text/30 font-medium">
+            © 2024 Pakery Artisan.
+          </p>
         </div>
       </footer>
     </div>
