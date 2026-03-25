@@ -32,7 +32,7 @@ function cn(...inputs: ClassValue[]) {
 const RUNNERS = [
   { id: "AS", name: "Aaryash S.", bio: "Self-proclaimed CTO, runs like a maniac, bets like a fool!" },
   { id: "AK", name: "Alok K.", bio: "He is an Ironman. He eats 100 for breakfast." },
-  { id: "AK", name: "Avinash K.", bio: "Has the most expensive shoes and watch, we have high hopes" },
+  { id: "AK", name: "Avinash K.", bio: "Remember, your drink might be the last drink of the day." },
   { id: "AN", name: "Anita N.", bio: "Don't let the new one beat you." },
   { id: "ID", name: "Ishu D.", bio: "She will complete the challenge with few lectures." },
   { id: "KB", name: "Karuna B.", bio: "Strolling light, fueled by bakery delights." },
