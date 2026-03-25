@@ -307,7 +307,7 @@ const Events = () => {
       shortName: "WWKTM",
       description: "A biennial conference on web tech and UI/UX. It brings together local and international builders to share knowledge and craft.",
       link: "https://wwktm.com/",
-      logo: "https://raw.githubusercontent.com/wwktm/brand-assets/master/logo/logo.png",
+      logo: "https://images.lumacdn.com/calendars/3a/13af145f-2d13-4938-bddb-bad881f558b9.png",
       color: "accent"
     },
     {
@@ -315,7 +315,7 @@ const Events = () => {
       shortName: "AI_CONF",
       description: "Focusing on practical AI deployment and governance. Exploring how generative intelligence is reshaping our workflows.",
       link: "https://ai.wwktm.com/",
-      logo: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2070&auto=format&fit=crop",
+      logo: "https://ai.wwktm.com/2026/logo.jpg",
       color: "accent-blue"
     },
     {
@@ -323,7 +323,7 @@ const Events = () => {
       shortName: "BARCAMP",
       description: "An attendee-led unconference where everyone is a speaker. Radical openness and spontaneous knowledge sharing.",
       link: "https://barcamp.wwktm.com/",
-      logo: "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=2070&auto=format&fit=crop",
+      logo: "https://barcamp.wwktm.com/barcamp-ktm.png",
       color: "accent-green"
     },
     {
