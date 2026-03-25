@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: only light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -19,9 +19,10 @@ html {
 body {
   @apply m-0 bg-background font-body text-text;
   background-image:
-    radial-gradient(circle at top left, rgba(255, 77, 109, 0.16), transparent 24%),
-    radial-gradient(circle at top right, rgba(0, 245, 212, 0.16), transparent 26%),
-    linear-gradient(180deg, rgba(7, 11, 20, 0.96), rgba(7, 11, 20, 1));
+    radial-gradient(circle at top left, rgba(255, 255, 0, 0.22), transparent 18%),
+    radial-gradient(circle at top right, rgba(0, 216, 255, 0.24), transparent 22%),
+    linear-gradient(180deg, rgba(18, 15, 50, 0.92), rgba(45, 27, 105, 1));
+  background-attachment: fixed;
   min-width: 320px;
 }
 
@@ -30,8 +31,8 @@ body {
 }
 
 ::selection {
-  background: rgba(0, 245, 212, 0.3);
-  color: #070b14;
+  background: rgba(255, 79, 216, 0.5);
+  color: #fff8a6;
 }
 
 @layer base {
@@ -46,6 +47,20 @@ body {
   img {
     display: block;
   }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 50%, transparent 50%),
+      linear-gradient(rgba(255, 255, 255, 0.04) 50%, transparent 50%);
+    background-size: 6px 6px;
+    mix-blend-mode: screen;
+    opacity: 0.22;
+    z-index: 0;
+  }
 }
 
 @layer components {
@@ -54,35 +69,41 @@ body {
   }
 
   .eyebrow {
-    @apply font-heading text-[0.72rem] uppercase tracking-[0.34em] text-accent;
+    @apply font-heading text-[0.62rem] uppercase tracking-[0.18em] text-highlight;
+    text-shadow: 2px 2px 0 rgba(21, 16, 58, 0.75);
   }
 
   .action-button {
-    @apply inline-flex items-center gap-2 border border-line bg-panel px-5 py-3 font-heading text-sm uppercase tracking-[0.2em] text-text transition-all duration-300 hover:-translate-y-0.5 hover:border-accent;
+    @apply inline-flex items-center gap-2 border-2 border-text bg-panel px-5 py-3 font-heading text-[0.62rem] uppercase tracking-[0.14em] text-text transition-all duration-200;
+    box-shadow: 4px 4px 0 rgba(21, 16, 58, 0.95);
   }
 
   .action-button--primary {
-    @apply border-accent bg-accent text-background;
+    @apply border-text bg-[#fff04a] text-text;
   }
 
   .action-link {
-    @apply items-center gap-2 font-heading text-sm uppercase tracking-[0.2em] text-accent transition-transform duration-300 hover:-translate-y-0.5;
+    @apply items-center gap-2 font-heading text-[0.62rem] uppercase tracking-[0.14em] text-accent transition-transform duration-200;
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   .progress-bar {
-    @apply fixed left-0 right-0 top-0 z-[60] h-1 origin-left bg-accent;
+    @apply fixed left-0 right-0 top-0 z-[60] h-2 origin-left bg-[#fff04a];
+    box-shadow: 0 2px 0 rgba(21, 16, 58, 0.9);
   }
 
   .retro-panel {
-    @apply border border-line bg-panel;
+    @apply border-2 border-text bg-panel;
     box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.02),
-      0 18px 40px rgba(0, 0, 0, 0.18);
+      inset 2px 2px 0 rgba(255, 255, 255, 0.72),
+      inset -2px -2px 0 rgba(81, 65, 143, 0.5),
+      8px 8px 0 rgba(21, 16, 58, 0.95);
   }
 
   .marquee-track {
     @apply flex overflow-hidden whitespace-nowrap;
-    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, black 4%, black 96%, transparent);
   }
 
   .marquee-content {
@@ -91,19 +112,41 @@ body {
   }
 
   .marquee-content span::before {
-    content: '</>';
+    content: '***';
     margin-right: 0.9rem;
-    color: #00f5d4;
+    color: #fff04a;
+  }
+
+  .window-frame {
+    @apply border-2 border-text bg-panel;
+    box-shadow:
+      inset 2px 2px 0 rgba(255, 255, 255, 0.72),
+      inset -2px -2px 0 rgba(81, 65, 143, 0.5),
+      10px 10px 0 rgba(21, 16, 58, 0.92);
+  }
+
+  .window-bar {
+    @apply flex items-center justify-between border-b-2 border-text bg-[#c8c2ff] px-4 py-3 font-heading text-[0.58rem] uppercase tracking-[0.12em] text-text;
+  }
+
+  .pixel-dot {
+    @apply h-3 w-3 border border-text;
+    box-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4) inset;
+  }
+
+  .status-pill {
+    @apply inline-flex items-center gap-2 border-2 border-text bg-[#dffcff] px-3 py-2 font-heading text-[0.58rem] uppercase tracking-[0.12em] text-soft;
+    box-shadow: 3px 3px 0 rgba(21, 16, 58, 0.8);
   }
 }
 
 @layer utilities {
   .bg-circuit-grid {
-    background-size: 64px 64px;
+    background-size: 24px 24px;
   }
 
   .bg-scanlines {
-    background-size: 100% 6px;
+    background-size: 100% 4px;
   }
 }
 
