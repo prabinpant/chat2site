@@ -84,10 +84,20 @@ User Message: "${text}"
     const response = await this.aiService.generateCode(systemPrompt);
     
     try {
-      const jsonString = response.replace(/```json|```/g, '').trim();
+      let jsonString = response.replace(/```json|```/g, '').trim();
+      
+      // If there's prefix text (like "YOLO mode is enabled..."), try to find the actual JSON object
+      if (!jsonString.startsWith('{')) {
+        const startIndex = jsonString.indexOf('{');
+        const endIndex = jsonString.lastIndexOf('}');
+        if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+          jsonString = jsonString.substring(startIndex, endIndex + 1);
+        }
+      }
+      
       return JSON.parse(jsonString) as Intent;
     } catch (e) {
-      console.error('Failed to parse intent JSON:', response);
+      console.error('Failed to parse intent JSON. Response was:\n', response);
       return {
         type: 'UNKNOWN',
         confidence: 0,

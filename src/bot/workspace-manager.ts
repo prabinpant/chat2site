@@ -49,6 +49,7 @@ export class WorkspaceManager {
     if (!fs.existsSync(this.baseDir)) return [];
     const projects = fs.readdirSync(this.baseDir);
     const matches: { path: string; id: string; name: string }[] = [];
+    const exactMatches: { path: string; id: string; name: string }[] = [];
     const q = query.toLowerCase();
 
     for (const name of projects) {
@@ -58,13 +59,16 @@ export class WorkspaceManager {
         if (metadata) {
           const id = metadata.preferredSubdomain || name;
           const siteName = metadata.name || '';
-          if (id.toLowerCase().includes(q) || siteName.toLowerCase().includes(q)) {
+          
+          if (id.toLowerCase() === q || siteName.toLowerCase() === q || name.toLowerCase() === q) {
+            exactMatches.push({ path: sitePath, id, name: siteName });
+          } else if (id.toLowerCase().includes(q) || siteName.toLowerCase().includes(q) || name.toLowerCase().includes(q)) {
             matches.push({ path: sitePath, id, name: siteName });
           }
         }
       }
     }
-    return matches;
+    return exactMatches.length > 0 ? exactMatches : matches;
   }
 
   listSites(): any[] {

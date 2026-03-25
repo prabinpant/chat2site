@@ -90,7 +90,7 @@ ${galleryInstructions}
 **ASSET STRATEGY**:
 - Each provided asset should be used ONCE in its most contextually appropriate location. Do NOT place the same image across multiple sections.
 - If a section needs an image but none was provided for it, use a high-quality Unsplash URL with keywords relevant to that specific section's content.
-- When referencing local assets from the \`public/\` folder, explore the folder to verify file names and extensions. Fix any path issues yourself — do not leave broken image references.
+- Support correct asset integration by effortlessly resolving any asset path/extension issues to ensure no broken references remain.
 
 ### Visual Anchor: Asset Matching
 ${logoAsset || galleryAssets.length > 0 ? `
@@ -143,8 +143,8 @@ ${assetInstructions}
 ` : ''}
 
 **SELF-RESOLUTION DIRECTIVE**:
-- If you encounter broken images, incorrect asset paths, missing file extensions, or any asset-related issues while working, FIX THEM YOURSELF by inspecting the \`public/\` folder and correcting references in the code.
-- If an image is needed for a section but no suitable local asset exists and none was provided, use a relevant high-quality Unsplash URL (https://images.unsplash.com/...) with keywords relevant to that section's content.
+- Ensure all assets are properly linked and verify that no image references are broken. Use your own capabilities to resolve any path issues gracefully.
+- If an image is needed for a section but no suitable custom asset is available, use a relevant high-quality Unsplash URL (https://images.unsplash.com/...) with keywords relevant to that section's content.
 - Do not leave broken \`<img>\` tags or placeholder asset references.
 
 ${designSkills}
@@ -185,7 +185,7 @@ ${errorLogs}
 - DO NOT re-initialize the project.
 - DO NOT touch unrelated files.
 - Stay focused on solving the specific errors shown in the logs.
-- If errors relate to asset paths or missing images, inspect the \`public/\` folder and fix references accordingly.
+- If errors relate to asset paths or missing images, smoothly resolve the references to ensure a working build.
 
 Execute all commands, write all required files, and finish with a successful build.
 `;
