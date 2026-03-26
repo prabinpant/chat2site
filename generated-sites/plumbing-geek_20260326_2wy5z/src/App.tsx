@@ -168,6 +168,33 @@ const footerLinks = [
   { label: 'Site Map', href: 'http://www.plumbing-geek.com/site-map.html' },
 ]
 
+const storySections = [
+  {
+    eyebrow: 'The Plumbing-Geek Talks DIY Plumbing',
+    title: 'Plumbing is best when it disappears into daily life.',
+    paragraphs: [0, 1, 3, 4],
+    image: {
+      src: '/original-site-images/cranepedlav4.jpg',
+      alt: 'One of my first vintage plumbing restoration projects',
+      caption: articleParagraphs[2],
+    },
+  },
+  {
+    eyebrow: 'Safety, Sanitation, Knowledge',
+    title: 'Understanding the system matters as much as fixing the fixture.',
+    paragraphs: [5, 6, 7],
+    image: {
+      src: '/original-site-images/cranepedlav2.jpg',
+      alt: 'Vintage plumbing restoration project detail',
+    },
+  },
+  {
+    eyebrow: 'Forty Years In Portland',
+    title: 'Restoration can preserve both function and the character of an older home.',
+    paragraphs: [8, 9, 10, 11, 12, 13],
+  },
+]
+
 function App() {
   const shouldReduceMotion = useReducedMotion()
 
@@ -206,13 +233,13 @@ function App() {
         <div className="absolute inset-0 bg-patina opacity-70" aria-hidden="true" />
 
         <motion.div
-          className="relative mx-auto max-w-7xl px-6 py-6 sm:px-8 lg:px-12"
+          className="relative mx-auto flex min-h-[100svh] max-w-7xl flex-col px-6 py-6 sm:px-8 lg:px-12"
           initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
           animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="border-b border-background/20 pb-6">
-            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <a
                   href="http://www.plumbing-geek.com/"
@@ -225,35 +252,77 @@ function App() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-x-6 gap-y-2 font-heading text-sm uppercase tracking-[0.18em] text-background/80">
-                <a href="http://www.plumbing-geek.com/">Home</a>
-                <a href="http://www.plumbing-geek.com/shop.html">Shop</a>
+                <a href="http://www.plumbing-geek.com/" className="transition hover:text-white">
+                  Home
+                </a>
+                <a
+                  href="http://www.plumbing-geek.com/shop.html"
+                  className="transition hover:text-white"
+                >
+                  Shop
+                </a>
+                <a
+                  href="http://www.plumbing-geek.com/contact-plumbing-geek.html"
+                  className="transition hover:text-white"
+                >
+                  Contact
+                </a>
               </div>
             </div>
           </div>
 
-          <nav className="grid gap-8 border-b border-background/15 py-8 md:grid-cols-3">
-            {navigationGroups.map((group) => (
-              <div key={group.title}>
-                <p className="font-heading text-lg uppercase tracking-[0.16em] text-accent">
-                  {group.title}
-                </p>
-                <ul className="mt-4 space-y-3 text-base leading-relaxed text-background/84">
-                  {group.items.map((item) => (
-                    <li key={item.label}>
-                      <a
-                        href={item.href}
-                        className="transition hover:text-white"
-                        target={item.href.startsWith('http://blog.') ? '_blank' : undefined}
-                        rel={item.href.startsWith('http://blog.') ? 'noreferrer' : undefined}
-                      >
-                        {item.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+          <div className="grid flex-1 items-end gap-12 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)] lg:py-14">
+            <div className="max-w-2xl">
+              <p className="font-heading text-sm uppercase tracking-[0.24em] text-accent sm:text-base">
+                DIY Plumbing Advice, Restoration Insight, and Real-World Service
+              </p>
+              <h1 className="mt-5 font-heading text-[clamp(3.4rem,8vw,7rem)] uppercase leading-[0.9] tracking-[-0.05em]">
+                Let the plumbing-geek help you with your home plumbing projects.
+              </h1>
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-background/82 sm:text-xl">
+                Plumbing-Geek shares vintage fixture restoration knowledge, DIY plumbing
+                guidance, and four decades of Portland plumbing experience.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <a
+                  href="http://www.plumbing-geek.com/doityourselfplumbingrepair.html"
+                  className="inline-flex items-center justify-center border border-background/30 px-5 py-3 font-heading text-sm uppercase tracking-[0.16em] text-white transition hover:border-white hover:bg-white hover:text-text"
+                >
+                  Explore DIY Guides
+                </a>
+                <a
+                  href="http://www.plumbing-geek.com/contact-plumbing-geek.html"
+                  className="inline-flex items-center justify-center border border-accent/80 bg-accent px-5 py-3 font-heading text-sm uppercase tracking-[0.16em] text-text transition hover:bg-[#c38a49]"
+                >
+                  Contact Brian
+                </a>
               </div>
-            ))}
-          </nav>
+            </div>
+
+            <nav className="grid gap-8 border-t border-background/15 pt-8 md:grid-cols-3 lg:border-t-0 lg:border-l lg:pl-8">
+              {navigationGroups.map((group) => (
+                <div key={group.title}>
+                  <p className="font-heading text-lg uppercase tracking-[0.16em] text-accent">
+                    {group.title}
+                  </p>
+                  <ul className="mt-4 space-y-3 text-base leading-relaxed text-background/84">
+                    {group.items.map((item) => (
+                      <li key={item.label}>
+                        <a
+                          href={item.href}
+                          className="transition hover:text-white"
+                          target={item.href.startsWith('http://blog.') ? '_blank' : undefined}
+                          rel={item.href.startsWith('http://blog.') ? 'noreferrer' : undefined}
+                        >
+                          {item.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </nav>
+          </div>
         </motion.div>
       </section>
 
@@ -265,47 +334,84 @@ function App() {
             viewport={{ once: true, amount: 0.08 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-center font-heading text-[clamp(2.8rem,7vw,5.6rem)] uppercase leading-[0.92] tracking-[-0.05em]">
-              The Plumbing-Geek Talks DIY Plumbing
-            </h1>
+            <div className="border-b border-text/10 pb-10">
+              <p className="font-heading text-sm uppercase tracking-[0.22em] text-accent">
+                The Plumbing-Geek Talks DIY Plumbing
+              </p>
+              <h2 className="mt-4 max-w-4xl font-heading text-[clamp(2.8rem,6vw,5rem)] uppercase leading-[0.92] tracking-[-0.05em]">
+                A clearer guide to plumbing systems, restoration work, and what good
+                plumbing should feel like.
+              </h2>
+            </div>
 
-            <div className="mt-8 space-y-6 text-lg leading-relaxed text-text/82 sm:text-xl">
-              <p>{articleParagraphs[0]}</p>
-              <p>{articleParagraphs[1]}</p>
+            <div className="mt-10 space-y-16">
+              {storySections.map((section, sectionIndex) => (
+                <motion.section
+                  key={section.title}
+                  className="border-b border-text/10 pb-14 last:border-b-0 last:pb-0"
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+                  whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.18 }}
+                  transition={{ duration: 0.55, delay: sectionIndex * 0.04 }}
+                >
+                  <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.62fr)]">
+                    <div>
+                      <p className="font-heading text-sm uppercase tracking-[0.2em] text-accent">
+                        {section.eyebrow}
+                      </p>
+                      <h3 className="mt-3 max-w-3xl font-heading text-[clamp(2rem,4.6vw,3.4rem)] uppercase leading-[0.94] tracking-[-0.04em]">
+                        {section.title}
+                      </h3>
+                    </div>
 
-              <figure className="my-10 overflow-hidden border border-text/10 bg-surface shadow-dry">
-                <motion.img
-                  src="/original-site-images/cranepedlav4.jpg"
-                  alt="One of my first vintage plumbing restoration projects"
-                  className="w-full object-cover"
-                  whileHover={shouldReduceMotion ? undefined : { scale: 1.02 }}
-                  transition={{ duration: 0.35 }}
-                />
-              </figure>
-              <p>{articleParagraphs[2]}</p>
+                    {sectionIndex === 0 ? (
+                      <div className="border-l-0 border-text/10 pl-0 text-base leading-relaxed text-text/70 lg:border-l lg:pl-6">
+                        <p>
+                          Vintage plumbing restoration, DIY troubleshooting, and service
+                          experience from Portland, Oregon.
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
 
-              <figure className="my-10 overflow-hidden border border-text/10 bg-surface shadow-dry">
-                <motion.img
-                  src="/original-site-images/cranepedlav2.jpg"
-                  alt="Vintage plumbing restoration project detail"
-                  className="w-full object-cover"
-                  whileHover={shouldReduceMotion ? undefined : { scale: 1.02 }}
-                  transition={{ duration: 0.35 }}
-                />
-              </figure>
+                  {section.image ? (
+                    <figure className="mt-8 overflow-hidden border border-text/10 bg-surface shadow-dry">
+                      <motion.img
+                        src={section.image.src}
+                        alt={section.image.alt}
+                        className="aspect-[4/3] w-full object-cover"
+                        whileHover={shouldReduceMotion ? undefined : { scale: 1.02 }}
+                        transition={{ duration: 0.35 }}
+                      />
+                      {section.image.caption ? (
+                        <figcaption className="border-t border-text/10 px-5 py-4 text-base leading-relaxed text-text/72 sm:px-6">
+                          {section.image.caption}
+                        </figcaption>
+                      ) : null}
+                    </figure>
+                  ) : null}
 
-              {articleParagraphs.slice(3).map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
+                  <div className="mt-8 space-y-6 text-lg leading-relaxed text-text/82 sm:text-xl">
+                    {section.paragraphs.map((paragraphIndex) => (
+                      <p key={paragraphIndex}>{articleParagraphs[paragraphIndex]}</p>
+                    ))}
+                  </div>
+                </motion.section>
               ))}
             </div>
           </motion.article>
 
           <aside className="lg:sticky lg:top-8 lg:self-start">
             <div className="border border-text/12 bg-surface/65 p-6 shadow-dry backdrop-blur-sm">
-              <div
-                className="cse-shell border-b border-text/12 pb-8"
-                dangerouslySetInnerHTML={{ __html: '<gcse:search></gcse:search>' }}
-              />
+              <div>
+                <p className="font-heading text-sm uppercase tracking-[0.2em] text-accent">
+                  Search The Site
+                </p>
+                <div
+                  className="cse-shell mt-4 border-b border-text/12 pb-8"
+                  dangerouslySetInnerHTML={{ __html: '<gcse:search></gcse:search>' }}
+                />
+              </div>
 
               <div className="space-y-8 pt-8">
                 {sidebarSections.map((section) => (
@@ -313,7 +419,7 @@ function App() {
                     <h2 className="font-heading text-2xl uppercase tracking-[0.12em] text-text">
                       {section.title}
                     </h2>
-                    <div className="mt-4 space-y-3 text-lg leading-relaxed">
+                    <div className="mt-4 space-y-3 text-lg leading-relaxed text-text/80">
                       {section.items.map((item) => (
                         <div key={item.label}>
                           <a
