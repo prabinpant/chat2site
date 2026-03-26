@@ -28,72 +28,42 @@ export class GenerationRunner {
   }
 
   async run(initialSpec: SiteSpec, onProgress: (status: string) => Promise<void> | void): Promise<{ sitePath: string; url?: string; deployedUrl?: string; expandedSpec: SiteSpec; version?: string }> {
-    // this.workspaceManager.cleanupOldSites(5); // Keep only last 5 sites to save disk space
-    
-    // Check for Reference URLs in the description
+    // Detect all reference URLs in the prompt
     const urlRegex = /(https?:\/\/[^\s]+)/g;
-    const urls = initialSpec.description.match(urlRegex);
-    let referenceData: ReferenceData | undefined;
+    const urls = Array.from(new Set(initialSpec.description?.match(urlRegex) || []));
 
-    if (urls && urls.length > 0) {
-      const targetUrl = urls[0];
-      await onProgress(`🔍 Studying reference: ${targetUrl}...`);
-      try {
-        // We'll use a mocked/agentic way to get content since we can't call internal tools easily here 
-        // In a real agent environment, we might have a helper or pre-fetch it.
-        // For now, let's assume the bot-layer or a tool fetcher passed it or we call it.
-        // I will use a placeholder fetch logic that would be backed by the read_url_content tool in the actual execution flow.
-        const response = await fetch(targetUrl);
-        const text = await response.text();
-        referenceData = await this.referenceService.study(targetUrl, text);
-        await onProgress('🎨 Extracting design values and imagery from reference...');
-      } catch (e) {
-        console.error('Failed to study reference URL', e);
-      }
+    if (urls.length > 0) {
+      await onProgress(`🔍 Detected ${urls.length} reference site(s). Delegating research to AI Architect...`);
     }
 
-    await onProgress('🧠 Brainstorming site structure and creative direction...');
-    const expandedSpec = await this.specExpansionService.expand(initialSpec.description, initialSpec.assets || [], referenceData);
+    await onProgress('🧠 Brainstorming site structure and comparative strategy...');
+    const expandedSpec = await this.specExpansionService.expand(
+      initialSpec.description || '', 
+      initialSpec.assets || [], 
+      urls // Pass raw URLs instead of referenceData
+    );
     
-    // Merge initial context with expanded details
-    // Prefer expandedSpec.name if initialSpec.name is suspiciously long or auto-generated
-    const spec: SiteSpec = {
-      ...expandedSpec,
-      name: (initialSpec.name && initialSpec.name.length <= 20) ? initialSpec.name : expandedSpec.name,
-      description: initialSpec.description,
-      preferredSubdomain: initialSpec.preferredSubdomain,
-      assets: initialSpec.assets || []
-    };
-
-    const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
-    const shortId = Math.random().toString(36).substring(2, 7);
-    const safeBaseName = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 30) || 'site';
-    
-    const localFolderName = `${safeBaseName}_${timestamp}_${shortId}`;
-    const netlifySiteName = spec.preferredSubdomain ? `${spec.preferredSubdomain.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${shortId.slice(0, 3)}` : `${safeBaseName}-${shortId}`;
-
-    const sitePath = this.workspaceManager.prepareSiteDirectory(localFolderName);
+    // AI now decides id, name, and subdomain
+    const sitePath = this.workspaceManager.prepareSiteDirectory(expandedSpec.id);
     
     try {
+      // Persist the strategic memory
+      await fs.writeFile(path.join(sitePath, 'memory.md'), expandedSpec.memory);
+
       // Handle Assets
-      if (spec.assets && spec.assets.length > 0) {
+      if (expandedSpec.assets && expandedSpec.assets.length > 0) {
         await onProgress('🖼️ Preparing your custom assets/logo...');
         const publicPath = path.join(sitePath, 'public');
         await fs.mkdir(publicPath, { recursive: true });
 
-        for (let i = 0; i < spec.assets.length; i++) {
-          const asset = spec.assets[i];
+        for (let i = 0; i < expandedSpec.assets.length; i++) {
+          const asset = expandedSpec.assets[i];
           if (asset.source === 'file') {
             const extension = asset.type === 'logo' ? 'png' : 'jpg';
-            let fileName: string;
-            if (asset.type === 'logo') {
-              fileName = `logo.${extension}`;
-            } else if (asset.usageHint) {
-              const safeHint = asset.usageHint.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/(^_|_$)/g, '');
-              fileName = `image_${safeHint}.${extension}`;
-            } else {
-              fileName = `image_section_${i}.${extension}`;
-            }
+            let fileName: string = asset.type === 'logo' 
+              ? `logo.${extension}` 
+              : `image_${asset.usageHint?.replace(/[^a-z0-9]+/gi, '_') || i}.${extension}`;
+            
             const filePath = path.join(publicPath, fileName);
             
             try {
@@ -115,35 +85,40 @@ export class GenerationRunner {
       }
 
       await onProgress('🚀 Autonomous Agent is building your site lifecycle (init, config, install, code, build)...');
-      const pronto = PromptBuilder.build(spec);
+      const pronto = PromptBuilder.build(expandedSpec);
       await this.executeWithRepair(pronto, sitePath, onProgress);
 
       await onProgress('🚀 Starting development server...');
       const url = await this.startDevServer(sitePath);
 
       await onProgress('🌐 Deploying to Netlify...');
-      const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
+      const deployment = await this.deploymentService.deploy(sitePath, expandedSpec.preferredSubdomain);
 
-      // Save metadata for future iterations
-      const finalSpec = { ...spec, preferredSubdomain: netlifySiteName };
+      // Save metadata for future iterations (syncing with netlify slug)
+      const finalSpec = { ...expandedSpec, preferredSubdomain: deployment.siteId || expandedSpec.preferredSubdomain };
       this.workspaceManager.saveMetadata(sitePath, finalSpec);
 
       await onProgress('📦 Initializing version control (v1)...');
-      await versionService.initVersionControl(sitePath, spec.name);
+      await versionService.initVersionControl(sitePath, expandedSpec.name);
 
-      return { sitePath, url, deployedUrl: deployment.url, expandedSpec: spec, version: 'v1' };
+      return { sitePath, url, deployedUrl: deployment.url, expandedSpec: finalSpec, version: 'v1' };
     } catch (error) {
-       // Cleanup failed generation attempt to avoid cluttering disk with broken sites
-       // console.error(`[GenerationRunner] Cleaning up failed site directory: ${sitePath}`);
-       // this.workspaceManager.deleteSiteDirectory(sitePath);
        throw error;
     }
   }
 
   async iterate(sitePath: string, instruction: string, onProgress: (status: string) => Promise<void> | void, newAssets: Asset[] = []) {
-    await onProgress('🔍 Loading site metadata...');
+    await onProgress('🔍 Loading site memory and identity...');
     const spec = this.workspaceManager.loadMetadata(sitePath) as SiteSpec;
     if (!spec) throw new Error('Site metadata not found');
+
+    let previousMemory = '';
+    try {
+      previousMemory = await fs.readFile(path.join(sitePath, 'memory.md'), 'utf-8');
+    } catch (e) {
+      console.warn('Memory file not found, continuing with metadata brain.');
+      previousMemory = spec.memory || '';
+    }
 
     // Handle New Assets for Iteration
     if (newAssets.length > 0) {
@@ -169,18 +144,30 @@ export class GenerationRunner {
       }
     }
 
-    await onProgress('🧠 Building update strategy...');
-    const prompt = PromptBuilder.buildIterationPrompt(spec, instruction, newAssets);
+    // Detect new reference URLs in the update instruction
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const newUrls = Array.from(new Set(instruction.match(urlRegex) || []));
+
+    await onProgress('🧠 Brainstorming update strategy based on memory...');
+    const expandedSpec = await this.specExpansionService.expand(
+      instruction, 
+      [...(spec.assets || []), ...newAssets], 
+      newUrls, 
+      previousMemory
+    );
+
+    // Update memory file
+    await fs.writeFile(path.join(sitePath, 'memory.md'), expandedSpec.memory);
 
     await onProgress('🛠️  AI is applying specific changes...');
+    const prompt = PromptBuilder.buildIterationPrompt(expandedSpec, instruction, newAssets);
     await this.executeWithRepair(prompt, sitePath, onProgress);
 
     await onProgress('🚀 Redeploying updates...');
-    const siteName = spec.preferredSubdomain || path.basename(sitePath);
-    const deployment = await this.deploymentService.deploy(sitePath, siteName);
+    const deployment = await this.deploymentService.deploy(sitePath, expandedSpec.preferredSubdomain);
 
     await onProgress('📦 Saving new version...');
-    const newVersion = await versionService.commitNewVersion(sitePath, spec.name);
+    const newVersion = await versionService.commitNewVersion(sitePath, expandedSpec.name);
 
     await onProgress('✅ Update complete!');
     return {

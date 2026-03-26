@@ -212,36 +212,8 @@ export class ConversationCoordinator {
       return;
     }
 
-    const missingName = !session.spec.name && session.spec.name !== '';
-    const missingSubdomain = !session.spec.preferredSubdomain && session.spec.preferredSubdomain !== '';
-    const hasImage = message.mediaUrl || (session.spec.assets && session.spec.assets.length > 0);
-
-    if (!session.spec.description && !hasImage) {
-      await provider.sendMessage(message.from, "Got it! Can you tell me a bit more about the website you'd like to build? You can describe it in detail or just send over a reference image.");
-      return;
-    }
-
-    if (missingName || missingSubdomain) {
-      const missingPieces: string[] = [];
-      if (missingName) missingPieces.push('a project name');
-      if (missingSubdomain) missingPieces.push('a preferred subdomain (e.g. my-awesome-site)');
-      if (!hasImage) missingPieces.push('any logos or images');
-
-      const askStr = missingPieces.length === 1 
-        ? missingPieces[0] 
-        : missingPieces.slice(0, -1).join(', ') + ' or ' + missingPieces[missingPieces.length - 1];
-      
-      let prompt = `Awesome! To help set things up, do you have ${askStr}? If you just want me to handle everything, simply reply 'done' and I'll start building.`;
-      
-      if (message.mediaUrl) {
-        prompt = "Image received! " + prompt;
-      }
-      
-      await provider.sendMessage(message.from, prompt);
-      return;
-    }
-
-    // Auto-start if they have given a name and subdomain and didn't mention they want to provide more.
+    // Auto-start generation as soon as we have a description or an image.
+    // The AI Strategist will now decide the Name, ID, and Subdomain autonomously.
     this.startGeneration(message.from, session, provider);
   }
 

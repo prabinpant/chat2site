@@ -8,13 +8,16 @@ export interface Asset {
 }
 
 export interface SiteSpec {
-  name: string;
-  description: string;
-  preferredSubdomain?: string;
+  id: string; // Decided by AI Architect (Strategist)
+  name: string; // Brand Name
+  preferredSubdomain: string; // URL Slug
+  memory: string; // The "Brain" - Markdown containing context, prompts, and design decisions
+  
+  description?: string;
   persona?: string;
   personaStyleGuide?: string;
-  features: string[];
-  theme: {
+  features?: string[];
+  theme?: {
     primaryColor: string;
     darkMode: boolean;
     palette?: {

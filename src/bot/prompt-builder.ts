@@ -3,191 +3,96 @@ import { getDesignSkills } from '../lib/design-skills-context.js';
 
 export class PromptBuilder {
   static build(spec: SiteSpec): string {
-    const palette = spec.theme.palette || {
-      background: 'ffffff',
-      surface: 'f8fafc',
-      accent: spec.theme.primaryColor,
-      text: '0f172a'
-    };
+    const assetInstructions = (spec.assets || []).length > 0 
+      ? `### RAW ASSETS PROVIDED:
+The following files have been placed in your current working directory for use:
+${(spec.assets || []).map(a => `- \`${a.content}\` (Type: ${a.type})`).join('\n')}
 
-    const typography = spec.branding?.typography || {
-      heading: 'Sans-serif',
-      body: 'Sans-serif'
-    };
+**ASSET DIRECTIVE**: 
+1. Move these files to your \`public/\` directory immediately.
+2. Link to them in your React components using absolute paths (\`/filename.jpg\`).
+3. If an asset is a logo, use it in the Navbar. If it's an image, use it in a relevant section.`
+      : 'No local assets provided. Use high-quality Unsplash URLs (https://images.unsplash.com/...) for all imagery.';
 
-    const logoAsset = spec.assets?.find(a => a.type === 'logo');
-    const galleryAssets = spec.assets?.filter(a => a.type === 'image') || [];
-
-    let logoInstruction = '- **LOGO**: Create a sophisticated text-based logo or use a Lucide icon if no logo is provided.';
-    if (logoAsset) {
-      if (logoAsset.source === 'text') {
-        logoInstruction = `- **LOGO**: Use the provided logo description: "${logoAsset.content}".`;
-      } else {
-        logoInstruction = `- **LOGO**: A logo file has been placed at \`${logoAsset.content}\` in the public folder. Use it in the appropriate brand position.`;
-      }
-    }
-
-    const galleryInstructions = galleryAssets.length > 0 
-      ? galleryAssets.map((a, i) => {
-          const hint = a.usageHint ? ` (suggested use: ${a.usageHint})` : '';
-          if (a.source === 'text') {
-            return `- **IMAGE ${i+1}**${hint}: Description: "${a.content}".`;
-          } else {
-            return `- **IMAGE ${i+1}**${hint}: Local asset at \`${a.content}\`. Use it ONLY where contextually appropriate — do not reuse the same image across multiple sections.`;
-          }
-        }).join('\n')
-      : '- **NO IMAGES PROVIDED**: Use high-quality Unsplash URLs (https://images.unsplash.com/...) with context-aware keywords relevant to each section\'s content. Choose different images for different sections.';
-
-    const designSkills = getDesignSkills(spec.persona);
+    const persona = spec.persona || 'Modern Designer';
+    const designSkills = getDesignSkills(persona);
 
     return `
-You are an **Autonomous System Architect**. You have full shell access to the current directory.
-Your task is to build a premium, high-fidelity website named "${spec.name}" from scratch.
+You are an **Autonomous System Architect**. You have full shell access and are responsible for the entire technical lifecycle of a premium website named "${spec.name}".
 
-### ORIGINAL USER REQUEST (HIGHEST PRIORITY):
-"""
-${spec.description}
-"""
-> This is the user's exact request. Every piece of data, name, copy, and requirement here is ABSOLUTE TRUTH.
-> - Use all names, text, prices, and details VERBATIM.
-> - Do NOT hallucinate content not present in this request.
-> - Do NOT add sections, features, or components the user did not ask for.
-> - Build ONLY what was requested, elevated to premium quality.
+### YOUR PROJECT BRAIN: **memory.md**
+You MUST read \`memory.md\` in your current directory. It contains your vision, design strategy, and any reference URLs you need to research. 
+**Follow its strategic plan as your primary directive.**
 
 ### YOUR LIFECYCLE:
-1. **Initialize**: Use \`npm create vite@latest . -- --template react-ts\`. Handle the Vite 8 experimental prompt by choosing the stable (No) option.
-2. **Configure Design**: 
-   - Configure Tailwind CSS v3 and PostCSS. 
-   - Set up \`tailwind.config.js\`, \`postcss.config.js\`, and \`src/index.css\` with standard Tailwind directives.
-3. **Manage Dependencies**: Install all required packages including \`lucide-react\`, \`framer-motion\`, \`clsx\`, \`tailwind-merge\`, and any other packages you deemed necessary: [${Object.keys(spec.extraDependencies || {}).join(', ')}].
-4. **Generate & Polish**:
-   - Delete default Vite boilerplate (\`App.css\`, \`assets/\`).
-   - Create a premium, responsive \`src/App.tsx\` that implements the design identity below.
-5. **Final Build**: Run \`npm run build\` to ensure the production bundle is generated in the \`dist/\` folder.
-
-**NOTE**: Your terminal output is being streamed LIVE to the user. Provide clear status updates for each step.
+1. **Research & Discovery**: Read \`memory.md\`. Use \`curl\`, \`web search\`, or browsing tools to study any reference sites mentioned. Extract brand values, layouts, and discover remote assets (logos, favicons).
+2. **Setup**: Use \`npm create vite@latest . -- --template react-ts\`. Configure Tailwind CSS v3 and PostCSS.
+3. **Asset Management**: Move any provided local assets to \`public/\`. Download any remote assets identified during research into \`public/\`.
+4. **Implementation**: Build a premium, responsive \`src/App.tsx\` using \`lucide-react\` and \`framer-motion\`. Ensure SEO meta tags in \`index.html\` are updated.
+5. **Quality Control**: Run \`npm run build\` to verify stability.
 
 ${designSkills}
 
-### Design Identity to Implement:
-- **Tone**: ${spec.branding?.tone || 'Professional & Modern'}
-${spec.persona ? `- **Design Persona**: ${spec.persona}` : ''}
-${spec.personaStyleGuide ? `- **Persona Style Guide**: ${spec.personaStyleGuide}` : '- **Style Guide**: Maintain a clean, professional React/Tailwind design.'}
-- **Palette**: 
-  - Background: #${palette.background}
-  - Surface/Cards: #${palette.surface}
-  - Accent: #${palette.accent}
-  - Text: #${palette.text}
-- **Typography**: Heading: ${typography.heading}, Body: ${typography.body}
+${assetInstructions}
 
-### Site Structure:
-${(spec.sections || []).map(s => `- ${s.title}: ${s.description} (Layout: ${s.layoutHint || 'standard'})`).join('\n')}
+### CONSTRAINTS:
+- **NO THOUGHTS IN UI**: Do NOT output internal reasoning into your components.
+- **PURE AUTONOMY**: Do not ask for permission. If a dependency is missing, install it. If a file is broken, fix it.
+- **VISUAL EXCELLENCE**: Aim for a "Stripe-level" or "Apple-level" premium aesthetic as guided by your memory.
 
-### Assets & Imagery:
-${logoInstruction}
-${galleryInstructions}
-
-**ASSET STRATEGY**:
-- Each provided asset should be used ONCE in its most contextually appropriate location. Do NOT place the same image across multiple sections.
-- If a section needs an image but none was provided for it, use a high-quality Unsplash URL with keywords relevant to that specific section's content.
-- Support correct asset integration by effortlessly resolving any asset path/extension issues to ensure no broken references remain.
-
-### Visual Anchor: Asset Matching
-${logoAsset || galleryAssets.length > 0 ? `
-- **INCORPORATION**: You have been provided with specific brand assets. Analyze the palette, style, and "vibe" of the logo and images.
-- **COHESION**: Your design (colors, spacing, typography) MUST be a sophisticated extension of these assets. 
-- **ALIGNMENT**: If the logo is minimalist, keep the UI minimalist. If the images are vibrant/organic, use similar gradients and shapes.
-` : '- **GENERIC ALIGNMENT**: Since no custom assets were provided, follow the Persona Style Guide strictly to create a cohesive brand from scratch.'}
-
-
-### TEXT AND THOUGHTS:
-- **NO THOUGHTS IN UI**: Do NOT output any of your internal thinking, <think> blocks, or placeholder text like "I will build this" into the actual user-facing React components. Use realistic placeholder content based on the original request.
-
-Execute all commands, write all files, and finish with a successful build.
+Execute all commands and finish with a successful build.
 `;
   }
 
   static buildIterationPrompt(spec: SiteSpec, instruction: string, newAssets: Asset[] = []): string {
-    const assetInstructions = newAssets.map((a, i) => {
-      const hint = a.usageHint ? ` (suggested use: ${a.usageHint})` : '';
-      if (a.source === 'text') return `- **NEW IMAGE ${i+1}**${hint}: Description: "${a.content}".`;
-      return `- **NEW IMAGE ${i+1}**${hint}: Local asset at \`${a.content}\`. Use it where contextually appropriate.`;
-    }).join('\n');
+    const assetInstructions = newAssets.length > 0 
+      ? `### NEW ASSETS PROVIDED:
+${newAssets.map(a => `- \`${a.content}\` (Type: ${a.type})`).join('\n')}
+**DIRECTIVE**: Move these to \`public/\` and integrate them into the requested changes.`
+      : '';
 
-    const designSkills = getDesignSkills(spec.persona);
+    const persona = spec.persona || 'Modern Designer';
+    const designSkills = getDesignSkills(persona);
 
     return `
-You are an **Autonomous System Architect** iterating on an existing Vite/React website named "${spec.name}".
-The project is already initialized and configured in the current directory.
+You are an **Autonomous System Architect** iterating on the website "${spec.name}".
+
+### YOUR UPDATE BRAIN: **memory.md**
+Read \`memory.md\` first. It has been updated with the latest strategy and historical context for this change.
 
 ### YOUR TASK:
-1. **STUDY THE PROJECT**: Before making any changes, explore the existing project completely — read the source files, check the \`public/\` folder for assets, understand the design system, component structure, and routing.
-2. **IMPLEMENTATION**: Apply the following **specific** changes/modifications as requested by the user:
-> "${instruction}"
+1. **IMPLEMENTATION**: Apply the following change: "${instruction}"
+2. **AGENTIC RESEARCH**: If the instruction or memory mentions new reference sources, research them before coding.
+3. **CONTINUITY**: Adhere to the existing design system found in the source code.
 
-${newAssets.length > 0 ? `### NEW ASSETS PROVIDED:
 ${assetInstructions}
-
-**ASSET STRATEGY**: 
-1. Use each new asset ONLY where the user's instruction indicates or where it contextually fits best.
-2. Do NOT insert new assets across the whole site. Find the single most logical placement.
-3. Leave all existing images UNTOUCHED unless the user explicitly asks to replace them.
-4. Do NOT use a new image as a global background unless explicitly asked.
-` : ''}
-
-**SELF-RESOLUTION DIRECTIVE**:
-- Ensure all assets are properly linked and verify that no image references are broken. Use your own capabilities to resolve any path issues gracefully.
-- If an image is needed for a section but no suitable custom asset is available, use a relevant high-quality Unsplash URL (https://images.unsplash.com/...) with keywords relevant to that section's content.
-- Do not leave broken \`<img>\` tags or placeholder asset references.
 
 ${designSkills}
 
-### DESIGN CONTINUITY:
-1. **RESPECT THE AESTHETIC**: Deeply analyze and adhere to the existing color palette, typography (font-families, sizes, weights), spacing, and visual "vibe" found in the provided source code.
-2. **STYLE MATCHING**: Any new components or sections MUST be stylistically seamless with the rest of the site. If the site is minimal, keep new additions minimal. If it's vibrant, match that energy.
-3. **NO UNSOLICITED CHANGES**: Do NOT change the theme, primary colors, or fonts unless the user explicitly asked to modify the design identity.
+### CONSTRAINTS:
+- **NO UNNECESSARY REFACTORS**.
+- **NO THOUGHTS IN UI**.
+- **STABILITY**: Ensure \`npm run build\` passes.
 
-### CRITICAL CONSTRAINTS:
-1. **DO NOT OVERCOMPLICATE**: Implement EXACTLY what the user requested. Do not invent new features, complex state, or animations unless explicitly asked.
-2. **TARGETED MODIFICATIONS ONLY**: ONLY modify the specific components, sections, or logic mentioned in the user's request. Leave everything else EXACTLY as it is.
-3. **NO UNNECESSARY REFACTORS**: Do not refactor, rename, or restructure existing code unless strictly required.
-4. **PRESERVE UNRELATED SECTIONS**: If the user asks to change a specific section, do NOT touch other sections.
-5. **PRESERVE ASSETS**: Do NOT delete or rename existing files in the \`public/\` folder unless instructed.
-6. **NO RE-INITIALIZATION**: Do NOT run \`npm create vite\`.
-7. **STABILITY**: Ensure the site remains functional. After making changes, run \`npm run build\` to verify.
-8. **NO THOUGHTS IN UI**: Do NOT output any of your internal thinking, <think> blocks, or placeholder text like "I will build this" into the actual user-facing React components. Use realistic placeholder content based on the original request.
-
-Execute all commands necessary, write the complete modified files, and finish with a successful build.
+Execute all commands and finish with a successful build.
 `;
   }
 
   static buildRepairPrompt(originalPrompt: string, errorLogs: string): string {
     return `
-You are an **Autonomous System Architect** tasked with repairing a failed build.
+You are an **Autonomous System Architect** repairing a failed build.
 
-### ORIGINAL INSTRUCTIONS (WHAT YOU WERE TRYING TO BUILD):
-"""
-${originalPrompt}
-"""
+### YOUR REPAIR TASK:
+1. **ANALYZE**: Read the logs below to find the root cause.
+2. **FIX**: Edit files and resolve dependencies.
+3. **VERIFY**: Ensure \`npm run build\` succeeds.
 
-The previous build attempt failed with the following errors:
-
+### ERROR LOGS:
 \`\`\`
 ${errorLogs}
 \`\`\`
 
-### YOUR REPAIR TASK:
-1. **ANALYZE**: Read the error logs carefully to identify the root cause (e.g., missing imports, syntax errors, conflicting dependencies, or missing files).
-2. **FIX**: Use the shell to read the problematic files, apply the necessary fixes, and ensure all imports and logic are correct.
-3. **VERIFY**: Run \`npm run build\` again to verify that your changes fixed the issue.
-
-### CONSTRAINTS:
-- DO NOT re-initialize the project.
-- DO NOT touch unrelated files.
-- Stay focused on solving the specific errors shown in the logs.
-- If errors relate to asset paths or missing images, smoothly resolve the references to ensure a working build.
-
-Execute all commands, write all required files, and finish with a successful build.
+Execute all commands and finish with a successful build.
 `;
   }
 }

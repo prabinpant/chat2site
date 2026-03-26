@@ -1,9 +1,6 @@
 export interface ReferenceData {
   url: string;
   textContent: string;
-  extractedImages: string[];
-  brandValues: string[];
-  suggestedColors: string[];
 }
 
 export class ReferenceService {
@@ -12,20 +9,11 @@ export class ReferenceService {
    * in the GenerationRunner. This service provides the structure for holding that data.
    */
   async study(url: string, content: string): Promise<ReferenceData> {
-    // We use LLM to summarize and extract relevant design bits from the raw markdown
-    // This is handled in the SpecExpansionService by passing this raw content.
+    // We provide the raw HTML content directly to the SpecExpansionService.
+    // The AI will perform "Agentic Extraction" to find logos, favicons, and images.
     return {
       url,
-      textContent: content,
-      extractedImages: this.extractImages(content),
-      brandValues: [], // To be populated by expansion service
-      suggestedColors: [] // To be populated by expansion service
+      textContent: content
     };
-  }
-
-  private extractImages(markdown: string): string[] {
-    const imgRegex = /!\[.*?\]\((.*?)\)/g;
-    const matches = [...markdown.matchAll(imgRegex)];
-    return matches.map(m => m[1]).filter(url => url.startsWith('http'));
   }
 }
