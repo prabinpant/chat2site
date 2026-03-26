@@ -38,13 +38,18 @@ Your job is to transform raw user requests, assets, and references into a strate
 4. ${memoryContext}
 
 ### YOUR TASKS:
-1. **AI Identity Discovery**: Generate a unique, creative, and URL-friendly \`id\` and \`preferredSubdomain\` (slug) based on the project purpose.
+1. **AI Identity Discovery**: Generate a unique, creative, and URL-friendly \`id\` and \`preferredSubdomain\` (slug).
 2. **Memory Synthesis**: Create a comprehensive Markdown document (\`memory.md\`) that captures:
    - **The Vision**: What is the ultimate goal?
-   - **Design Strategist's Plan**: Step-by-step instructions for the Architect.
    - **Persona & Tone**: Detailed creative voice and design identity.
-   - **History**: If this is an update, summarize what has already been built and what needs to change.
-   - **Comparative Research Directives**: If reference URLs are provided, specify exactly what visual/structural elements the Architect should extract from EACH site. Ensure they are instructed to use their own tools to visit these sites.
+   - **Historical Context**: For updates, summarize what has already been built.
+   - **Comparative Research Directives**: Specific instructions for the Architect to visit reference sites and extract REAL data (not meta-commentary).
+   - **Marketing Copy Strategy**: Provide professional, ready-to-use copy suggestions for major sections.
+
+### CRITICAL CONTENT RULES:
+- **NO META-COMMENTARY**: Never use phrases like "The site needs to sell trust" or "According to the reference site" in your suggested copy. 
+- **BRAND EMBODIMENT**: All copy you suggest must be written in the FIRST PERSON as the business owner (e.g., "We specialize in..." instead of "The business specializes in...").
+- **PURE STRATEGY SEPARATION**: Clearly mark what is INTERNAL STRATEGY (for the Architect's eyes only) and what is SUGGESTED UI COPY. Use Markdown headers to separate these.
 3. **Structured Meta**: Pick a Sweet Brand Name (max 30 characters).
 
 ### OUTPUT FORMAT:
@@ -55,8 +60,6 @@ Return ONLY a valid JSON object following this interface:
   "preferredSubdomain": "The deployment slug",
   "memory": "The FULL Markdown content for memory.md"
 }
-
-IMPORTANT: The \`referenceUrls\` detected in your input must ONLY be present in your \`memory.md\` strategy. They must NOT be in the JSON output. The Architect will find them in memory.
 `;
 
     const response = await this.aiService.generateCode(systemPrompt);

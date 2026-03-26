@@ -10,8 +10,7 @@ ${(spec.assets || []).map(a => `- \`${a.content}\` (Type: ${a.type})`).join('\n'
 
 **ASSET DIRECTIVE**: 
 1. Move these files to your \`public/\` directory immediately.
-2. Link to them in your React components using absolute paths (\`/filename.jpg\`).
-3. If an asset is a logo, use it in the Navbar. If it's an image, use it in a relevant section.`
+2. Link to them in your React components using absolute paths (\`/filename.jpg\`).`
       : 'No local assets provided. Use high-quality Unsplash URLs (https://images.unsplash.com/...) for all imagery.';
 
     const persona = spec.persona || 'Modern Designer';
@@ -25,20 +24,24 @@ You MUST read \`memory.md\` in your current directory. It contains your vision, 
 **Follow its strategic plan as your primary directive.**
 
 ### YOUR LIFECYCLE:
-1. **Research & Discovery**: Read \`memory.md\`. Use \`curl\`, \`web search\`, or browsing tools to study any reference sites mentioned. Extract brand values, layouts, and discover remote assets (logos, favicons).
+1. **Research & Discovery**: Read \`memory.md\`. Use \`curl\`, \`web search\`, or browsing tools to study any reference sites mentioned. Extract REAL textual copy, service lists, about info, and license numbers. 
 2. **Setup**: Use \`npm create vite@latest . -- --template react-ts\`. Configure Tailwind CSS v3 and PostCSS.
-3. **Asset Management**: Move any provided local assets to \`public/\`. Download any remote assets identified during research into \`public/\`.
-4. **Implementation**: Build a premium, responsive \`src/App.tsx\` using \`lucide-react\` and \`framer-motion\`. Ensure SEO meta tags in \`index.html\` are updated.
-5. **Quality Control**: Run \`npm run build\` to verify stability.
+3. **Asset Management**: Move provided assets to \`public/\`.
+4. **Implementation**: Build a premium, responsive \`src/App.tsx\`. 
+
+### CRITICAL: BRAND EMBODIMENT PROTOCOL
+- **YOU ARE THE BUSINESS**: Write all copy exactly as if you were the business owner. Use "We", "I", "Our".
+- **NO META-COMMENTARY**: Forbid any mention of "the reference site", "the original site", "the redesign", or "according to research" in the actual user-facing code.
+- **NO THOUGHT LEAKAGE**: Do NOT use strategic reasoning from \`memory.md\` (e.g., "The site needed to sell trust...") as actual website text. Every sentence on the site must be a direct marketing statement or factual info about the services.
+- **REAL DATA**: Extract REAL contents (from \`curl\` or search) rather than hallucinating industry boilerplate.
 
 ${designSkills}
 
 ${assetInstructions}
 
 ### CONSTRAINTS:
-- **NO THOUGHTS IN UI**: Do NOT output internal reasoning into your components.
-- **PURE AUTONOMY**: Do not ask for permission. If a dependency is missing, install it. If a file is broken, fix it.
-- **VISUAL EXCELLENCE**: Aim for a "Stripe-level" or "Apple-level" premium aesthetic as guided by your memory.
+- **NO THOUGHTS IN UI**: Never leak internal reasoning into components.
+- **PURE AUTONOMY**: No spoon-feeding. Research everything, build everything.
 
 Execute all commands and finish with a successful build.
 `;
@@ -46,31 +49,32 @@ Execute all commands and finish with a successful build.
 
   static buildIterationPrompt(spec: SiteSpec, instruction: string, newAssets: Asset[] = []): string {
     const assetInstructions = newAssets.length > 0 
-      ? `### NEW ASSETS PROVIDED:
-${newAssets.map(a => `- \`${a.content}\` (Type: ${a.type})`).join('\n')}
-**DIRECTIVE**: Move these to \`public/\` and integrate them into the requested changes.`
+      ? `### NEW ASSETS: Move these to \`public/\` and integrate into the changes.`
       : '';
 
     const persona = spec.persona || 'Modern Designer';
     const designSkills = getDesignSkills(persona);
 
     return `
-You are an **Autonomous System Architect** iterating on the website "${spec.name}".
+You are an **Autonomous System Architect** iterating on "${spec.name}".
 
 ### YOUR UPDATE BRAIN: **memory.md**
-Read \`memory.md\` first. It has been updated with the latest strategy and historical context for this change.
+Read \`memory.md\` first for the updated strategy and context.
+
+### BRAND EMBODIMENT & TRUTH:
+- **NO META-REFERENCES**: Do not mention "reference site", "original site", or "redesign" in the UI.
+- **FIRST PERSON**: Speak as the business proprietor.
+- **REAL CONTENT**: Pull actual data from reference sources. Do not hallucinate content.
 
 ### YOUR TASK:
-1. **IMPLEMENTATION**: Apply the following change: "${instruction}"
-2. **AGENTIC RESEARCH**: If the instruction or memory mentions new reference sources, research them before coding.
-3. **CONTINUITY**: Adhere to the existing design system found in the source code.
+1. **IMPLEMENTATION**: Apply: "${instruction}"
+2. **CONTINUITY**: Adhere to the existing design system.
 
 ${assetInstructions}
 
 ${designSkills}
 
 ### CONSTRAINTS:
-- **NO UNNECESSARY REFACTORS**.
 - **NO THOUGHTS IN UI**.
 - **STABILITY**: Ensure \`npm run build\` passes.
 
@@ -81,9 +85,8 @@ Execute all commands and finish with a successful build.
   static buildRepairPrompt(originalPrompt: string, errorLogs: string): string {
     return `
 You are an **Autonomous System Architect** repairing a failed build.
-
 ### YOUR REPAIR TASK:
-1. **ANALYZE**: Read the logs below to find the root cause.
+1. **ANALYZE**: Read logs below.
 2. **FIX**: Edit files and resolve dependencies.
 3. **VERIFY**: Ensure \`npm run build\` succeeds.
 
@@ -91,7 +94,6 @@ You are an **Autonomous System Architect** repairing a failed build.
 \`\`\`
 ${errorLogs}
 \`\`\`
-
 Execute all commands and finish with a successful build.
 `;
   }
