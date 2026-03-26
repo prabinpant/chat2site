@@ -6,8 +6,12 @@
 
 @layer base {
   :root {
-    color: #1f1a17;
-    background: #f4f0e8;
+    color: #1b1816;
+    background: #f8f4ec;
+    --paper: #f4f0e8;
+    --ink: #1b1816;
+    --accent: #b22222;
+    --gold: #d3b26d;
     font-family: 'Source Serif 4', serif;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -23,9 +27,9 @@
     margin: 0;
     min-width: 320px;
     background:
-      linear-gradient(180deg, rgba(244, 240, 232, 0.98), rgba(230, 222, 209, 0.94)),
-      #f4f0e8;
-    color: #1f1a17;
+      linear-gradient(180deg, rgba(248, 244, 236, 0.98), rgba(238, 231, 219, 0.92)),
+      #f8f4ec;
+    color: var(--ink);
   }
 
   a {
@@ -45,42 +49,6 @@
   }
 
   ::selection {
-    background: rgba(176, 122, 59, 0.2);
-  }
-
-  .cse-shell .gsc-control-cse,
-  .cse-shell .gsc-control-cse-en {
-    border: 0;
-    padding: 0;
-    background: transparent;
-    font-family: 'Source Serif 4', serif;
-  }
-
-  .cse-shell .gsc-search-box-tools .gsc-search-box .gsc-input {
-    padding-right: 0;
-  }
-
-  .cse-shell .gsc-input-box {
-    border: 1px solid rgba(31, 26, 23, 0.16);
-    border-radius: 9999px;
-    background: rgba(244, 240, 232, 0.75);
-  }
-
-  .cse-shell input.gsc-input {
-    background: transparent !important;
-    color: #1f1a17 !important;
-    font-family: 'Source Serif 4', serif !important;
-  }
-
-  .cse-shell .gsc-search-button-v2 {
-    margin: 0;
-    border-radius: 9999px;
-    background: #1f1a17;
-  }
-
-  .cse-shell .gs-title,
-  .cse-shell .gs-snippet,
-  .cse-shell .gsc-url-top {
-    font-family: 'Source Serif 4', serif !important;
+    background: rgba(178, 34, 34, 0.18);
   }
 }
