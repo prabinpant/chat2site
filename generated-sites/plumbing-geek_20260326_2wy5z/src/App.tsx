@@ -1,285 +1,388 @@
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
-import { ArrowUpRight, Droplets } from 'lucide-react'
+import { useEffect } from 'react'
+import { motion, useReducedMotion } from 'framer-motion'
 
-const sections = [
+const navigationGroups = [
   {
-    label: 'Plumbing contractor work',
-    title: 'Plumbing contractor',
-    body: "Brian's Plumbing Works, doing business as Plumbing-Geek, serves Portland, Oregon as a plumbing contractor.",
-    image:
-      'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=1200&q=80',
-    alt: 'Workshop plumbing tools and fittings',
+    title: 'Vintage Plumbing',
+    items: [
+      { label: 'Restoration', href: 'http://www.plumbing-geek.com/antique-faucet-repair.html' },
+      { label: 'Repair', href: 'http://www.plumbing-geek.com/vintageplumbing.html' },
+      {
+        label: 'Buy Vintage Fixtures',
+        href: 'http://www.plumbing-geek.com/vintageplumbingfixtures.html',
+      },
+      { label: 'Standard', href: 'http://www.plumbing-geek.com/vintagestandardfixtures.html' },
+      { label: 'Crane Co.', href: 'http://www.plumbing-geek.com/craneplumbingfixtures.html' },
+    ],
   },
   {
-    label: 'Vintage plumbing restoration',
-    title: 'Vintage plumbing restoration',
-    body: "Brian's Plumbing Works, doing business as Plumbing-Geek, is also a vintage plumbing restoration business.",
-    image:
-      'https://images.unsplash.com/photo-1505798577917-a65157d3320a?auto=format&fit=crop&w=1200&q=80',
-    alt: 'Restored vintage metal plumbing fixture detail',
+    title: 'Hire Plumbing Geek',
+    items: [
+      { label: 'Brians Plumbing Works', href: 'http://www.plumbing-geek.com/brians-plumbing-works.html' },
+      { label: 'FAQ', href: 'http://www.plumbing-geek.com/faq.html' },
+      { label: 'Contact', href: 'http://www.plumbing-geek.com/contact-plumbing-geek.html' },
+      { label: 'Portfolio', href: 'http://www.plumbing-geek.com/antique-plumbing-fixtures.html' },
+      { label: 'About', href: 'http://www.plumbing-geek.com/about-me.html' },
+      { label: 'Blog', href: 'http://blog.plumbing-geek.com' },
+      {
+        label: 'Find A Local Contractor',
+        href: 'http://www.plumbing-geek.com/Find-A-Local-Contractor.html',
+      },
+    ],
+  },
+  {
+    title: 'DIY Plumbing Guides',
+    items: [
+      { label: 'Plumbing Basics', href: 'http://www.plumbing-geek.com/plumbing-basics.html' },
+      { label: 'DIY Guides', href: 'http://www.plumbing-geek.com/doityourselfplumbingrepair.html' },
+      { label: 'Tools', href: 'http://www.plumbing-geek.com/plumbing-tool.html' },
+      { label: 'Supplies', href: 'http://www.plumbing-geek.com/plumbing-supplies.html' },
+      { label: 'Pipes', href: 'http://www.plumbing-geek.com/plumbing-pipes.html' },
+      { label: 'Frozen Pipes', href: 'http://www.plumbing-geek.com/frozen-water-pipes.html' },
+      { label: 'Clogged Drains', href: 'http://www.plumbing-geek.com/clogged-drains.html' },
+      { label: 'Water Heater Info', href: 'http://www.plumbing-geek.com/water-heater-info.html' },
+      { label: 'Emergency Plumbing', href: 'http://www.plumbing-geek.com/emergency-plumbing.html' },
+    ],
   },
 ]
 
-const projects = [
+const articleParagraphs = [
+  <>
+    Who is a plumbing-geek? Anyone that finds beauty in a well-functioning plumbing
+    system. That person you know who actually begins DIY plumbing projects when
+    everything was working or the do it yourself plumbing guru everyone calls for
+    advice are both plumbing geeks.
+  </>,
+  <>
+    Because of plumbing&apos;s utilitarian nature, function is always more important
+    than form. However, beauty and function are always attainable in plumbing.
+  </>,
+  <>One of my first vintage plumbing restoration projects. Pretty isn&apos;t it?</>,
+  <>
+    Plumbing should be essentially out-of-mind. You may not notice good plumbing but
+    you <i>always</i> notice plumbing that <i>doesn&apos;t</i> work as it should. For
+    example, you should NEVER have to explain to a guest how to use your plumbing...
+    &quot;just jiggle the handle three times.&quot;
+  </>,
+  <>
+    Plumbing is fundamental to our lifestyle. Yet few people really understand the
+    plumbing systems in their homes.
+  </>,
+  <>
+    Our mission is to help people understand the plumbing systems that serve them, in
+    order to promote safety, sanitation, and knowledge. These are important for all
+    home owners, but especially important for the DIY plumbing handyman. You may only
+    be concerned about your drippy faucet, unaware of other unsafe conditions that
+    could make your family sick if left unattended.
+  </>,
+  <>
+    Plumbing codes are based on physical laws; the essential aspects of the plumbing
+    code have not changed much in 100 years. Whether you have modern or vintage
+    plumbing, your should have confidence that it&apos;s safe, sanitary, and efficient.
+  </>,
+  <>
+    What&apos;s good plumbing? Plumbing is utilitarian... functional. You can compare
+    plumbing that works well to a computer that runs well. When both are at their
+    peak, you just &quot;use&quot; them without thinking about it. You shouldn&apos;t see
+    either your plumber or computer tech very often <i>if they&apos;ve done their job right</i>.
+  </>,
+  <>
+    I&apos;ve been a Portland plumbing contractor for forty years as of December 2024, as
+    owner of <b>Brian&apos;s Plumbing Works.</b> After more than forty years as a
+    journeyman plumber I&apos;ve seen the good, the bad, and the ugly side of plumbing.
+  </>,
+  <>
+    I&apos;ve had the pleasure of restoring the beauty and function to vintage plumbing
+    fixtures in many old homes in the Portland, Oregon area. In doing so, the
+    original interior architecture of the homes has been preserved. Many of these
+    customers were advised by other plumbers that a remodel was unavoidable because
+    of the age of the fixtures.
+  </>,
+  <>
+    The repair or restoration of fixtures is one way to practice <b>green plumbing,</b>{' '}
+    and can be much more economical than replacing the fixture or remodeling the
+    room.
+  </>,
+  <>
+    <b>I&apos;m a plumbing-geek.</b> I love to repair fixtures. But I&apos;m always
+    mindful that the fixture serves the customer, and so do I. My mission as a
+    plumber has always been to be a servant of my client. And my personal philosophy
+    has been that my needs will be met by serving the needs of others.
+  </>,
+  <>
+    I hope the information you find here on Plumbing-Geek meets your needs. Whether
+    you do your own plumbing or choose to hire a plumber, good luck with your
+    project!
+  </>,
+  <>
+    If you&apos;re a plumbing geek, or only have a specific need right now, I think
+    you&apos;ll be happy with the information on this website. Please contact me with
+    any questions or comments. Thank you.
+  </>,
+]
+
+const sidebarSections = [
   {
-    title: 'Recent projects',
-    text: 'Content referencing recent projects reinforces that the business is active and currently working on notable plumbing and restoration jobs.',
-    image:
-      'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=900&q=80',
-    alt: 'Copper piping installation detail',
-    className: 'md:col-span-5 md:pt-16',
+    title: 'Vintage Plumbing',
+    items: [
+      { label: 'Shop', href: 'http://www.plumbing-geek.com/shop.html' },
+      { label: 'Restoration', href: 'http://www.plumbing-geek.com/antique-faucet-repair.html' },
+      { label: 'Repair', href: 'http://www.plumbing-geek.com/vintageplumbing.html' },
+      { label: 'Blog', href: 'http://blog.plumbing-geek.com/' },
+    ],
   },
   {
-    title: 'Portland, Oregon',
-    text: "Brian's Plumbing Works, doing business as Plumbing-Geek, continues to connect plumbing contractor work with vintage plumbing restoration in Portland, Oregon.",
-    image:
-      'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=900&q=80',
-    alt: 'Historic bathroom fixture and tile detail',
-    className: 'md:col-span-4',
+    title: 'Top DIY Guides',
+    items: [
+      { label: 'Frozen Pipes', href: 'http://www.plumbing-geek.com/frozen-water-pipes.html' },
+      { label: 'Emergency Plumbing', href: 'http://www.plumbing-geek.com/emergency-plumbing.html' },
+      { label: 'Washing Machine Pipes', href: 'http://www.plumbing-geek.com/washing-machine-pipes.html' },
+      { label: 'Washing Machine Drains', href: 'http://www.plumbing-geek.com/washing-machine-drain.html' },
+      { label: 'Clogged Pipes', href: 'http://www.plumbing-geek.com/clogged-pipes.html' },
+      { label: 'Solvent Cement', href: 'http://www.plumbing-geek.com/solvent-cement.html' },
+      { label: 'Solder Copper Pipe', href: 'http://www.plumbing-geek.com/soldering-copper-pipe.html' },
+    ],
   },
   {
-    title: 'Active work',
-    text: 'The recent-projects section keeps the emphasis on current work without resorting to dated layout patterns or boxed portfolio tiles.',
-    image:
-      'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=900&q=80',
-    alt: 'Industrial pipe fittings and restoration tools',
-    className: 'md:col-span-3 md:-mt-20',
+    title: "DIY's by Category",
+    items: [
+      { label: 'Plumbing Basics', href: 'http://www.plumbing-geek.com/plumbing-basics.html' },
+      { label: 'DIY Guides', href: 'http://www.plumbing-geek.com/doityourselfplumbingrepair.html' },
+      { label: 'Plumbing Tools', href: 'http://www.plumbing-geek.com/plumbing-tool.html' },
+      { label: 'Plumbing Supplies', href: 'http://www.plumbing-geek.com/plumbing-supplies.html' },
+      { label: 'Plumbing Pipes', href: 'http://www.plumbing-geek.com/plumbing-pipes.html' },
+      { label: 'Frozen Pipes', href: 'http://www.plumbing-geek.com/frozen-water-pipes.html' },
+      { label: 'Clogged Drains', href: 'http://www.plumbing-geek.com/clogged-drains.html' },
+      { label: 'Water Heaters', href: 'http://www.plumbing-geek.com/water-heater-info.html' },
+      { label: 'Emergency Plumbing', href: 'http://www.plumbing-geek.com/emergency-plumbing.html' },
+    ],
   },
+]
+
+const footerLinks = [
+  { label: 'Home', href: 'http://www.plumbing-geek.com/' },
+  { label: 'Contact', href: 'http://www.plumbing-geek.com/contact-plumbing-geek.html' },
+  { label: 'About', href: 'http://www.plumbing-geek.com/about-me.html' },
+  { label: 'Privacy', href: 'http://www.plumbing-geek.com/privacy-policy.html' },
+  { label: 'Disclaimer', href: 'http://www.plumbing-geek.com/disclaimer.html' },
+  { label: 'Site Map', href: 'http://www.plumbing-geek.com/site-map.html' },
 ]
 
 function App() {
   const shouldReduceMotion = useReducedMotion()
-  const { scrollYProgress } = useScroll()
-  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, shouldReduceMotion ? 1 : 1.06])
-  const heroY = useTransform(scrollYProgress, [0, 0.2], [0, shouldReduceMotion ? 0 : -40])
+
+  useEffect(() => {
+    document.title = 'Let the plumbing-geek help you with your home plumbing projects.'
+
+    const description = document.querySelector('meta[name="description"]')
+    if (description) {
+      description.setAttribute(
+        'content',
+        'Let the plumbing-geek help you with your DIY plumbing projects.',
+      )
+    }
+
+    const scriptId = 'plumbing-geek-cse'
+    if (document.getElementById(scriptId)) return
+
+    const script = document.createElement('script')
+    script.id = scriptId
+    script.async = true
+    script.src = 'https://cse.google.com/cse.js?cx=001486685281190327539:xueyvg1uzcc'
+    document.body.appendChild(script)
+
+    return () => {
+      script.remove()
+    }
+  }, [])
 
   return (
     <main className="bg-background text-text">
-      <section className="relative min-h-screen overflow-hidden border-b border-text/15 bg-text text-background">
-        <motion.div
-          aria-hidden="true"
-          className="absolute inset-0"
-          style={{ scale: heroScale, y: heroY }}
-        >
-          <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(31,26,23,0.88),rgba(31,26,23,0.45)_45%,rgba(31,26,23,0.72))]" />
-          <img
-            src="https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&w=1800&q=80"
-            alt="Vintage plumbing workshop with brass and iron fittings"
-            className="h-full w-full object-cover object-center"
-          />
-        </motion.div>
-
-        <div className="absolute inset-x-0 top-0 z-20 h-40 bg-[linear-gradient(180deg,rgba(31,26,23,0.68),transparent)]" />
-
-        <div className="relative z-10 flex min-h-screen flex-col justify-between px-6 py-6 sm:px-8 lg:px-12">
-          <div className="flex items-center justify-between border-b border-background/20 pb-4">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-full border border-background/30 bg-background/10 backdrop-blur-sm">
-                <Droplets className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="font-heading text-2xl uppercase tracking-[0.18em]">Plumbing-Geek</p>
-                <p className="text-sm uppercase tracking-[0.28em] text-background/70">
-                  Brian&apos;s Plumbing Works
-                </p>
-              </div>
-            </div>
-            <a
-              href="tel:503-656-6192"
-              className="font-heading text-sm uppercase tracking-[0.22em] text-background/90 transition hover:text-white"
-            >
-              503-656-6192
-            </a>
-          </div>
-
-          <motion.div
-            className="grid gap-12 pb-10 pt-20 lg:grid-cols-[minmax(0,0.95fr)_minmax(280px,0.55fr)] lg:items-end lg:gap-16 lg:pb-12"
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 28 }}
-            animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="max-w-4xl">
-              <p className="mb-5 font-heading text-sm uppercase tracking-[0.34em] text-background/70">
-                Portland, Oregon
-              </p>
-              <h1 className="font-heading text-[clamp(4.5rem,14vw,11rem)] uppercase leading-[0.88] tracking-[-0.05em] text-background">
-                Brian&apos;s Plumbing Works
-              </h1>
-              <p className="mt-4 max-w-xl font-heading text-[clamp(1.6rem,3vw,2.7rem)] uppercase leading-[0.95] tracking-[0.08em] text-accent">
-                Doing business as Plumbing-Geek
-              </p>
-              <p className="mt-8 max-w-lg text-lg leading-relaxed text-background/82 sm:text-xl">
-                Portland, Oregon plumbing contractor and vintage plumbing restoration business.
-              </p>
-            </div>
-
-            <motion.div
-              className="max-w-sm self-end border-t border-background/25 pt-6"
-              initial={shouldReduceMotion ? false : { opacity: 0, x: 24 }}
-              animate={shouldReduceMotion ? undefined : { opacity: 1, x: 0 }}
-              transition={{ duration: 0.75, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <p className="font-heading text-sm uppercase tracking-[0.28em] text-background/60">
-                Call
-              </p>
-              <a
-                href="tel:503-656-6192"
-                className="mt-2 inline-flex items-center gap-3 font-heading text-4xl uppercase tracking-[0.02em] text-background transition hover:text-accent"
-              >
-                503-656-6192
-                <ArrowUpRight className="h-8 w-8" />
-              </a>
-              <p className="mt-3 max-w-xs text-base leading-relaxed text-background/70">
-                Brian&apos;s Plumbing Works, doing business as Plumbing-Geek.
-              </p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      <section className="border-b border-text/15 px-6 py-20 sm:px-8 lg:px-12 lg:py-24">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
-          <div>
-            <p className="font-heading text-sm uppercase tracking-[0.3em] text-accent">Experience &amp; license</p>
-            <div className="mt-5 border-t border-text/20 pt-8">
-              <p className="font-heading text-[clamp(6rem,18vw,12rem)] leading-none tracking-[-0.06em] text-text">
-                40
-              </p>
-              <p className="mt-4 max-w-2xl font-body text-2xl leading-tight sm:text-3xl">
-                Forty years of experience as of December 2024.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col justify-end border-t border-text/20 pt-8 lg:border-l lg:border-t-0 lg:pl-10">
-            <p className="font-heading text-sm uppercase tracking-[0.28em] text-text/55">Oregon CCB</p>
-            <p className="mt-3 font-heading text-5xl uppercase leading-none tracking-[-0.04em] text-accent">
-              #46846
-            </p>
-            <p className="mt-4 text-lg leading-relaxed text-text/74">
-              Oregon CCB License #46846.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-text/15 px-6 py-20 sm:px-8 lg:px-12 lg:py-24">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10 flex items-end justify-between gap-6 border-b border-text/15 pb-5">
-            <div>
-              <p className="font-heading text-sm uppercase tracking-[0.3em] text-accent">Services</p>
-              <h2 className="mt-3 font-heading text-[clamp(3rem,7vw,5.5rem)] uppercase leading-[0.9] tracking-[-0.05em]">
-                Two exact disciplines
-              </h2>
-            </div>
-            <p className="hidden max-w-sm text-right text-lg leading-relaxed text-text/72 lg:block">
-              Plumbing contractor work and vintage plumbing restoration, presented without generic service grids.
-            </p>
-          </div>
-
-          <div className="grid gap-12 lg:grid-cols-2 lg:gap-14">
-            {sections.map((section, index) => (
-              <motion.article
-                key={section.title}
-                className="group"
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 28 }}
-                whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.7, delay: index * 0.08 }}
-              >
-                <div className="overflow-hidden">
-                  <motion.img
-                    src={section.image}
-                    alt={section.alt}
-                    className="h-[420px] w-full object-cover object-center grayscale-[12%] transition duration-700 group-hover:scale-[1.03]"
-                    whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
-                    transition={{ duration: 0.45 }}
-                  />
-                </div>
-                <div className="mt-6 flex items-start justify-between gap-4 border-t border-text/20 pt-5">
-                  <div>
-                    <p className="font-heading text-sm uppercase tracking-[0.28em] text-accent">
-                      {section.label}
-                    </p>
-                    <h3 className="mt-3 font-heading text-4xl uppercase leading-none tracking-[-0.04em]">
-                      {section.title}
-                    </h3>
-                  </div>
-                  <ArrowUpRight className="mt-2 h-6 w-6 shrink-0 text-text/45 transition group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-accent" />
-                </div>
-                <p className="mt-4 max-w-xl text-lg leading-relaxed text-text/76">{section.body}</p>
-              </motion.article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="overflow-hidden border-b border-text/15 bg-surface/55 px-6 py-20 sm:px-8 lg:px-12 lg:py-24">
-        <div className="mx-auto max-w-7xl">
-          <div className="max-w-3xl">
-            <p className="font-heading text-sm uppercase tracking-[0.3em] text-accent">Recent projects</p>
-            <h2 className="mt-3 font-heading text-[clamp(3rem,7vw,5.5rem)] uppercase leading-[0.9] tracking-[-0.05em]">
-              Active work, current references
-            </h2>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-text/76">
-              Content referencing recent projects reinforces that the business is active and currently working on notable plumbing and restoration jobs.
-            </p>
-          </div>
-
-          <div className="mt-12 grid gap-8 md:grid-cols-12 md:items-start">
-            {projects.map((project, index) => (
-              <motion.figure
-                key={project.title}
-                className={project.className}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 36 }}
-                whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.75, delay: index * 0.1 }}
-              >
-                <div className="overflow-hidden bg-text">
-                  <motion.img
-                    src={project.image}
-                    alt={project.alt}
-                    className="h-[280px] w-full object-cover object-center md:h-[340px]"
-                    whileHover={shouldReduceMotion ? undefined : { scale: 1.04 }}
-                    transition={{ duration: 0.45 }}
-                  />
-                </div>
-                <figcaption className="border-t border-text/20 pt-4">
-                  <p className="font-heading text-sm uppercase tracking-[0.28em] text-accent">
-                    {project.title}
-                  </p>
-                  <p className="mt-3 text-lg leading-relaxed text-text/76">{project.text}</p>
-                </figcaption>
-              </motion.figure>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden bg-text px-6 py-20 text-background sm:px-8 lg:px-12 lg:py-24">
+      <section className="relative overflow-hidden border-b border-text/15 bg-text text-background">
         <div
           aria-hidden="true"
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage:
-              'linear-gradient(135deg, rgba(176,122,59,0.28), transparent 42%), url(https://images.unsplash.com/photo-1542013936693-884638332954?auto=format&fit=crop&w=1600&q=80)',
-            backgroundPosition: 'center',
-            backgroundSize: 'cover',
-          }}
+          className="absolute inset-0 bg-[linear-gradient(120deg,rgba(31,26,23,0.78),rgba(31,26,23,0.58)_38%,rgba(31,26,23,0.88)),url('/original-site-images/cranepedlav4.jpg')] bg-cover bg-center"
         />
-        <div className="relative mx-auto max-w-5xl border-y border-background/20 py-12 text-center">
-          <p className="font-heading text-sm uppercase tracking-[0.34em] text-background/65">Contact</p>
-          <h2 className="mt-4 font-heading text-[clamp(3.2rem,10vw,7rem)] uppercase leading-[0.88] tracking-[-0.05em]">
-            503-656-6192
-          </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-xl leading-relaxed text-background/78">
-            Brian&apos;s Plumbing Works, doing business as Plumbing-Geek, Portland, Oregon.
-          </p>
-          <p className="mt-4 font-heading text-lg uppercase tracking-[0.18em] text-accent">
-            Oregon CCB License #46846
-          </p>
+        <div className="absolute inset-0 bg-patina opacity-70" aria-hidden="true" />
+
+        <motion.div
+          className="relative mx-auto max-w-7xl px-6 py-6 sm:px-8 lg:px-12"
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
+          animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="border-b border-background/20 pb-6">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <a
+                  href="http://www.plumbing-geek.com/"
+                  className="font-heading text-[clamp(2.8rem,8vw,5.8rem)] uppercase leading-[0.88] tracking-[-0.05em]"
+                >
+                  Plumbing Geek
+                </a>
+                <p className="mt-3 max-w-xl font-heading text-lg uppercase tracking-[0.22em] text-accent sm:text-xl">
+                  Vintage Plumbing Restoration
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 font-heading text-sm uppercase tracking-[0.18em] text-background/80">
+                <a href="http://www.plumbing-geek.com/">Home</a>
+                <a href="http://www.plumbing-geek.com/shop.html">Shop</a>
+              </div>
+            </div>
+          </div>
+
+          <nav className="grid gap-8 border-b border-background/15 py-8 md:grid-cols-3">
+            {navigationGroups.map((group) => (
+              <div key={group.title}>
+                <p className="font-heading text-lg uppercase tracking-[0.16em] text-accent">
+                  {group.title}
+                </p>
+                <ul className="mt-4 space-y-3 text-base leading-relaxed text-background/84">
+                  {group.items.map((item) => (
+                    <li key={item.label}>
+                      <a
+                        href={item.href}
+                        className="transition hover:text-white"
+                        target={item.href.startsWith('http://blog.') ? '_blank' : undefined}
+                        rel={item.href.startsWith('http://blog.') ? 'noreferrer' : undefined}
+                      >
+                        {item.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
+        </motion.div>
+      </section>
+
+      <section className="px-6 py-14 sm:px-8 lg:px-12 lg:py-16">
+        <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.7fr)]">
+          <motion.article
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+            whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.08 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-center font-heading text-[clamp(2.8rem,7vw,5.6rem)] uppercase leading-[0.92] tracking-[-0.05em]">
+              The Plumbing-Geek Talks DIY Plumbing
+            </h1>
+
+            <div className="mt-8 space-y-6 text-lg leading-relaxed text-text/82 sm:text-xl">
+              <p>{articleParagraphs[0]}</p>
+              <p>{articleParagraphs[1]}</p>
+
+              <figure className="my-10 overflow-hidden border border-text/10 bg-surface shadow-dry">
+                <motion.img
+                  src="/original-site-images/cranepedlav4.jpg"
+                  alt="One of my first vintage plumbing restoration projects"
+                  className="w-full object-cover"
+                  whileHover={shouldReduceMotion ? undefined : { scale: 1.02 }}
+                  transition={{ duration: 0.35 }}
+                />
+              </figure>
+              <p>{articleParagraphs[2]}</p>
+
+              <figure className="my-10 overflow-hidden border border-text/10 bg-surface shadow-dry">
+                <motion.img
+                  src="/original-site-images/cranepedlav2.jpg"
+                  alt="Vintage plumbing restoration project detail"
+                  className="w-full object-cover"
+                  whileHover={shouldReduceMotion ? undefined : { scale: 1.02 }}
+                  transition={{ duration: 0.35 }}
+                />
+              </figure>
+
+              {articleParagraphs.slice(3).map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          </motion.article>
+
+          <aside className="lg:sticky lg:top-8 lg:self-start">
+            <div className="border border-text/12 bg-surface/65 p-6 shadow-dry backdrop-blur-sm">
+              <div
+                className="cse-shell border-b border-text/12 pb-8"
+                dangerouslySetInnerHTML={{ __html: '<gcse:search></gcse:search>' }}
+              />
+
+              <div className="space-y-8 pt-8">
+                {sidebarSections.map((section) => (
+                  <section key={section.title}>
+                    <h2 className="font-heading text-2xl uppercase tracking-[0.12em] text-text">
+                      {section.title}
+                    </h2>
+                    <div className="mt-4 space-y-3 text-lg leading-relaxed">
+                      {section.items.map((item) => (
+                        <div key={item.label}>
+                          <a
+                            href={item.href}
+                            className="transition hover:text-accent"
+                            target={item.href.startsWith('http://blog.') ? '_blank' : undefined}
+                            rel={item.href.startsWith('http://blog.') ? 'noreferrer' : undefined}
+                          >
+                            {item.label}
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+
+                <section className="border-t border-text/12 pt-8">
+                  <h2 className="font-heading text-2xl uppercase tracking-[0.12em] text-text">
+                    Your Donations Help
+                  </h2>
+                  <p className="mt-4 text-lg leading-relaxed text-text/76">
+                    The Plumbing Geek is now spending an hour or more a day helping people
+                    by answering your questions via email or phone. Please consider the
+                    value of my help and help me as well with a donation in the amount of
+                    your choosing.
+                  </p>
+
+                  <form
+                    action="https://www.paypal.com/cgi-bin/webscr"
+                    method="post"
+                    target="_top"
+                    className="mt-6"
+                  >
+                    <input type="hidden" name="cmd" value="_s-xclick" />
+                    <input type="hidden" name="hosted_button_id" value="DZTZW7544B2EA" />
+                    <input
+                      type="image"
+                      src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif"
+                      name="submit"
+                      alt="PayPal - The safer, easier way to pay online!"
+                      className="h-auto max-w-full"
+                    />
+                    <img
+                      alt=""
+                      src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif"
+                      width="1"
+                      height="1"
+                      className="sr-only"
+                    />
+                  </form>
+                </section>
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
+
+      <footer className="border-t border-text/15 bg-text px-6 py-8 text-background sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <nav className="flex flex-wrap gap-x-5 gap-y-2 text-base text-background/82">
+            {footerLinks.map((link) => (
+              <a key={link.label} href={link.href} className="transition hover:text-white">
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <p className="text-base text-background/72">Copyright 2021 - plumbing-geek.com</p>
+        </div>
+      </footer>
     </main>
   )
 }
