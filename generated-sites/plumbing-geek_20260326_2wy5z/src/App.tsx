@@ -2,100 +2,107 @@ import { useEffect } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import {
   ArrowRight,
+  Building2,
   Clock3,
-  Droplets,
-  Hammer,
+  House,
   MapPin,
   Phone,
+  ShieldAlert,
   ShieldCheck,
-  Wrench,
+  Vault,
 } from 'lucide-react'
 
 const smoothEase = [0.22, 1, 0.36, 1] as const
 
 const navigation = [
-  { label: 'Vintage Plumbing', href: '#vintage-plumbing' },
-  { label: 'DIY Guides', href: '#guides' },
-  { label: 'About Brian', href: '#about' },
+  { label: 'Residential', href: '#residential' },
+  { label: 'Service Lines', href: '#services' },
+  { label: 'About Charley', href: '#about' },
   { label: 'Contact', href: '#contact' },
 ]
 
 const contentGroups = [
   {
-    title: 'Vintage Plumbing',
+    title: 'Residential locksmith work',
     summary:
-      'The original site centers on restoration, repair, and sourcing for older fixtures that many plumbers would rather replace.',
-    items: ['Restoration', 'Repair', 'Buy Vintage Fixtures', 'Standard', 'Crane Co.'],
-  },
-  {
-    title: 'Hire Plumbing Geek',
-    summary:
-      'Brian’s Plumbing Works and the core service pages focus on restoration questions, project planning, and direct homeowner help.',
+      'The reference site emphasizes practical home security help: lock repairs, strike adjustments, lockout entry, re-keying, and thoughtful keying plans for daily household use.',
     items: [
-      "Brian's Plumbing Works",
-      'FAQ',
-      'Contact',
-      'Portfolio',
-      'About and Blog',
+      'Re-keying for new homeowners and tenants',
+      'House lockouts and lock opening',
+      'Lock and deadbolt installation',
+      'Gate, maid, and service-access keying ideas',
+      'High-security residential lock options',
     ],
   },
   {
-    title: 'Top DIY Guides',
+    title: 'Commercial and industrial service',
     summary:
-      'The reference site highlights practical homeowner topics that solve common plumbing problems without turning the page into a text wall.',
+      'Commercial coverage centers on ongoing lock maintenance and access planning, from re-key and master-key work to hardware upgrades and electronic access control.',
     items: [
-      'Frozen Pipes',
-      'Emergency Plumbing',
-      'Washing Machine Pipes',
-      'Washing Machine Drains',
-      'Clogged Pipes',
+      'Commercial re-keying and master-keying',
+      'Lock repairs and strike adjustments',
+      'Business lockout and malfunction response',
+      'Electric strikes, mag locks, and keypads',
+      'Card readers, CCTV, and security hardware',
     ],
   },
   {
-    title: 'DIY By Category',
+    title: 'Safes and specialty security',
     summary:
-      'Broader navigation on the original site organizes repair knowledge into foundations, tools, materials, and plumbing system topics.',
+      'Charley’s original site also covers safe opening, servicing, buying guidance, fire-versus-burglary ratings, and combination-dialing help for common lock bodies.',
     items: [
-      'Plumbing Basics',
-      'DIY Guides',
-      'Plumbing Tools',
-      'Plumbing Supplies',
-      'Water Heaters',
+      'Safe opening and servicing',
+      'Burglary and fire safe guidance',
+      'Combination dialing assistance',
+      'New and used safe sourcing',
+      'Proper container selection by risk',
+    ],
+  },
+  {
+    title: 'Consumer guidance and trust',
+    summary:
+      'A consistent theme across the site is fair quoting, realistic service fees, and warning customers about bait-and-switch scammers posing as legitimate locksmiths.',
+    items: [
+      'Fair quotes with re-quote if complications arise',
+      'Consumer scam awareness',
+      'High-security lock education',
+      'Honest explanation of service pricing',
+      'Direct phone and email contact',
     ],
   },
 ]
 
 const serviceHighlights = [
-  'Vintage plumbing restoration and repair',
-  'DIY plumbing guidance for homeowners',
-  'Portland, Oregon metro area contractor',
-  'Phone support from 9am to 7pm Pacific',
-  'Safety, sanitation, and knowledge first',
+  'Residential, commercial, and safe locksmith service',
+  'Mobile locksmith support with direct contact numbers',
+  'High-security lock options for home and business',
+  'Scam-awareness and realistic quote guidance',
+  'Reference site now notes Orlando-area service',
 ]
 
 const credibilityPoints = [
-  'Brian Marrone is originally from Long Island, New York and started working with tools at age twelve.',
-  'He relocated to Portland, Oregon in 1968, served in the U.S. Navy Hospital Corps, and later entered the plumbing trade in 1978.',
-  "By 1984 he was licensed and founded Brian's Plumbing Works, which he still owns and operates.",
-  'His work increasingly focused on the repair and restoration of vintage plumbing fixtures in older Portland-area homes.',
-  'The site’s philosophy is that good plumbing should be safe, sanitary, efficient, and essentially out of mind when it is working right.',
+  'Charles "Locksmith Charley" Eastwood describes a long mobile-locksmith career shaped by varied work across multiple cities before establishing his present operation.',
+  'The site presents Charley as a hands-on specialist serving residential, commercial, automotive legacy requests, and safe opening or servicing work.',
+  'He writes plainly about professionalism, integrity, and honor, with an emphasis on quoting fairly and keeping customers informed when complications change the job.',
+  'His biography highlights public advocacy against locksmith scammers and court-and-media efforts to expose bait-and-switch operators.',
+  'The reference site also notes his election as Southwest Director of ALOA Security Professionals Association, reinforcing his standing in the trade.',
 ]
 
 const guideSections = [
   {
-    title: 'Why restoration matters',
+    title: 'Why honest pricing is part of the service',
     body:
-      'The original site makes the case that repair and restoration can preserve the original architecture of a home, avoid unnecessary remodeling, and support a more economical form of green plumbing.',
+      'Charley’s site is unusually direct about pricing: the quote should be fair, the bill should usually match it, and customers should be told immediately when a job becomes more complex than expected.',
   },
   {
-    title: 'What the site is for',
+    title: 'How the site frames better security',
     body:
-      'Plumbing-Geek exists to help homeowners understand the systems that serve them, whether they are working on a drippy faucet, troubleshooting a fixture, or deciding when to hire a plumber.',
+      'Instead of generic promises, the original content explains how re-keying, master-key planning, strike adjustments, and high-security hardware solve specific access and control problems.',
   },
   {
-    title: 'What good plumbing looks like',
+    title: 'What the education pages add',
     body:
-      'The reference copy repeatedly comes back to function: you should not have to explain your plumbing to a guest, and when a system is doing its job well, you barely think about it.',
+      'Beyond service pages, the site teaches people how to think about safes, builder keys, duplicate control, and scam red flags so they can make better decisions before they buy.',
   },
 ]
 
@@ -112,13 +119,13 @@ function App() {
   const shouldReduceMotion = Boolean(useReducedMotion())
 
   useEffect(() => {
-    document.title = 'Plumbing Geek | Vintage Plumbing Restoration and DIY Plumbing Guides'
+    document.title = 'Locksmith Charley | Residential, Commercial, and Safe Locksmith Service'
 
     const description = document.querySelector('meta[name="description"]')
     if (description) {
       description.setAttribute(
         'content',
-        'Plumbing Geek shares vintage plumbing restoration expertise, DIY plumbing guides, and Portland-based help from Brian’s Plumbing Works.',
+        'Locksmith Charley offers residential, commercial, and safe locksmith guidance with direct contact, honest pricing language, and Orlando-area branding from the reference site.',
       )
     }
   }, [])
@@ -129,9 +136,11 @@ function App() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 md:px-8">
           <a href="#top" className="shrink-0 text-white">
             <div className="rounded-sm border border-white/20 bg-white/10 px-4 py-3 backdrop-blur">
-              <p className="font-['Oswald'] text-2xl uppercase tracking-[0.16em]">Plumbing Geek</p>
+              <p className="font-['Oswald'] text-2xl uppercase tracking-[0.16em]">
+                Locksmith Charley
+              </p>
               <p className="text-xs uppercase tracking-[0.28em] text-stone-300">
-                Vintage Plumbing Restoration
+                Residential • Commercial • Safes
               </p>
             </div>
           </a>
@@ -143,11 +152,11 @@ function App() {
             ))}
           </nav>
           <a
-            href="tel:15036566192"
+            href="tel:18003135397"
             className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur transition hover:bg-white hover:text-stone-900"
           >
             <Phone className="h-4 w-4" />
-            (503) 656-6192
+            1-800-313-5397
           </a>
         </div>
       </header>
@@ -158,12 +167,12 @@ function App() {
             className="absolute inset-0 bg-cover bg-center"
             style={{
               backgroundImage:
-                "linear-gradient(110deg, rgba(18,20,23,0.84) 0%, rgba(18,20,23,0.56) 42%, rgba(18,20,23,0.24) 100%), url('/original-site-images/cranepedlav4.jpg')",
+                "linear-gradient(110deg, rgba(18,20,23,0.88) 0%, rgba(18,20,23,0.58) 42%, rgba(18,20,23,0.28) 100%), url('https://images.unsplash.com/photo-1759564225887-e2e2e27f8972?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=80&w=2200')",
             }}
           />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(178,34,34,0.28),transparent_32%)]" />
           <div className="relative flex min-h-[100svh] items-end px-5 pb-12 pt-28 md:px-8 md:pb-20">
-            <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(260px,0.7fr)] lg:items-end">
+            <div className="mx-auto grid w-full max-w-7xl gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)] lg:items-end">
               <motion.div
                 initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 36 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -171,31 +180,31 @@ function App() {
                 className="max-w-3xl"
               >
                 <p className="mb-5 text-sm font-medium uppercase tracking-[0.28em] text-stone-200">
-                  Portland, Oregon
+                  Orlando Area Locksmith
                 </p>
                 <h1 className="max-w-4xl text-5xl font-semibold leading-[0.95] text-white md:text-7xl">
-                  Vintage plumbing restoration and DIY guidance from the Plumbing Geek.
+                  Locksmith Charley for homes, businesses, and safe service.
                 </h1>
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-stone-200 md:text-xl">
-                  Plumbing Geek helps homeowners understand the plumbing systems that
-                  serve them, with restoration know-how, repair insight, and practical DIY
-                  plumbing guidance grounded in decades of field experience.
+                  Rebuilt from the original Locksmith Charley site, this page keeps the same core
+                  coverage: residential and commercial lock work, safe expertise, fair quoting, and
+                  practical security guidance from Charles Eastwood, CRL.
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <a
-                    href="tel:15036566192"
+                    href="tel:18887175397"
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-[#b22222] px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-[#921b1b]"
                   >
-                    Call Brian&apos;s Plumbing Works
+                    24-Hour Mobile Service
                     <Phone className="h-4 w-4" />
                   </a>
                   <a
-                    href="http://www.plumbing-geek.com/contact-plumbing-geek.html"
+                    href="https://www.locksmithcharley.com/about_locksmithcharley.htm"
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white backdrop-blur transition hover:bg-white hover:text-stone-900"
                   >
-                    Open Original Contact Page
+                    Read Charley&apos;s Story
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </div>
@@ -211,24 +220,33 @@ function App() {
                 }}
                 className="grid gap-6 border-t border-white/15 pt-6 text-stone-100 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0"
               >
-                <div>
-                  <p className="text-sm uppercase tracking-[0.22em] text-stone-300">Core Promise</p>
-                  <p className="mt-3 text-2xl leading-tight text-white">
-                    Safe, sanitary, efficient plumbing and better-informed homeowners.
-                  </p>
+                <div className="flex items-center gap-4">
+                  <img
+                    src="/reference-site-assets/locksmith-charley/lc1.jpg"
+                    alt="Charles Eastwood of Locksmith Charley"
+                    className="h-24 w-24 rounded-sm object-cover object-top ring-1 ring-white/20"
+                  />
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.22em] text-stone-300">
+                      Charles Eastwood, CRL
+                    </p>
+                    <p className="mt-2 text-2xl leading-tight text-white">
+                      Direct, specialist locksmith service with fair-quote messaging.
+                    </p>
+                  </div>
                 </div>
                 <div className="space-y-4 text-sm leading-7 text-stone-200">
                   <div className="flex items-start gap-3">
-                    <Wrench className="mt-1 h-4 w-4 shrink-0 text-[#d3b26d]" />
-                    <span>Portland plumbing contractor for forty years as of December 2024.</span>
+                    <ShieldCheck className="mt-1 h-4 w-4 shrink-0 text-[#d3b26d]" />
+                    <span>Residential, commercial, safe, and specialty security coverage.</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <Clock3 className="mt-1 h-4 w-4 shrink-0 text-[#d3b26d]" />
-                    <span>Phone calls answered from 9am to 7pm U.S. Pacific time.</span>
+                    <span>24-hour mobile-service messaging appears on the original homepage.</span>
                   </div>
                   <div className="flex items-start gap-3">
                     <MapPin className="mt-1 h-4 w-4 shrink-0 text-[#d3b26d]" />
-                    <span>Based in the Portland, Oregon metro area and helping people well beyond it.</span>
+                    <span>The homepage currently says Charley is serving the Orlando area.</span>
                   </div>
                 </div>
               </motion.div>
@@ -251,18 +269,18 @@ function App() {
           </div>
         </section>
 
-        <section id="vintage-plumbing" className="bg-stone-50 py-20 md:py-28">
+        <section id="residential" className="bg-stone-50 py-20 md:py-28">
           <div className="mx-auto max-w-7xl px-5 md:px-8">
             <motion.div {...fadeInUp(shouldReduceMotion)} className="max-w-3xl">
               <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#b22222]">
                 Site Overview
               </p>
               <h2 className="mt-4 text-4xl font-semibold leading-tight text-stone-900 md:text-5xl">
-                The original Plumbing-Geek content, reorganized into the current layout.
+                The original Locksmith Charley content, reorganized into the current layout.
               </h2>
               <p className="mt-5 text-lg leading-8 text-stone-700">
-                Instead of unrelated legal copy, this section now follows the real site structure:
-                vintage plumbing, homeowner help, and the DIY topics that Plumbing-Geek is known for.
+                The section coverage stays intact: home service, commercial work, safe expertise,
+                and consumer education about realistic security pricing and scam prevention.
               </p>
             </motion.div>
 
@@ -296,21 +314,27 @@ function App() {
           </div>
         </section>
 
-        <section id="guides" className="bg-[#181716] py-20 text-stone-100 md:py-28">
+        <section id="services" className="bg-[#181716] py-20 text-stone-100 md:py-28">
           <div className="mx-auto grid max-w-7xl gap-12 px-5 md:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-            <motion.div {...fadeInUp(shouldReduceMotion)} className="relative overflow-hidden">
+            <motion.div
+              {...fadeInUp(shouldReduceMotion)}
+              className="relative overflow-hidden"
+              whileInView={shouldReduceMotion ? undefined : { scale: [0.98, 1] }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.9, ease: smoothEase }}
+            >
               <img
-                src="/original-site-images/cranepedlav2.jpg"
-                alt="Restored vintage Crane pedestal lavatory"
+                src="https://images.unsplash.com/photo-1685537710889-84750d9fec12?auto=format&fit=crop&fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=80&w=1800"
+                alt="Vintage door lock and keys"
                 className="aspect-[4/5] w-full object-cover"
               />
               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-6">
                 <p className="text-sm uppercase tracking-[0.24em] text-stone-300">
-                  Restoration Plumbing
+                  Security Guidance
                 </p>
                 <p className="mt-2 text-xl leading-tight text-white">
-                  Repairing older fixtures can preserve beauty, function, and the original character
-                  of a home.
+                  Re-keying, key control, and hardware choices are presented as practical decisions,
+                  not vague promises.
                 </p>
               </div>
             </motion.div>
@@ -319,7 +343,7 @@ function App() {
               {guideSections.map((section) => (
                 <motion.div key={section.title} {...fadeInUp(shouldReduceMotion)}>
                   <p className="text-sm uppercase tracking-[0.24em] text-[#d3b26d]">
-                    Plumbing Geek
+                    Locksmith Charley
                   </p>
                   <h2 className="mt-3 text-3xl font-semibold leading-tight text-white md:text-4xl">
                     {section.title}
@@ -337,20 +361,21 @@ function App() {
           <div className="mx-auto grid max-w-7xl gap-12 px-5 md:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
             <motion.div {...fadeInUp(shouldReduceMotion)} className="space-y-5">
               <p className="text-sm font-medium uppercase tracking-[0.24em] text-[#b22222]">
-                About Brian
+                About Charley
               </p>
               <h2 className="text-4xl font-semibold leading-tight text-stone-900 md:text-5xl">
-                Brian Marrone, owner of Brian&apos;s Plumbing Works
+                Charles Eastwood, CRL, the locksmith behind the original site
               </h2>
               <p className="text-lg leading-8 text-stone-700">
-                The reference site’s biography combines trade experience, restoration work, and a
-                service-first philosophy built around helping homeowners solve plumbing problems.
+                Charley’s biography mixes personal history, trade credibility, and consumer
+                advocacy, presenting him as both a working locksmith and a vocal critic of scam
+                operators in the industry.
               </p>
               <div className="overflow-hidden border border-stone-300 bg-white">
                 <img
-                  src="/original-site-images/cranepedlav4.jpg"
-                  alt="Vintage plumbing restoration example from Plumbing Geek"
-                  className="w-full object-cover"
+                  src="/reference-site-assets/locksmith-charley/lc1.jpg"
+                  alt="Portrait of Charles Eastwood"
+                  className="w-full object-cover object-top"
                 />
               </div>
             </motion.div>
@@ -370,9 +395,8 @@ function App() {
                   Original Site Philosophy
                 </p>
                 <p className="mt-3 text-base leading-7 text-stone-700">
-                  Brian describes himself as a plumbing geek who loves to repair fixtures, while
-                  staying mindful that the fixture serves the customer first and the work should meet
-                  the needs of others.
+                  The recurring message is simple: quote honestly, explain complications clearly,
+                  and help customers make smart security decisions instead of selling on confusion.
                 </p>
               </div>
             </motion.div>
@@ -386,11 +410,12 @@ function App() {
                 Why People Visit
               </p>
               <h2 className="mt-4 text-4xl font-semibold leading-tight text-stone-900 md:text-5xl">
-                Practical plumbing help, not filler.
+                Practical locksmith help, not bait-and-switch copy.
               </h2>
               <p className="mt-5 text-lg leading-8 text-stone-700">
-                The original homepage speaks directly to two audiences: homeowners doing their own
-                plumbing and people who need a specialist to restore or repair older fixtures.
+                The original site speaks to customers who need real lock work now and to people who
+                want to understand re-keying, safe selection, and the difference between realistic
+                service fees and scam pricing.
               </p>
             </motion.div>
 
@@ -400,12 +425,12 @@ function App() {
                 className="border-t border-stone-300 pt-5"
               >
                 <div className="flex items-center gap-3">
-                  <Droplets className="h-4 w-4 text-[#b22222]" />
-                  <h3 className="text-xl font-semibold text-stone-900">DIY plumbing</h3>
+                  <House className="h-4 w-4 text-[#b22222]" />
+                  <h3 className="text-xl font-semibold text-stone-900">Residential service</h3>
                 </div>
                 <p className="mt-4 text-base leading-7 text-stone-700">
-                  Learn the basics, solve common problems, and understand the safety issues behind
-                  the fixtures and pipes in your home.
+                  Re-key a home, improve day-to-day key control, open a locked house, or upgrade
+                  vulnerable hardware without losing sight of how the household actually uses it.
                 </p>
               </motion.div>
               <motion.div
@@ -413,12 +438,12 @@ function App() {
                 className="border-t border-stone-300 pt-5"
               >
                 <div className="flex items-center gap-3">
-                  <Hammer className="h-4 w-4 text-[#b22222]" />
-                  <h3 className="text-xl font-semibold text-stone-900">Restoration work</h3>
+                  <Building2 className="h-4 w-4 text-[#b22222]" />
+                  <h3 className="text-xl font-semibold text-stone-900">Commercial systems</h3>
                 </div>
                 <p className="mt-4 text-base leading-7 text-stone-700">
-                  Restore vintage fixtures instead of replacing them when repair is the better path
-                  for the room, the budget, and the architecture.
+                  Businesses get maintenance, re-keying, master-key strategy, and access-control
+                  planning grounded in hardware realities instead of sales jargon.
                 </p>
               </motion.div>
               <motion.div
@@ -426,14 +451,38 @@ function App() {
                 className="border-t border-stone-300 pt-5"
               >
                 <div className="flex items-center gap-3">
-                  <Wrench className="h-4 w-4 text-[#b22222]" />
-                  <h3 className="text-xl font-semibold text-stone-900">Working knowledge</h3>
+                  <Vault className="h-4 w-4 text-[#b22222]" />
+                  <h3 className="text-xl font-semibold text-stone-900">Safes and security</h3>
                 </div>
                 <p className="mt-4 text-base leading-7 text-stone-700">
-                  Plumbing codes follow physical laws, so the site emphasizes fundamentals that stay
-                  useful across both modern and vintage plumbing systems.
+                  Safe pages explain why fire and burglary ratings serve different purposes and when
+                  opening, servicing, or replacing a container is the better move.
                 </p>
               </motion.div>
+            </div>
+
+            <div className="mt-12 grid gap-4 sm:grid-cols-3">
+              <div className="overflow-hidden border border-stone-300 bg-white p-4">
+                <img
+                  src="/reference-site-assets/locksmith-charley/house.jpg"
+                  alt="Residential locksmith service"
+                  className="aspect-[4/3] w-full object-cover"
+                />
+              </div>
+              <div className="overflow-hidden border border-stone-300 bg-white p-4">
+                <img
+                  src="/reference-site-assets/locksmith-charley/commercial.jpg"
+                  alt="Commercial locksmith service"
+                  className="aspect-[4/3] w-full object-cover"
+                />
+              </div>
+              <div className="overflow-hidden border border-stone-300 bg-white p-4">
+                <img
+                  src="/reference-site-assets/locksmith-charley/safe.jpg"
+                  alt="Safe locksmith service"
+                  className="aspect-[4/3] w-full object-contain"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -447,28 +496,26 @@ function App() {
               <div>
                 <p className="text-sm uppercase tracking-[0.24em] text-[#d3b26d]">Contact</p>
                 <h2 className="mt-4 text-4xl font-semibold leading-tight text-white md:text-5xl">
-                  Questions about a plumbing problem or a vintage fixture?
+                  Need a quote, a lock opened, or help with a safe?
                 </h2>
                 <p className="mt-5 max-w-2xl text-lg leading-8 text-stone-300">
-                  The original contact page invites questions by email or phone, notes a 48-hour
-                  email response window, and recommends the FAQ first for common restoration
-                  questions.
+                  The original site invites customers to call for mobile service, send work orders
+                  by email, and use direct contact instead of anonymous lead forms. This version
+                  keeps that same direct-contact approach.
                 </p>
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <a
-                    href="tel:15036566192"
+                    href="tel:18003135397"
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-[#b22222] px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-[#921b1b]"
                   >
-                    (503) 656-6192
+                    1-800-313-5397
                     <Phone className="h-4 w-4" />
                   </a>
                   <a
-                    href="http://www.plumbing-geek.com/contact-plumbing-geek.html"
-                    target="_blank"
-                    rel="noreferrer"
+                    href="mailto:Orders@LocksmithCharley.com"
                     className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white transition hover:bg-white hover:text-stone-900"
                   >
-                    Use Original Contact Form
+                    Email Work Order
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </div>
@@ -476,25 +523,64 @@ function App() {
 
               <div className="grid gap-6 border-l-0 border-white/15 lg:border-l lg:pl-8">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.22em] text-stone-400">Phone Hours</p>
-                  <p className="mt-3 text-2xl text-white">9am to 7pm</p>
-                  <p className="mt-1 text-lg text-stone-300">U.S. Pacific time zone</p>
+                  <p className="text-sm uppercase tracking-[0.22em] text-stone-400">
+                    Primary Numbers
+                  </p>
+                  <p className="mt-3 text-2xl text-white">1-800-313-5397</p>
+                  <p className="mt-1 text-lg text-stone-300">24-hour line: 888-717-5397</p>
                 </div>
                 <div>
-                  <p className="text-sm uppercase tracking-[0.22em] text-stone-400">Service Base</p>
+                  <p className="text-sm uppercase tracking-[0.22em] text-stone-400">Email</p>
                   <p className="mt-3 text-base leading-7 text-stone-300">
-                    Brian&apos;s Plumbing Works is based in the Portland, Oregon metro area, with
-                    homeowners from other locations also using the site for guidance.
+                    Orders@LocksmithCharley.com for work orders and{' '}
+                    <a href="mailto:charley@locksmithcharley.com" className="text-white underline">
+                      charley@locksmithcharley.com
+                    </a>{' '}
+                    for direct questions.
                   </p>
                 </div>
                 <div>
                   <p className="text-sm uppercase tracking-[0.22em] text-stone-400">
-                    Contractor License
+                    Consumer Note
                   </p>
-                  <p className="mt-3 text-sm leading-7 text-stone-400">
-                    Oregon CCB #46846. The reference site also asks visitors to double-check their
-                    email address so responses are not lost.
+                  <div className="mt-3 flex items-start gap-3 text-sm leading-7 text-stone-400">
+                    <ShieldAlert className="mt-1 h-4 w-4 shrink-0 text-[#d3b26d]" />
+                    <p>
+                      The reference site strongly warns against unrealistically low advertised
+                      service fees and positions clear, realistic quoting as a trust signal.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm uppercase tracking-[0.22em] text-stone-400">
+                    Reference Pages
                   </p>
+                  <div className="mt-3 grid gap-2 text-sm text-stone-300">
+                    <a
+                      href="https://www.locksmithcharley.com/residential.html"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="transition hover:text-white"
+                    >
+                      Residential services
+                    </a>
+                    <a
+                      href="https://www.locksmithcharley.com/commercial.html"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="transition hover:text-white"
+                    >
+                      Commercial services
+                    </a>
+                    <a
+                      href="https://www.locksmithcharley.com/safes.html"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="transition hover:text-white"
+                    >
+                      Safe information
+                    </a>
+                  </div>
                 </div>
               </div>
             </motion.div>
