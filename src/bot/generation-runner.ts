@@ -70,7 +70,7 @@ export class GenerationRunner {
     const safeBaseName = spec.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 30) || 'site';
     
     const localFolderName = `${safeBaseName}_${timestamp}_${shortId}`;
-    const netlifySiteName = spec.preferredSubdomain || `${safeBaseName}-${shortId}`;
+    const netlifySiteName = spec.preferredSubdomain ? `${spec.preferredSubdomain.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${shortId.slice(0, 3)}` : `${safeBaseName}-${shortId}`;
 
     const sitePath = this.workspaceManager.prepareSiteDirectory(localFolderName);
     
@@ -234,7 +234,7 @@ export class GenerationRunner {
       
       // Extract last 50 lines of logs for context
       const relevantLogs = logs.split('\n').slice(-50).join('\n');
-      const repairPrompt = PromptBuilder.buildRepairPrompt(relevantLogs);
+      const repairPrompt = PromptBuilder.buildRepairPrompt(prompt, relevantLogs);
       
       try {
         await this.aiService.executeAutonomousBuild(repairPrompt, sitePath);

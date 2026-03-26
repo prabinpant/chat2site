@@ -26,7 +26,9 @@ Extracted Image References: ${referenceData.extractedImages.slice(0, 3).join(', 
 Your instructions are to:
 1. Extract the core design values (e.g., minimalist, brutalist, organic, playful).
 2. Identify signature colors or typography vibes.
-3. Incorporate these into the refined spec without copying blindly.`
+3. **CRITICAL REVAMP RULE**: Extract and USE the actual textual content, copy, and structural meaning from the reference site.
+4. **NO LINKING TO ORIGINAL**: DO NOT just link back to the original site. The original site is considered destroyed/replaced. Everything necessary must live on this new site.
+5. **NO FAKE CONTENT**: DO NOT make up random placeholder content if the reference site provides it. Use the provided content exactly, but elevate the presentation.`
       : '';
 
     const systemPrompt = `
@@ -66,6 +68,7 @@ Analyze the original user prompt above and derive:
 Return ONLY a JSON object following this interface:
 {
   "name": "A short and sweet brand name (max 15 characters) — USE the user's name if they provided one",
+  "preferredSubdomain": "A clean, URL-friendly slug based on the project purpose (e.g. 'artisan-bakery', 'cyber-portfolio')",
   "description": "Engaging description of the brand/purpose — derived from the user's prompt, not invented",
   "persona": "A unique creative persona name derived from the user's domain and tone",
   "personaStyleGuide": "Detailed instructions on how to implement this persona (typography, spacing, vibe, shadow usage, color rationale, etc.)",

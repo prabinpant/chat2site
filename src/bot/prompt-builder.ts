@@ -100,6 +100,9 @@ ${logoAsset || galleryAssets.length > 0 ? `
 ` : '- **GENERIC ALIGNMENT**: Since no custom assets were provided, follow the Persona Style Guide strictly to create a cohesive brand from scratch.'}
 
 
+### TEXT AND THOUGHTS:
+- **NO THOUGHTS IN UI**: Do NOT output any of your internal thinking, <think> blocks, or placeholder text like "I will build this" into the actual user-facing React components. Use realistic placeholder content based on the original request.
+
 Execute all commands, write all files, and finish with a successful build.
 `;
   }
@@ -152,14 +155,21 @@ ${designSkills}
 5. **PRESERVE ASSETS**: Do NOT delete or rename existing files in the \`public/\` folder unless instructed.
 6. **NO RE-INITIALIZATION**: Do NOT run \`npm create vite\`.
 7. **STABILITY**: Ensure the site remains functional. After making changes, run \`npm run build\` to verify.
+8. **NO THOUGHTS IN UI**: Do NOT output any of your internal thinking, <think> blocks, or placeholder text like "I will build this" into the actual user-facing React components. Use realistic placeholder content based on the original request.
 
 Execute all commands necessary, write the complete modified files, and finish with a successful build.
 `;
   }
 
-  static buildRepairPrompt(errorLogs: string): string {
+  static buildRepairPrompt(originalPrompt: string, errorLogs: string): string {
     return `
 You are an **Autonomous System Architect** tasked with repairing a failed build.
+
+### ORIGINAL INSTRUCTIONS (WHAT YOU WERE TRYING TO BUILD):
+"""
+${originalPrompt}
+"""
+
 The previous build attempt failed with the following errors:
 
 \`\`\`

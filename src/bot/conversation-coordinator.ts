@@ -531,6 +531,10 @@ export class ConversationCoordinator {
         finalSession.processingId = undefined;
         finalSession.currentScene = 'IDLE';
         finalSession.sceneStep = 0;
+        finalSession.spec = {};
+        finalSession.siteId = undefined;
+        finalSession.sitePath = undefined;
+        finalSession.instruction = undefined;
         await sessionManager.saveSession(platform, to, finalSession);
       }
     }
@@ -583,6 +587,9 @@ export class ConversationCoordinator {
         finalSession.processingId = undefined;
         finalSession.currentScene = 'IDLE';
         finalSession.sceneStep = 0;
+        finalSession.spec = {};
+        finalSession.siteId = undefined;
+        finalSession.sitePath = undefined;
         finalSession.instruction = undefined;
         await sessionManager.saveSession(platform, to, finalSession);
       }
