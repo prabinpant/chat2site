@@ -99,16 +99,6 @@ ${logoAsset || galleryAssets.length > 0 ? `
 - **ALIGNMENT**: If the logo is minimalist, keep the UI minimalist. If the images are vibrant/organic, use similar gradients and shapes.
 ` : '- **GENERIC ALIGNMENT**: Since no custom assets were provided, follow the Persona Style Guide strictly to create a cohesive brand from scratch.'}
 
-### Frontend Design Principles:
-- **One Composition**: The first viewport must read as a single composition, not a dashboard. On landing pages, the hero image should be a dominant edge-to-edge visual plane or background unless the design system clearly requires something else. Do not use generic hero overlays (floating badges, stickers) on top of media.
-- **Brand First**: The brand or product name must be a hero-level signal. Focus the first viewport on the brand, one headline, a short supporting sentence, and one CTA group.
-- **Cards Rule**: Default to no cards. Never use cards in the hero. Cards are allowed only when they are the container for a user interaction.
-- **One Job Per Section**: Each section should have one purpose, one headline, and usually one short supporting sentence. Do not clutter sections with pill clusters, stat strips, or overlapping blocks.
-- **Design System Adherence**: Establish a clear design system with variables for background, surface, primary text, muted text, and accent. Define typography roles (display, headline, body).
-- **Structure as Narrative**: Structure the page as a narrative: Hero -> Supporting imagery -> Context/Detail -> Social proof -> Final CTA.
-- **Ground Content**: Ground the design in real content from the user's request. Avoid generic placeholder patterns.
-- **DESIGN COMMITMENT**: Follow the "${spec.persona || 'Modern Minimalist'}" identity with extreme conviction.
-- **ANTI-PATTERN**: AVOID the "generic AI startup" look (purple gradients on white, standard Inter font, 3-column feature grid) unless specifically required.
 
 Execute all commands, write all files, and finish with a successful build.
 `;
