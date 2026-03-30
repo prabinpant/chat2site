@@ -6,48 +6,52 @@ This document provides a deep dive into how Prompt2Site operates, from the first
 
 ```mermaid
 graph TD
-    User((User)) -- Telegram --> Bot[Telegram Bot /index.ts]
+    User((User)) -- Telegram/WhatsApp --> Bot[Bot Entry Layer]
     Bot -- Wizard Scene --> Spec[SiteSpec Construction]
     Spec -- Description --> Expander[SpecExpansionService]
-    Expander -- Expanded Spec --> Runner[GenerationRunner]
+    Expander -- Strategy --> Memory[memory.md]
     
     subgraph "Core Pipeline"
+        Runner[GenerationRunner] -- Read Memory --> PB[PromptBuilder]
         Runner -- Setup Directory --> WM[WorkspaceManager]
         Runner -- Download Assets --> Assets[public/ Folder]
-        Runner -- Build Prompt --> PB[PromptBuilder]
-        PB -- Multi-Step Prompt --> Codex[CodexService]
-        Codex -- 🐚 Shell Commands --> Project[Generated Vite Project]
+        PB -- Multi-Step Prompt --> AI[AI Engine Codex/Gemini]
+        AI -- 🐚 Shell Commands --> Project[Generated Vite Project]
     end
     
     Project -- npm run build --> Dist[dist/ Folder]
-    Dist -- Deploy --> Netlify[NetlifyDeploymentService]
+    Dist -- Deploy (AI Naming Retry) --> Netlify[NetlifyDeploymentService]
     Netlify -- Live URL --> User
 ```
 
 ## 🔄 The Lifecycle: Step-by-Step
 
-### 1. The Intake Flow (Intelligent Collection)
-- **Module**: `src/bot/index.ts` (using Telegraf Scenes)
-- **Process**: The bot guides the user through a structured wizard. Instead of one big prompt, it collects specific metadata (Name, Subdomain, Assets). This ensures the AI has "ground truth" labels for images and the project name.
+### 1. The Intake Flow (Multi-Platform)
+- **Module**: `src/bot/index.ts` (Telegram) & `src/bot/webhook-server.ts` (WhatsApp)
+- **Process**: Users start a guided wizard. The system captures structured metadata (Name, Subdomain, Design Persona) and asset labels. 
 
-### 2. Spec Expansion (Creativity Layer)
+### 2. Spec Expansion: The "Prompt Context Builder"
 - **Module**: `src/lib/spec-expansion-service.ts`
-- **Process**: Your short prompt like "law firm site" is expanded into a detailed technical JSON (`SiteSpec`). It defines color palettes, typography, and site sections before a single line of code is written.
+- **Process**: The raw description is expanded into a strategic `SiteSpec` JSON. This service acts as a "Naming Specialist" and "Strategy Architect," generating a persistent `memory.md` file.
 
-### 3. Preparation (Workspace Management)
-- **Module**: `src/bot/workspace-manager.ts`
-- **Process**: A unique directory is created. If the user uploaded images or logos, they are downloaded and placed into the `public/` folder immediately. A `.spec.json` file is saved to keep the project's configuration persistent.
+### 3. Strategy Persistence: `memory.md`
+- **Concept**: Instead of just passing JSON, the system creates a Markdown "brain" for the AI Architect.
+- **Content**: Captures the vision, brand persona, customer-facing copy strategy, and competitive research directives.
+- **Updates**: During `/update`, the `memory.md` is read and updated with new historical context, ensuring the AI remembers previous decisions.
 
-### 4. Autonomous Execution (The Engine)
-- **Modules**: `src/bot/prompt-builder.ts` + `src/lib/codex-service.ts`
+### 4. Preparation: DNS & Reliability
+- **Module**: `src/bot/index.ts`
+- **Process**: To prevent connection failures in regions with DNS poisoning, the bot includes a global override for `api.telegram.org` that maps directly to a hardcoded IP.
+
+### 5. Autonomous Execution (The Engine)
+- **Modules**: `src/bot/prompt-builder.ts` + `AIServiceFactory`
 - **Process**: 
-    - `PromptBuilder` constructs a massive "System Architect" instruction.
-    - `CodexService` starts the `codex exec` command with **autonomous shell access**.
-    - **Codex runs the terminal**: It executes `npm create vite`, `npm install`, and writes `src/App.tsx`. It uses the local assets you uploaded by referencing them as root-relative paths (e.g., `/logo.png`).
+    - `PromptBuilder` generates high-context instructions that force the AI to read `memory.md` first.
+    - **Codex** runs with **autonomous shell access**, heart-beating terminal commands to build the React project directly.
 
-### 5. Deployment (Final Handover)
+### 6. Deployment: Smart Handover
 - **Module**: `src/lib/deployment-service.ts`
-- **Process**: Once Codex finishes `npm run build`, the runner triggers the Netlify deployment. It handles subdomain conflicts by automatically retrying with random suffixes if the name is taken.
+- **Process**: Automated build and Netlify deployment. If a subdomain is taken, the system triggers an **AI Identity Regeneration** to brainstorm a new, available slug without user intervention.
 
 ---
 
@@ -55,14 +59,12 @@ graph TD
 
 | Module | Role |
 | :--- | :--- |
-| **`index.ts`** | The "Face". Handles UX, scenes, commands, and user session state. |
-| **`generation-runner.ts`** | The "Orchestrator". Connects all services in a linear pipeline. |
-| **`workspace-manager.ts`** | The "Librarian". Handles file system logic, directory isolation, and metadata. |
-| **`prompt-builder.ts`** | The "Strategist". Translates Specs into high-context LLM instructions. |
-| **`codex-service.ts`** | The "Action Layer". Spawns shell processes and feeds instructions to Codex. |
-| **`deployment-service.ts`** | The "Courier". Manages the interface with Netlify's CLI/API. |
-
----
+| **`index.ts`** | The "Face". Handles UX, sessions, and DNS reliability. |
+| **`generation-runner.ts`** | The "Orchestrator". Manages the pipeline and repair loops. |
+| **`spec-expansion-service.ts`**| The "Strategist". Synthesizes prompts into `memory.md`. |
+| **`workspace-manager.ts`** | The "Librarian". Handles file system logic and metadata (Deletion Disabled). |
+| **`prompt-builder.ts`** | The "Translator". Turns strategy into actionable LLM instructions. |
+| **`deployment-service.ts`** | The "Courier". Manages Netlify and team detection. |
 
 ---
 
@@ -77,8 +79,13 @@ If the `npm run build` step fails:
 
 ## 🔄 Iterative Updates: The "Loop"
 When you run `/update`:
-1. **lookup**: `WorkspaceManager` find the folder by ID.
-2. **Context**: It reads the `.spec.json` to remember what was built.
-3. **Multi-modal Input**: If you uploaded images, they are downloaded into the project's `public/` folder.
-4. **Targeted Change**: `PromptBuilder` creates an **Iteration Prompt** including specific instructions for the new assets.
-5. **Precision Build**: Codex modifies existing components and rebuilds.
+1. **Context Loading**: `WorkspaceManager` loads existing metadata and `memory.md`.
+2. **Strategy Update**: `SpecExpansionService` updates the memory with new instructions.
+3. **Multi-modal Input**: New images are downloaded into the project's `public/` folder.
+4. **Precision Build**: Codex modifies existing components and rebuilds while adhering to the original design system found in `memory.md`.
+
+---
+
+## 🔒 Safety & Constraints
+- **Site Deletion**: Intentionally disabled in `WorkspaceManager` to preserve user data and history.
+- **Brand Embodiment**: The AI is forbidden from using meta-commentary (e.g., "The reference site says..."). It must speak as the brand owner.

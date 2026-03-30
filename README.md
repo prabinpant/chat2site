@@ -1,91 +1,70 @@
 # 🚀 Autonomous AI Website Builder (Prompt2Site)
 
-An autonomous AI system that transforms simple Telegram prompts into high-fidelity, deployed React/Tailwind websites. See [ARCHITECTURE.md](ARCHITECTURE.md) for a deep dive into how the system works.
+An autonomous AI system that transforms simple Telegram prompts into high-fidelity, deployed React/Tailwind websites. See [ARCHITECTURE.md](ARCHITECTURE.md) for a deep dive into the memory-driven pipeline.
 
 ## ✨ Key Features
 
-- **Autonomous Agent**: Codex drives the entire project lifecycle—from Vite initialization to writing premium React code and production builds.
-- **Guided Intake & Personas**: Choose from design personas like **Cyberpunk**, **Minimalist**, or **Luxury** to set the visual tone.
-- **Recursive Repair Loop**: If a build fails, the system automatically analyzes error logs and attempts an AI-driven repair.
+- **Autonomous Agent**: Codex/Gemini drives the entire project lifecycle—from Vite initialization to writing premium React code and production builds.
+- **Strategic Memory**: Built-in `memory.md` persists brand vision, persona, and customer-facing copy strategy across builds and updates.
+- **Multi-Platform Entry**: Create sites via **Telegram** or **WhatsApp**.
+- **DNS Override Safety Net**: Built-in bypass for `api.telegram.org` connection issues (DNS poisoning) using hardcoded IP mapping.
+- **Smart Deployment**: Automatic Netlify deployments with **AI-driven identity regeneration** to handle subdomain collisions gracefully.
+- **Recursive Repair Loop**: If a build fails, the system automatically analyzes error logs and attempts an AI-driven repair with a 1-retry safety net.
 - **Multi-modal Updates**: Modify your site using text + images. Send `/update <siteId>`, provide instructions, and upload as many photos as you want!
-- **Automatic Deployment**: Sites are instantly live on Netlify with smart subdomain resolution.
-- **Site Management**: Keep track of all your projects with the `/list` command.
+- **Data Persistence**: Site deletion is intentionally disabled to ensure every iteration is preserved.
 
 ## 🛠️ Technology Stack
 
-- **Bot**: [Telegraf](https://telegraf.js.org/) (Node.js)
-- **AI Engine**: Codex (Autonomous Shell Access)
-- **Frontend**: React + TypeScript + Vite
-- **Styling**: Tailwind CSS + Framer Motion + Lucide Icons
-- **Infrastructure**: Netlify CLI (Automated Deployments)
+- **Bots**: [Telegraf](https://telegraf.js.org/) (Telegram), Express (WhatsApp Webhook)
+- **AI Engines**: 
+  - **Codex**: Autonomous Shell Access (Default)
+  - **Gemini**: High-speed, high-context generation via Google AI.
+- **Frontend**: React + TypeScript + Vite + Tailwind CSS
+- **Infrastructure**: Netlify CLI (Automated & Non-interactive Deployments)
 
-## 🎮 How to Use
+## ⚙️ Setup Guide
 
-1. **Start the Bot**: Send `/start` to the Telegram bot.
-2. **Build a Site**: Run `/build` and follow the guided prompts:
-   - Provide a site description.
-   - **Pick a Design Persona** (e.g., Cyberpunk 🌆, Luxury ✨).
-   - Provide a project name and subdomain.
-   - Upload assets (Logo, Photos).
-3. **Wait for Generation**: The bot will stream status updates. If a build error occurs, the **Repair Loop** will automatically kick in to fix it.
-4. **View & Update**: Once finished, you'll get a live Netlify URL and a local preview link. 
-5. **Iterate**: Want to change something? Use `/update <siteId>`. The bot will collect your text instructions and any new images you want to add!
+### 1. Prerequisites
+- **Node.js**: v18+ recommended.
+- **CLIs**: Install `netlify-cli` globally:
+  ```bash
+  npm install -g netlify-cli
+  ```
+- **Bot Token**: Get a token from [@BotFather](https://t.me/BotFather).
 
-## 📂 Project Architecture
+### 2. Configuration
+Create a `.env` file from the example:
+```bash
+cp .env.example .env
+```
+Fill in your tokens. If you experience connection issues with Telegram, ensure `TELEGRAM_API_IP` is set to `149.154.166.110`.
 
-### `src/bot`
-- **`index.ts`**: Main bot entry point, command handlers, and `BUILD_SCENE` wizard.
-- **`generation-runner.ts`**: Orchestrates the build lifecycle (Asset preparation -> Codex Execution -> Deployment).
-- **`workspace-manager.ts`**: Manages the `generated-sites/` directory and handles project metadata (`.spec.json`).
-- **`prompt-builder.ts`**: Generates complex, high-context system prompts for Codex to drive the autonomous build.
+### 3. Installation & Running
+```bash
+npm install
+npm run dev:bot
+```
 
-### `src/lib`
-- **`codex-service.ts`**: Interface for the Codex CLI with autonomous shell execution.
-- **`deployment-service.ts`**: Handles Netlify site creation and deployments with retry logic for name conflicts.
-- **`spec-expansion-service.ts`**: Expands raw user prompts into structured `SiteSpec` objects.
+## 🎮 How to Use (Telegram)
+1. **Start**: Send `/start` to your bot.
+2. **Build**: Run `/build` and follow the guided wizard to pick a persona and upload images.
+3. **Update**: Use `/update <siteId>` to add new images or change text. The AI remembers your site's "Memory".
+4. **List**: Run `/list` to see all your deployed sites.
 
-## 🐳 Docker Setup
-
-Maintain a stable instance of the bot in the background:
-
-1. **Build and Start**:
-   ```bash
-   docker compose up -d
-   ```
-2. **View Logs**:
-   ```bash
-   docker compose logs -f
-   ```
-
-## 🛠️ Development Setup (Separate Folder)
-
-To work on new features without taking down the stable bot instance:
-
-1. **Clone the Project to a Dev Folder**:
-   ```bash
-   ./setup-dev.sh ~/path/to/dev-folder
-   ```
-2. **Configure the Dev Instance**:
-   - `cd ~/path/to/dev-folder`
-   - Edit the `.env` file and **change the `BOT_TOKEN`** to a different Telegram Bot Token.
-3. **Environment Isolation**:
-   - Run `npm install` in the dev folder.
-   - Start the dev bot: `npm run dev:bot`.
-   - Your dev instance will now run independently of the stable Docker container.
+## 📱 WhatsApp Integration
+The bot supports WhatsApp via Meta's Graph API. Start the webhook server:
+```bash
+npm run dev:whatsapp
+```
+Ensure your webhook URL is configured in the Meta for Developers dashboard.
 
 ---
 
-## ⚙️ Environment Variables
+## 🛠️ Development & Isolation (Separate Folder)
+To work on new features without taking down the stable bot:
+1. **Clone to Dev Folder**: `./setup-dev.sh ~/path/to/dev-folder`
+2. **Isolate**: Change the `BOT_TOKEN` in the new folder's `.env`.
+3. **Run**: `npm run dev:bot` in the dev folder.
 
-Create a `.env` file with the following:
-```env
-BOT_TOKEN=your_telegram_bot_token
-NETLIFY_AUTH_TOKEN=your_netlify_personal_access_token
-# OPENAI_API_KEY=your_openai_key (if needed by your specific Codex setup)
-```
-
-## 🚀 Getting Started (Manual)
-
-1. Install dependencies: `npm install`
-2. Ensure you have the `codex` CLI and `netlify-cli` installed globally.
-3. Start the bot: `npm run dev:bot`
+## 📂 Project Architecture
+See [ARCHITECTURE.md](ARCHITECTURE.md) for a detailed breakdown of the internal services, the memory-driven pipeline, and the autonomous repair loop.
