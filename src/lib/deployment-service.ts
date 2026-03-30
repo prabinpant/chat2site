@@ -28,14 +28,16 @@ export class NetlifyDeploymentService implements DeploymentService {
 
   async deploy(sitePath: string, siteName: string): Promise<DeploymentResult> {
     const maxRetries = 3;
-    let currentSiteName = siteName;
-    if (currentSiteName.length > 63) {
-      currentSiteName = currentSiteName.slice(0, 58) + '-' + Math.random().toString(36).substring(2, 6);
-    }
     let attempt = 0;
+    let currentSiteName = siteName;
 
     while (attempt < maxRetries) {
       try {
+        // Handle Length Limit (Netlify 63 chars)
+        if (currentSiteName.length > 63) {
+          currentSiteName = currentSiteName.slice(0, 58) + '-' + Math.random().toString(36).substring(2, 6);
+        }
+
         console.log(`[DeploymentService] Attempting deployment to site: ${currentSiteName} (Attempt ${attempt + 1})`);
         
         // Try creating/deploying
@@ -52,9 +54,10 @@ export class NetlifyDeploymentService implements DeploymentService {
         } catch (error: any) {
           const stderr = error.stderr || '';
           const stdout = error.stdout || '';
+          const fullOutput = stdout + stderr;
 
           // Check if site doesn't exist - try creating it
-          if (stderr.includes('Project not found') || stderr.includes('Could not find site')) {
+          if (fullOutput.includes('Project not found') || fullOutput.includes('Could not find site')) {
             console.log(`[DeploymentService] Site ${currentSiteName} not found, creating new site...`);
             const createCmd = `npx netlify deploy --dir="dist" --prod --create-site="${currentSiteName}" --auth="${this.authToken}" --no-build --json`;
             const { stdout: createStdout } = await execAsync(createCmd, { cwd: sitePath, timeout: 300000 });
@@ -65,25 +68,36 @@ export class NetlifyDeploymentService implements DeploymentService {
             };
           }
 
-          // Check for "already taken" or "conflict"
-          if (stderr.includes('already exists') || stderr.includes('already taken') || stderr.includes('422') || stdout.includes('already exists')) {
+          // Check for "already taken" or "conflict" (422)
+          if (fullOutput.toLowerCase().includes('already exists') || 
+              fullOutput.toLowerCase().includes('already taken') || 
+              fullOutput.includes('422') ||
+              fullOutput.includes('Conflict')) {
             console.warn(`[DeploymentService] Subdomain ${currentSiteName} is already taken or conflict occurred.`);
             attempt++;
             const shortId = Math.random().toString(36).substring(2, 6);
-            currentSiteName = `${siteName}-${shortId}`;
+            currentSiteName = `${siteName.slice(0, 50)}-${shortId}`; // Truncate base name to leave room for suffix
             continue; // Retry with new name
           }
 
           throw error;
         }
       } catch (error: any) {
+        const fullOutput = (error.stdout || '') + (error.stderr || '');
+        if (fullOutput.toLowerCase().includes('already taken') || fullOutput.toLowerCase().includes('already exists')) {
+            attempt++;
+            const shortId = Math.random().toString(36).substring(2, 6);
+            currentSiteName = `${siteName.slice(0, 50)}-${shortId}`;
+            continue;
+        }
+
         if (attempt >= maxRetries - 1) {
           console.error('Netlify deployment failed after retries:', error);
           throw new Error(`Deployment failed after ${maxRetries} attempts: ${error.message}`);
         }
         attempt++;
         const shortId = Math.random().toString(36).substring(2, 6);
-        currentSiteName = `${siteName}-${shortId}`;
+        currentSiteName = `${siteName.slice(0, 50)}-${shortId}`;
       }
     }
 

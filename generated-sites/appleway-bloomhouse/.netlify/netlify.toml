@@ -1,0 +1,28 @@
+plugins = []
+headers = []
+redirects = []
+
+[functions]
+
+[functions."*"]
+
+[build]
+publish = "/Users/prabinpant/Documents/projects/arbyte/prompt2site/generated-sites/appleway-bloomhouse/dist"
+publishOrigin = "ui"
+commandOrigin = "ui"
+base = "/Users/prabinpant/Documents/projects/arbyte/prompt2site/generated-sites/appleway-bloomhouse"
+command = "npm run build"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]

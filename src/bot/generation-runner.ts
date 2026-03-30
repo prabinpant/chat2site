@@ -50,6 +50,9 @@ export class GenerationRunner {
       // Persist the strategic memory
       await fs.writeFile(path.join(sitePath, 'memory.md'), expandedSpec.memory);
 
+      // Save initial metadata so the site appears in /list even if deployment fails
+      this.workspaceManager.saveMetadata(sitePath, expandedSpec);
+
       // Handle Assets
       if (expandedSpec.assets && expandedSpec.assets.length > 0) {
         await onProgress('🖼️ Preparing your custom assets/logo...');

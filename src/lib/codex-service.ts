@@ -52,7 +52,7 @@ export class CodexService implements AIService {
   }
 
   async executeAutonomousBuild(prompt: string, sitePath: string): Promise<string> {
-    const BUILD_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
+    const BUILD_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
 
     try {
       console.log(`[AutonomousCodex] Handing over keys to AI in ${sitePath}...`);
