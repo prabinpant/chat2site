@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --ink: #0e161d;
+    --desert: #8f5936;
+    --clay: #a95d2b;
+    --brass: #d6a45f;
+    --sand-100: #f5ecdf;
+    --sand-200: #ddcfba;
+    --sand-300: #baa88f;
+    --stone: #4b4237;
+    color: var(--sand-100);
+    background: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background:
+      linear-gradient(180deg, rgba(14, 22, 29, 0.98), rgba(14, 22, 29, 1));
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  ::selection {
+    background: rgba(214, 164, 95, 0.28);
+    color: white;
+  }
+}
+
+@layer components {
+  .section-label {
+    @apply text-sm uppercase tracking-[0.32em] text-[var(--desert)];
+  }
+
+  .hero-kicker {
+    @apply text-xs uppercase tracking-[0.44em] text-[var(--brass)] sm:text-sm;
+  }
+
+  .primary-action {
+    @apply inline-flex items-center justify-center rounded-full border border-[rgba(214,164,95,0.8)] bg-[var(--brass)] px-7 py-4 text-xs font-extrabold uppercase tracking-[0.28em] text-[var(--ink)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#e6b877];
+  }
+
+  .secondary-action {
+    @apply inline-flex items-center justify-center rounded-full border border-white/20 bg-white/5 px-7 py-4 text-xs font-bold uppercase tracking-[0.28em] text-[var(--sand-100)] backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:border-white/35 hover:bg-white/10;
+  }
+
+  .link-underline {
+    @apply relative pb-1;
+  }
+
+  .link-underline::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 bg-[var(--brass)] transition-transform duration-300;
+  }
+
+  .link-underline:hover::after,
+  .link-underline:focus-visible::after {
+    @apply scale-x-100;
+  }
+
+  .link-inline {
+    @apply text-xs font-bold uppercase tracking-[0.28em] text-[var(--ink)] transition duration-300 hover:text-[var(--clay)];
+  }
+
+  .image-frame {
+    @apply relative overflow-hidden rounded-[2rem] border border-white/10 bg-black/20 shadow-[0_30px_80px_rgba(0,0,0,0.32)];
+  }
+
+  .image-frame img {
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+
+  .animate-rise {
+    animation: rise 0.9s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+  }
+
+  .hero-image {
+    animation: drift 22s ease-in-out infinite alternate;
+    background-position: center;
+    background-size: cover;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: scale(1.02) translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: scale(1.08) translate3d(-1.2%, -1.6%, 0);
+  }
+}
