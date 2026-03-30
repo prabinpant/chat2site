@@ -95,16 +95,45 @@ export class GenerationRunner {
       const url = await this.startDevServer(sitePath);
 
       await onProgress('🌐 Deploying to Netlify...');
-      const deployment = await this.deploymentService.deploy(sitePath, expandedSpec.preferredSubdomain);
+      let finalSpec = { ...expandedSpec };
+      let deployment;
+      let deployAttempts = 0;
+      const maxDeployRetries = 3;
+      const failedSlugs: string[] = [];
 
-      // Save metadata for future iterations (syncing with netlify slug)
-      const finalSpec = { ...expandedSpec, preferredSubdomain: deployment.siteId || expandedSpec.preferredSubdomain };
+      while (deployAttempts < maxDeployRetries) {
+        try {
+          deployment = await this.deploymentService.deploy(sitePath, finalSpec.preferredSubdomain, finalSpec.netlifySiteId);
+          break; // Success!
+        } catch (error: any) {
+          if (error.message === 'DEPLOYMENT_NAMING_CONFLICT' && deployAttempts < maxDeployRetries - 1) {
+            failedSlugs.push(finalSpec.preferredSubdomain);
+            deployAttempts++;
+            await onProgress(`⚠️ Subdomain "${finalSpec.preferredSubdomain}" is taken. AI is brainstorming a new creative identity...`);
+            const newSlug = await this.specExpansionService.regenerateSlug(initialSpec.description || '', finalSpec.preferredSubdomain, failedSlugs);
+            finalSpec = { ...finalSpec, id: newSlug, preferredSubdomain: newSlug };
+            this.workspaceManager.saveMetadata(sitePath, finalSpec);
+            continue;
+          }
+          throw error;
+        }
+      }
+
+      if (!deployment) throw new Error('Deployment failed after multiple naming attempts');
+
+      // Sync final subdomain, URL and Site ID
+      finalSpec = { 
+        ...finalSpec, 
+        preferredSubdomain: finalSpec.preferredSubdomain,
+        netlifySiteId: deployment.siteId,
+        netlifyUrl: deployment.url
+      };
       this.workspaceManager.saveMetadata(sitePath, finalSpec);
 
       await onProgress('📦 Initializing version control (v1)...');
-      await versionService.initVersionControl(sitePath, expandedSpec.name);
+      await versionService.initVersionControl(sitePath, finalSpec.name);
 
-      return { sitePath, url, deployedUrl: deployment.url, expandedSpec: finalSpec, version: 'v1' };
+      return { sitePath, url: deployment.url, deployedUrl: deployment.url, expandedSpec: finalSpec, version: 'v1' };
     } catch (error) {
        throw error;
     }
@@ -167,16 +196,50 @@ export class GenerationRunner {
     await this.executeWithRepair(prompt, sitePath, onProgress);
 
     await onProgress('🚀 Redeploying updates...');
-    const deployment = await this.deploymentService.deploy(sitePath, expandedSpec.preferredSubdomain);
+    let finalSpec = { ...expandedSpec };
+    let deployment;
+    let deployAttempts = 0;
+    const maxDeployRetries = 3;
+    const failedSlugs: string[] = [];
+
+    while (deployAttempts < maxDeployRetries) {
+      try {
+        // Use existing Netlify Site ID if we have it
+        deployment = await this.deploymentService.deploy(sitePath, finalSpec.preferredSubdomain, spec.netlifySiteId);
+        break; // Success!
+      } catch (error: any) {
+        if (error.message === 'DEPLOYMENT_NAMING_CONFLICT' && deployAttempts < maxDeployRetries - 1) {
+          failedSlugs.push(finalSpec.preferredSubdomain);
+          deployAttempts++;
+          await onProgress(`⚠️ Subdomain "${finalSpec.preferredSubdomain}" is taken. AI is brainstorming a new creative identity...`);
+          const newSlug = await this.specExpansionService.regenerateSlug(instruction, finalSpec.preferredSubdomain, failedSlugs);
+          finalSpec = { ...finalSpec, id: newSlug, preferredSubdomain: newSlug };
+          this.workspaceManager.saveMetadata(sitePath, finalSpec);
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    if (!deployment) throw new Error('Deployment failed after multiple naming attempts');
+
+    // Persist final deployment details
+    finalSpec = {
+      ...finalSpec,
+      netlifySiteId: deployment.siteId,
+      netlifyUrl: deployment.url
+    };
+    this.workspaceManager.saveMetadata(sitePath, finalSpec);
 
     await onProgress('📦 Saving new version...');
-    const newVersion = await versionService.commitNewVersion(sitePath, expandedSpec.name);
+    const newVersion = await versionService.commitNewVersion(sitePath, finalSpec.name);
 
     await onProgress('✅ Update complete!');
     return {
       url: deployment.url,
       deployedUrl: deployment.url,
-      version: newVersion
+      version: newVersion,
+      finalSpec // Return final spec in case slug changed
     };
   }
 
@@ -204,7 +267,7 @@ export class GenerationRunner {
     
     await onProgress('🚀 Redeploying reverted version...');
     const netlifySiteName = spec.preferredSubdomain || path.basename(sitePath);
-    const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName);
+    const deployment = await this.deploymentService.deploy(sitePath, netlifySiteName, spec.netlifySiteId);
     
     await onProgress('✅ Revert and deployment complete!');
     return { deployedUrl: deployment.url };

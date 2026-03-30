@@ -82,4 +82,26 @@ Return ONLY a valid JSON object following this interface:
       } as SiteSpec;
     }
   }
+  async regenerateSlug(prompt: string, failingSlug: string, history: string[] = []): Promise<string> {
+    const historyContext = history.length > 0 
+      ? `\nThese slugs have ALREADY BEEN TRIED and are TAKEN: ${history.join(', ')}` 
+      : '';
+
+    const systemPrompt = `
+You are a **Naming Specialist** for an AI-driven site generation pipeline.
+The user wants to build a site based on this prompt: "${prompt}"
+The previous slug attempt was "${failingSlug}", but it is already taken on Netlify.${historyContext}
+
+### YOUR TASK:
+Generate a NEW, creative, unique, and URL-friendly slug.
+Avoid just adding numbers or generic suffixes like '-1'.
+Try to find a different angle on the brand identity (e.g., if 'appleway-florist' is taken, try 'appleway-bloomhouse' or 'spokane-appleway-floral').
+
+### OUTPUT FORMAT:
+Return ONLY the raw slug string (all lowercase, hyphenated, max 63 characters).
+`;
+
+    const response = await this.aiService.generateCode(systemPrompt);
+    return response.trim().toLowerCase().replace(/```/g, '').replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+  }
 }

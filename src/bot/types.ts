@@ -44,6 +44,8 @@ export interface SiteSpec {
   };
   assets?: Asset[];
   extraDependencies?: Record<string, string>;
+  netlifySiteId?: string;
+  netlifyUrl?: string;
 }
 
 export interface GenerationSpec {

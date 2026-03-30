@@ -57,7 +57,7 @@ export class WorkspaceManager {
       if (fs.lstatSync(sitePath).isDirectory()) {
         const metadata = this.loadMetadata(sitePath);
         if (metadata) {
-          const id = metadata.preferredSubdomain || metadata.id || name;
+          const id = metadata.netlifySiteId || metadata.preferredSubdomain || metadata.id || name;
           const siteName = metadata.name || '';
           
           if (id.toLowerCase() === q || siteName.toLowerCase() === q || name.toLowerCase() === q) {
@@ -84,7 +84,8 @@ export class WorkspaceManager {
           sites.push({
             id: metadata.preferredSubdomain || metadata.id || name,
             name: metadata.name,
-            url: `https://${metadata.preferredSubdomain || metadata.id || name}.netlify.app`
+            url: metadata.netlifyUrl || `https://${metadata.preferredSubdomain || metadata.id || name}.netlify.app`,
+            netlifySiteId: metadata.netlifySiteId
           });
         }
       }
