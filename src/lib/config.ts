@@ -12,6 +12,7 @@ export const config = {
   codexModel: process.env.CODEX_MODEL,
   aiEngine: (process.env.AI_ENGINE || 'codex') as 'codex' | 'gemini',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-3-flash-preview',
+  telegramApiIp: process.env.TELEGRAM_API_IP,
 };
 
 // Validate critical variables
