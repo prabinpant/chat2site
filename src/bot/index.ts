@@ -5,6 +5,25 @@ import { coordinator } from './conversation-coordinator.js';
 import { IncomingMessage } from './messaging-service.js';
 import './webhook-server.js'; // Starts the WhatsApp webhook server
 import { config } from '../lib/config.js';
+import dns from 'dns';
+
+// DNS Override to bypass poisoning
+const TELEGRAM_IP = '149.154.166.110';
+const originalLookup = dns.lookup;
+(dns as any).lookup = (hostname: string, options: any, callback: any) => {
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
+
+  if (hostname === 'api.telegram.org') {
+    if (options?.all) {
+      return callback(null, [{ address: TELEGRAM_IP, family: 4 }]);
+    }
+    return callback(null, TELEGRAM_IP, 4);
+  }
+  return originalLookup(hostname, options, callback);
+};
 
 const token = config.botToken;
 if (!token) {

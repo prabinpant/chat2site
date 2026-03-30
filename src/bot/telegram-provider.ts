@@ -1,5 +1,6 @@
 import { Telegraf } from 'telegraf';
 import { MessagingProvider, MessageContent } from './messaging-service.js';
+import { config } from '../lib/config.js';
 
 export class TelegramProvider implements MessagingProvider {
   constructor(private bot: Telegraf<any>) {}
