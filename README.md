@@ -9,6 +9,7 @@ An autonomous AI system that transforms simple Telegram prompts into high-fideli
 - **Multi-Platform Entry**: Create sites via **Telegram** or **WhatsApp**.
 - **DNS Override Safety Net**: Built-in bypass for `api.telegram.org` connection issues (DNS poisoning) using hardcoded IP mapping.
 - **Smart Deployment**: Automatic Netlify deployments with **AI-driven identity regeneration** to handle subdomain collisions gracefully.
+- **Git-Based Versioning**: Every successful build is tagged in Git (`v1`, `v2`, etc.), enabling reliable rollbacks.
 - **Recursive Repair Loop**: If a build fails, the system automatically analyzes error logs and attempts an AI-driven repair with a 1-retry safety net.
 - **Multi-modal Updates**: Modify your site using text + images. Send `/update <siteId>`, provide instructions, and upload as many photos as you want!
 - **Data Persistence**: Site deletion is intentionally disabled to ensure every iteration is preserved.
@@ -49,7 +50,8 @@ npm run dev:bot
 1. **Start**: Send `/start` to your bot.
 2. **Build**: Run `/build` and follow the guided wizard to pick a persona and upload images.
 3. **Update**: Use `/update <siteId>` to add new images or change text. The AI remembers your site's "Memory".
-4. **List**: Run `/list` to see all your deployed sites.
+4. **Revert**: Run `/revert <siteId> <version>` (e.g., `/revert my-site v1`) to rollback to a previous successful state.
+5. **List**: Run `/list` to see all your deployed sites.
 
 ## 📱 WhatsApp Integration
 The bot supports WhatsApp via Meta's Graph API. Start the webhook server:

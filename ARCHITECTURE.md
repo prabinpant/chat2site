@@ -65,6 +65,19 @@ graph TD
 | **`workspace-manager.ts`** | The "Librarian". Handles file system logic and metadata (Deletion Disabled). |
 | **`prompt-builder.ts`** | The "Translator". Turns strategy into actionable LLM instructions. |
 | **`deployment-service.ts`** | The "Courier". Manages Netlify and team detection. |
+| **`version-service.ts`** | The "Archivist". Handles Git-based versioning and site reverts. |
+
+---
+
+## 📦 Git-Based Versioning & Reverts
+The system implements a sophisticated versioning strategy to ensure every successful build is safely archived and reversible.
+- **Tagging Strategy**: Each site uses its own tag namespace: `<site-slug>/v1`, `<site-slug>/v2`.
+- **Initialization**: Upon the first successful deployment, the `VersionService` initializes Git tracking for the site folder, commits the code, and tags it as `v1`.
+- **Iteration**: Every `/update` that results in a successful build triggers a new commit and a version increment (v2, v3, etc.).
+- **Reverts**: When a user triggers a revert, the system:
+  1. Performs a `git checkout` of the specific site folder from the target tag.
+  2. Commits this "restored" state as the *next* sequential version (e.g., v3 might be a revert to v1).
+  3. Rebuilds and redeploys the restored code to Netlify.
 
 ---
 
