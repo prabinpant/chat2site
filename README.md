@@ -5,13 +5,13 @@ An autonomous AI system that transforms simple Telegram prompts into high-fideli
 ## ✨ Key Features
 
 - **Autonomous Agent**: Codex/Gemini drives the entire project lifecycle—from Vite initialization to writing premium React code and production builds.
+- **Voice-to-Site**: Send voice messages to describe your vision. The system uses **Whisper** to transcribe instructions automatically.
 - **Strategic Memory**: Built-in `memory.md` persists brand vision, persona, and customer-facing copy strategy across builds and updates.
-- **Multi-Platform Entry**: Create sites via **Telegram** or **WhatsApp**.
-- **DNS Override Safety Net**: Built-in bypass for `api.telegram.org` connection issues (DNS poisoning) using hardcoded IP mapping.
 - **Smart Deployment**: Automatic Netlify deployments with **AI-driven identity regeneration** to handle subdomain collisions gracefully.
 - **Git-Based Versioning**: Every successful build is tagged in Git (`v1`, `v2`, etc.), enabling reliable rollbacks.
 - **Recursive Repair Loop**: If a build fails, the system automatically analyzes error logs and attempts an AI-driven repair with a 1-retry safety net.
-- **Multi-modal Updates**: Modify your site using text + images. Send `/update <siteId>`, provide instructions, and upload as many photos as you want!
+- **Multi-modal Updates**: Modify your site using text + images + voice. Send `/update <siteId>`, provide instructions, and upload as many photos as you want!
+- **Multi-Platform Support**: Seamlessly build and update sites via **Telegram** or **WhatsApp**.
 - **Data Persistence**: Site deletion is intentionally disabled to ensure every iteration is preserved.
 
 ## 🛠️ Technology Stack
@@ -54,11 +54,10 @@ npm run dev:bot
 5. **List**: Run `/list` to see all your deployed sites.
 
 ## 📱 WhatsApp Integration
-The bot supports WhatsApp via Meta's Graph API. Start the webhook server:
-```bash
-npm run dev:whatsapp
-```
-Ensure your webhook URL is configured in the Meta for Developers dashboard.
+The bot supports WhatsApp via Meta's Graph API. 
+1. **Setup**: Configure your Meta for Developers dashboard with your Webhook URL.
+2. **Start**: Start the webhook server: `npm run dev:whatsapp`.
+3. **Usage**: Enjoy full feature parity with the Telegram version.
 
 ---
 

@@ -64,6 +64,9 @@ graph TD
 | **`spec-expansion-service.ts`**| The "Strategist". Synthesizes prompts into `memory.md`. |
 | **`workspace-manager.ts`** | The "Librarian". Handles file system logic and metadata (Deletion Disabled). |
 | **`prompt-builder.ts`** | The "Translator". Turns strategy into actionable LLM instructions. |
+| **`intent-service.ts`** | The "Listener". Classifies natural language into structured intents. |
+| **`design-skills-context.ts`**| The "Lenticular". Enforces premium design and aesthetic rules. |
+| **`transcription-service.ts`**| The "Ear". Uses Whisper (Python) to transcribe voice messages. |
 | **`deployment-service.ts`** | The "Courier". Manages Netlify and team detection. |
 | **`version-service.ts`** | The "Archivist". Handles Git-based versioning and site reverts. |
 
@@ -78,6 +81,37 @@ The system implements a sophisticated versioning strategy to ensure every succes
   1. Performs a `git checkout` of the specific site folder from the target tag.
   2. Commits this "restored" state as the *next* sequential version (e.g., v3 might be a revert to v1).
   3. Rebuilds and redeploys the restored code to Netlify.
+
+---
+
+## 🧠 Intent-Driven Communication
+The bot does not rely on rigid slash commands. Instead, it uses an **AI Intent Classification** system:
+- **Natural Language Parsing**: Every user message is analyzed by `IntentService` to identify actions like `GENERATE_SITE`, `UPDATE_SITE`, or `REVERT_VERSION`.
+- **Parameter Extraction**: It automatically extracts site names, IDs, version numbers, and update instructions from conversational text.
+- **Context Awareness**: The classifier considers the current scene (e.g., Build vs. Update) to disambiguate short or vague messages.
+
+---
+
+## 🎙️ Multimodal Inputs (Voice & Vision)
+Prompt2Site is built for the modern, mobile-first user:
+- **Voice-to-Site**: Users can send voice messages. `TranscriptionService` executes a Python-based **Whisper** model to transform audio into text before the AI Strategist processes it.
+- **Vision Integration**: Images sent via Telegram or WhatsApp are automatically collected, stored in `temp-uploads`, and eventually moved to the project's `public/` folder for use in the UI.
+
+---
+
+## 💎 Design Intelligence: The Design Skills System
+To ensure every site looks "premium" and "award-level," the system injects a specialized **Design Skills Context**:
+- **Hard Rules**: Enforces strict layout rules (e.g., "No cards by default", "One big idea per section").
+- **Aesthetic Defaults**: Defines high-level art direction for typography, hierarchy, and motion.
+- **Brand Embodiment**: Forces the AI to write clear, human copy instead of generic AI boilerplate.
+
+---
+
+## 📱 Multi-Platform Provider Abstraction
+The core logic is completely isolated from the messaging platforms via the `MessagingProvider` interface:
+- **Telegram Provider**: Uses Telegraf to handle bot interactions and media downloads.
+- **WhatsApp Provider**: Uses Meta's Graph API for cloud-based messaging and media retrieval.
+- **Standardized Messaging**: `ConversationCoordinator` interacts only with the abstract provider, allowing for easy expansion to other platforms like Discord or Slack.
 
 ---
 
